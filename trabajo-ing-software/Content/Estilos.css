@@ -1,0 +1,121 @@
+﻿/* Importar fuentes oficiales de tu diseño */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap');
+
+:root {
+    --color-primario: #D7C9B8;
+    --color-secundario: #A89B8A;
+    --color-acento: #8B6F56;
+    --color-fondo: #F7F4EE;
+    --color-texto: #2E2E2E;
+    --color-blanco: #FFFFFF;
+}
+
+body {
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Títulos con Playfair Display */
+h1, h2, h3, .titulo-elegante {
+    font-family: 'Playfair Display', serif;
+    color: var(--color-acento);
+    font-weight: 700;
+}
+
+/* Tarjeta / Contenedor blanco minimalista */
+.card-dermocosmetica {
+    background-color: var(--color-blanco);
+    border-radius: 20px;
+    padding: 35px;
+    box-shadow: 0 10px 30px rgba(139, 111, 86, 0.08);
+    border: 1px solid var(--color-primario);
+}
+
+/* Cajas de texto (Inputs) redondeadas */
+.input-dermo {
+    width: 100%;
+    padding: 12px 18px;
+    border: 1.5px solid var(--color-primario);
+    border-radius: 25px;
+    background-color: var(--color-blanco);
+    font-family: 'Montserrat', sans-serif;
+    color: var(--color-texto);
+    font-size: 14px;
+    outline: none;
+    box-sizing: border-box;
+    margin-top: 6px;
+    margin-bottom: 16px;
+    transition: all 0.3s ease;
+}
+
+    .input-dermo:focus {
+        border-color: var(--color-acento);
+        box-shadow: 0 0 8px rgba(139, 111, 86, 0.2);
+    }
+
+/* Botón Principal (Marrón elegante con borde redondeado) */
+.btn-principal {
+    background-color: var(--color-acento);
+    color: var(--color-blanco);
+    border: none;
+    padding: 12px 28px;
+    border-radius: 25px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .btn-principal:hover {
+        background-color: #725944;
+        transform: translateY(-2px);
+    }
+
+/* Botón Secundario (Borde fino) */
+.btn-secundario {
+    background-color: transparent;
+    color: var(--color-acento);
+    border: 1.5px solid var(--color-acento);
+    padding: 11px 26px;
+    border-radius: 25px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .btn-secundario:hover {
+        background-color: var(--color-primario);
+        color: var(--color-texto);
+    }
+
+/* Tablas con estilo suave */
+.tabla-dermo {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--color-blanco);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 15px;
+}
+
+    .tabla-dermo th {
+        background-color: var(--color-acento);
+        color: var(--color-blanco);
+        padding: 14px;
+        font-weight: 500;
+        text-align: left;
+    }
+
+    .tabla-dermo td {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--color-fondo);
+    }
+
+    .tabla-dermo tr:hover {
+        background-color: #FAF8F5;
+    }
