@@ -1,13 +1,14 @@
 ﻿using System;
+using System.Configuration;
 using System.Data;
-using System.Data.SqlClient;
+using MySql.Data.MySqlClient; // Cambiado a la librería de MySQL
 using System.Web.UI.WebControls;
 
 namespace trabajo_ing_software
 {
     public partial class Laboratorios : System.Web.UI.Page
     {
-        string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ingsofDB;Integrated Security=True;TrustServerCertificate=True;";
+        string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -30,11 +31,11 @@ namespace trabajo_ing_software
         {
             string query = "SELECT IdLaboratorio, Rut, RazonSocial, Marca, Pais, Contacto, Email, Telefono, DiasPago, Activo FROM Laboratorio ORDER BY IdLaboratorio DESC";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    using (MySqlDataAdapter da = new MySqlDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
                         da.Fill(dt);
@@ -81,7 +82,7 @@ namespace trabajo_ing_software
 
             bool esEdicion = !string.IsNullOrEmpty(hfIdLaboratorio.Value);
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
                 string query = "";
 
@@ -97,7 +98,7 @@ namespace trabajo_ing_software
                              WHERE IdLaboratorio=@IdLaboratorio";
                 }
 
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@Rut", rut);
                     cmd.Parameters.AddWithValue("@RazonSocial", razonSocial);
@@ -124,9 +125,9 @@ namespace trabajo_ing_software
                         LimpiarFormulario();
                         CargarLaboratorios();
                     }
-                    catch (SqlException ex)
+                    catch (MySqlException ex)
                     {
-                        if (ex.Number == 2627) // RUT duplicado
+                        if (ex.Number == 1062) // Código de MySQL para RUT duplicado
                         {
                             lblMensaje.Text = "Ya existe un laboratorio registrado con ese RUT.";
                         }
@@ -166,13 +167,13 @@ namespace trabajo_ing_software
         {
             string query = "SELECT IdLaboratorio, Rut, RazonSocial, Marca, Pais, Contacto, Email, Telefono, DiasPago FROM Laboratorio WHERE IdLaboratorio = @Id";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@Id", idLab);
                     con.Open();
-                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
                         {
@@ -199,9 +200,9 @@ namespace trabajo_ing_software
         private void CambiarEstado(int idLab, bool nuevoEstado)
         {
             string query = "UPDATE Laboratorio SET Activo = @NuevoEstado WHERE IdLaboratorio = @IdLaboratorio";
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@NuevoEstado", nuevoEstado);
                     cmd.Parameters.AddWithValue("@IdLaboratorio", idLab);
@@ -216,9 +217,9 @@ namespace trabajo_ing_software
         {
             string query = "DELETE FROM Laboratorio WHERE IdLaboratorio = @IdLaboratorio";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@IdLaboratorio", idLab);
                     try
@@ -229,7 +230,7 @@ namespace trabajo_ing_software
                         lblMensaje.ForeColor = System.Drawing.Color.Green;
                         CargarLaboratorios();
                     }
-                    catch (SqlException)
+                    catch (MySqlException)
                     {
                         lblMensaje.Text = "No se puede eliminar este laboratorio porque ya tiene órdenes de compra asociadas. Puedes usar 'Desactivar'.";
                         lblMensaje.ForeColor = System.Drawing.Color.Red;

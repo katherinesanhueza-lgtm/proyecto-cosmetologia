@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Data;
-using System.Data.SqlClient;
+using System.Configuration; // Necesario para leer el Web.config
+using MySql.Data.MySqlClient; // Librería de MySQL
 using System.Web.UI.WebControls;
 
 namespace trabajo_ing_software
 {
     public partial class Usuarios : System.Web.UI.Page
     {
-        string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ingsofDB;Integrated Security=True;TrustServerCertificate=True;";
+        // Traemos la conexión desde Web.config
+        string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -28,11 +30,11 @@ namespace trabajo_ing_software
         {
             string query = "SELECT IdUsuario, Nombre, Correo, Rol, Activo FROM Usuario ORDER BY IdUsuario DESC";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    using (MySqlDataAdapter da = new MySqlDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
                         da.Fill(dt);
@@ -61,7 +63,7 @@ namespace trabajo_ing_software
             // ¿Estamos creando o editando?
             bool esEdicion = !string.IsNullOrEmpty(hfIdUsuario.Value);
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
                 string query = "";
 
@@ -91,7 +93,7 @@ namespace trabajo_ing_software
                     }
                 }
 
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@Nombre", nombre);
                     cmd.Parameters.AddWithValue("@Correo", correo);
@@ -118,9 +120,11 @@ namespace trabajo_ing_software
                         LimpiarFormulario();
                         CargarUsuarios();
                     }
-                    catch (SqlException ex)
+                    // Actualizado para capturar excepciones específicas de MySQL
+                    catch (MySqlException ex)
                     {
-                        lblMensaje.Text = (ex.Number == 2627) ? "Ya existe un usuario con ese correo." : "❌ Error: " + ex.Message;
+                        // 1062 es el código de MySQL para "Entrada duplicada" (correo ya existe)
+                        lblMensaje.Text = (ex.Number == 1062) ? "Ya existe un usuario con ese correo." : "❌ Error: " + ex.Message;
                         lblMensaje.ForeColor = System.Drawing.Color.Red;
                     }
                 }
@@ -155,13 +159,13 @@ namespace trabajo_ing_software
         {
             string query = "SELECT IdUsuario, Nombre, Correo, Rol FROM Usuario WHERE IdUsuario = @Id";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@Id", idUsuario);
                     con.Open();
-                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
                         {
@@ -172,7 +176,7 @@ namespace trabajo_ing_software
                             txtPassword.Text = ""; // Por seguridad se deja en blanco
 
                             // Cambiar textos a modo edición
-                            lblTituloForm.InnerText = "✏️ Modificar Usuario (ID: " + hfIdUsuario.Value + ")";
+                            lblTituloForm.InnerText = "✏️️ Modificar Usuario (ID: " + hfIdUsuario.Value + ")";
                             btnGuardar.Text = "Guardar Cambios";
                             btnCancelar.Visible = true;
                             lblMensaje.Text = "";
@@ -185,9 +189,9 @@ namespace trabajo_ing_software
         private void CambiarEstadoUsuario(int idUsuario, bool nuevoEstado)
         {
             string query = "UPDATE Usuario SET Activo = @NuevoEstado WHERE IdUsuario = @IdUsuario";
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@NuevoEstado", nuevoEstado);
                     cmd.Parameters.AddWithValue("@IdUsuario", idUsuario);
@@ -210,9 +214,9 @@ namespace trabajo_ing_software
 
             string query = "DELETE FROM Usuario WHERE IdUsuario = @IdUsuario";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@IdUsuario", idUsuario);
                     try
@@ -224,7 +228,7 @@ namespace trabajo_ing_software
                         lblMensaje.ForeColor = System.Drawing.Color.Green;
                         CargarUsuarios();
                     }
-                    catch (SqlException)
+                    catch (MySqlException)
                     {
                         lblMensaje.Text = "No se puede eliminar este usuario porque ya tiene registros o compras asociadas. En su lugar, usa el botón 'Desactivar'.";
                         lblMensaje.ForeColor = System.Drawing.Color.Red;

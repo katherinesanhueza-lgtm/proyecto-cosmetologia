@@ -1,11 +1,14 @@
-﻿using System;
+﻿using MySql.Data.MySqlClient;
+using System;
+using System.Configuration;
 using System.Data.SqlClient;
 
 namespace trabajo_ing_software
 {
     public partial class Login : System.Web.UI.Page
     {
-        string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ingsofDB;Integrated Security=True;TrustServerCertificate=True;";
+        // Traemos la cadena de conexión desde el Web.config para que conecte a tu MySQL
+        string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -26,9 +29,9 @@ namespace trabajo_ing_software
             // 2. Consulta a la tabla Usuario
             string query = "SELECT IdUsuario, Nombre, Rol FROM Usuario WHERE Correo = @Correo AND Password = @Password AND Activo = 1";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@Correo", correo);
                     cmd.Parameters.AddWithValue("@Password", clave);
@@ -36,7 +39,7 @@ namespace trabajo_ing_software
                     try
                     {
                         con.Open();
-                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
                         {
                             if (reader.Read())
                             {
@@ -45,7 +48,7 @@ namespace trabajo_ing_software
                                 Session["NombreUsuario"] = reader["Nombre"].ToString();
                                 Session["RolUsuario"] = reader["Rol"].ToString();
 
-                                // Redireccionamiento a la pagina x que quiera
+                                // Redireccionamiento a la pantalla de Usuarios
                                 Response.Redirect("Usuarios.aspx");
                             }
                             else

@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Configuration;
 using System.Data;
-using System.Data.SqlClient;
+using MySql.Data.MySqlClient; // Librería de MySQL
+using System.Web.UI.WebControls;
 
 namespace trabajo_ing_software
 {
     public partial class ReporteProveedores : System.Web.UI.Page
     {
-        string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ingsofDB;Integrated Security=True;TrustServerCertificate=True;";
+        // Traemos la cadena de conexión desde el Web.config
+        string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -26,18 +29,19 @@ namespace trabajo_ing_software
         // 1. Cargar las tarjetas superiores (KPIs)
         private void CargarMetricasGenerales()
         {
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
+                // En MySQL se usa IFNULL en lugar de ISNULL
                 string queryKPIs = @"
                     SELECT 
                         (SELECT COUNT(*) FROM Laboratorio WHERE Activo = 1) AS TotalLabs,
                         (SELECT COUNT(*) FROM OrdenCompra) AS TotalOC,
-                        (SELECT ISNULL(AVG(DiasPago), 0) FROM Laboratorio WHERE Activo = 1) AS PromedioDias";
+                        (SELECT IFNULL(AVG(DiasPago), 0) FROM Laboratorio WHERE Activo = 1) AS PromedioDias";
 
-                using (SqlCommand cmd = new SqlCommand(queryKPIs, con))
+                using (MySqlCommand cmd = new MySqlCommand(queryKPIs, con))
                 {
                     con.Open();
-                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
                         {
@@ -53,21 +57,21 @@ namespace trabajo_ing_software
         // 2. Cargar la tabla analítica que relaciona Laboratorios, Órdenes y Cumplimiento
         private void CargarTablaReporte()
         {
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                // Consulta analítica: hace LEFT JOIN con OrdenCompra y RecepcionCompra
+                // Consulta analítica ajustada para MySQL (IFNULL y CAST AS SIGNED)
                 string queryReporte = @"
                     SELECT 
                         l.IdLaboratorio,
                         l.RazonSocial,
                         l.Marca,
-                        ISNULL(l.Pais, 'N/A') AS Pais,
+                        IFNULL(l.Pais, 'N/A') AS Pais,
                         l.DiasPago,
                         COUNT(DISTINCT oc.IdOC) AS TotalOC,
                         COUNT(DISTINCT rc.IdRecepcion) AS TotalRecepciones,
                         CASE 
                             WHEN COUNT(DISTINCT oc.IdOC) = 0 THEN 100
-                            ELSE CAST((COUNT(DISTINCT rc.IdRecepcion) * 100.0 / COUNT(DISTINCT oc.IdOC)) AS INT)
+                            ELSE CAST((COUNT(DISTINCT rc.IdRecepcion) * 100.0 / COUNT(DISTINCT oc.IdOC)) AS SIGNED)
                         END AS PorcentajeCumplimiento,
                         CASE 
                             WHEN COUNT(DISTINCT oc.IdOC) = 0 THEN 'Excelente'
@@ -82,9 +86,9 @@ namespace trabajo_ing_software
                     GROUP BY l.IdLaboratorio, l.RazonSocial, l.Marca, l.Pais, l.DiasPago
                     ORDER BY TotalOC DESC, l.RazonSocial ASC";
 
-                using (SqlCommand cmd = new SqlCommand(queryReporte, con))
+                using (MySqlCommand cmd = new MySqlCommand(queryReporte, con))
                 {
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    using (MySqlDataAdapter da = new MySqlDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
                         da.Fill(dt);
