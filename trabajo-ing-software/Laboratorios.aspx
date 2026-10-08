@@ -108,7 +108,8 @@
                         </p>
                     </div>
                     <div style="display: flex; gap: 12px;">
-                        <asp:Button ID="btnIrReporte" runat="server" Text="Exportar Cat&aacute;logo (Reporte)" CssClass="btn-dermo-secondary" OnClick="btnIrReporte_Click" />
+                        <a href="ReporteProveedores.aspx" class="btn-dermo-secondary" style="text-decoration: none; display: inline-flex; align-items: center;">Exportar Cat&aacute;logo (Reporte)</a>
+                        <asp:Button ID="btnIrReporte" runat="server" Visible="false" OnClick="btnIrReporte_Click" />
                         <button type="button" class="btn-dermo-primary" onclick="nuevoLaboratorioFocus();">
                             + Agregar Nuevo Laboratorio
                         </button>

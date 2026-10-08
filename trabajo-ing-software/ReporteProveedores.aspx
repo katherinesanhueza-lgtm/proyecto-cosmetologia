@@ -14,9 +14,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         .container {
-            max-width: 1200px;
+            max-width: 1240px;
             margin: 30px auto;
-            padding: 0 20px;
+            padding: 0 24px;
         }
         .header-top {
             display: flex;
@@ -63,26 +63,29 @@
         .badge-excelente {
             background-color: #E8F8F0;
             color: #27AE60;
-            padding: 4px 10px;
+            padding: 4px 12px;
             border-radius: 12px;
             font-size: 12px;
             font-weight: 600;
+            display: inline-block;
         }
         .badge-aceptable {
             background-color: #FEF9E7;
             color: #D4AC0D;
-            padding: 4px 10px;
+            padding: 4px 12px;
             border-radius: 12px;
             font-size: 12px;
             font-weight: 600;
+            display: inline-block;
         }
         .badge-critico {
             background-color: #FDEDEC;
             color: #C0392B;
-            padding: 4px 10px;
+            padding: 4px 12px;
             border-radius: 12px;
             font-size: 12px;
             font-weight: 600;
+            display: inline-block;
         }
         @media print {
             .no-print {
@@ -106,13 +109,13 @@
                     <span style="font-size: 13px; color: var(--color-texto-suave);">M&Oacute;DULO DE COMPRAS &bull; CUMPLIMIENTO Y TIEMPOS DE ENTREGA</span>
                 </div>
                 <div class="nav-links">
-                    <asp:Button ID="btnVolver" runat="server" Text="Volver a Laboratorios" CssClass="btn-dermo-secondary" style="padding: 7px 15px; font-size: 13px;" OnClick="btnVolver_Click" />
-                    <button type="button" class="btn-dermo-primary" style="padding: 7px 18px; font-size: 13px;" onclick="descargarPDF();">Descargar PDF</button>
-                    <asp:Button ID="btnLogout" runat="server" Text="Cerrar Sesi&oacute;n" CssClass="btn-dermo-secondary" style="padding: 7px 15px; font-size: 13px;" OnClick="btnLogout_Click" />
+                    <a href="Laboratorios.aspx" class="btn-dermo-secondary" style="padding: 8px 18px; font-size: 13px; text-decoration: none;">Volver a Laboratorios</a>
+                    <button type="button" class="btn-dermo-primary" style="padding: 8px 20px; font-size: 13px;" onclick="descargarPDF();">Descargar PDF</button>
+                    <asp:Button ID="btnLogout" runat="server" Text="Cerrar Sesi&oacute;n" CssClass="btn-dermo-secondary" style="padding: 8px 16px; font-size: 13px;" OnClick="btnLogout_Click" />
                 </div>
             </div>
 
-            <!-- Titulo al imprimir -->
+            <!-- Titulo del informe -->
             <div style="margin-bottom: 20px;">
                 <h2 style="margin-bottom: 5px;">Distribuidora de Dermocosm&eacute;tica Profesional</h2>
                 <p style="margin: 0; font-size: 14px; color: var(--color-texto-suave);">Informe Anal&iacute;tico de Rendimiento y Tiempos de Proveedores</p>
@@ -146,18 +149,25 @@
             <!-- Tabla de Evaluacion -->
             <div class="table-dermo-container" style="margin-bottom: 30px;">
                 <asp:GridView ID="gvReporte" runat="server" AutoGenerateColumns="False" 
-                    CssClass="table-dermo-modern" GridLines="None" EmptyDataText="No hay datos de compras u ordenes registradas para evaluar.">
+                    CssClass="table-dermo-modern" GridLines="None" EmptyDataText="No hay datos de compras u &oacute;rdenes registradas para evaluar.">
                     <Columns>
                         <asp:BoundField DataField="RazonSocial" HeaderText="LABORATORIO" />
+                        <asp:BoundField DataField="Marca" HeaderText="MARCA" />
                         <asp:BoundField DataField="Pais" HeaderText="PA&Iacute;S" HtmlEncode="false" />
-                        <asp:BoundField DataField="DiasPago" HeaderText="PLAZO CR&Eacute;DITO" HtmlEncode="false" />
-                        <asp:BoundField DataField="TotalOC" HeaderText="ORDENES COMPRA" HtmlEncode="false" />
-                        <asp:BoundField DataField="PromedioDiasEntrega" HeaderText="TIEMPO PROMEDIO ENTREGA" HtmlEncode="false" />
+                        <asp:BoundField DataField="DiasPago" HeaderText="PLAZO CR&Eacute;DITO (D&Iacute;AS)" HtmlEncode="false" />
+                        <asp:BoundField DataField="TotalOC" HeaderText="&Oacute;RDENES EMITIDAS" HtmlEncode="false" />
+                        <asp:BoundField DataField="TotalRecepciones" HeaderText="RECEPCIONES" HtmlEncode="false" />
                         
-                        <asp:TemplateField HeaderText="NIVEL CUMPLIMIENTO">
+                        <asp:TemplateField HeaderText="% CUMPLIMIENTO">
                             <ItemTemplate>
-                                <span class='<%# Eval("ClaseBadge") %>'>
-                                    <%# Eval("NivelCumplimiento") %>
+                                <strong><%# Eval("PorcentajeCumplimiento") %>%</strong>
+                            </ItemTemplate>
+                        </asp:TemplateField>
+
+                        <asp:TemplateField HeaderText="CALIFICACI&Oacute;N">
+                            <ItemTemplate>
+                                <span class='<%# GetClaseCalificacion(Eval("Calificacion").ToString()) %>'>
+                                    <%# Eval("Calificacion") %>
                                 </span>
                             </ItemTemplate>
                         </asp:TemplateField>
@@ -168,11 +178,14 @@
             <!-- Resumen explicativo -->
             <div style="background-color: var(--color-blanco); border: 1px solid var(--color-borde-suave); border-radius: 16px; padding: 20px; font-size: 13px; line-height: 1.6; color: var(--color-texto-suave);">
                 <strong>Criterio de Evaluaci&oacute;n Comercial y Log&iacute;stica:</strong><br />
-                &bull; <strong>Excelente (A):</strong> Entrega en menos o igual al plazo acordado sin retrasos de cadena de fr&iacute;o.<br />
-                &bull; <strong>Aceptable (B):</strong> Entrega dentro de una tolerancia de 5 d&iacute;as posteriores a la orden.<br />
-                &bull; <strong>Cr&iacute;tico (C):</strong> Retrasos sistem&aacute;ticos que superan la ventana de abastecimiento pactada.
+                &bull; <strong>Excelente:</strong> Cumplimiento &ge; 90% o sin incidencias en recepci&oacute;n de pedidos.<br />
+                &bull; <strong>Aceptable:</strong> Cumplimiento entre 70% y 89% dentro de la ventana de tolerancia.<br />
+                &bull; <strong>Cr&iacute;tico:</strong> Cumplimiento &lt; 70% con demoras en la cadena de suministros.
             </div>
         </div>
+
+        <!-- Boton de respaldo para el diseñador -->
+        <asp:Button ID="btnVolver" runat="server" Visible="false" OnClick="btnVolver_Click" />
 
         <script>
             function descargarPDF() {

@@ -168,7 +168,7 @@
                         </div>
 
                         <!-- BOTON ACCESO -->
-                        <asp:Button ID="btnLogin" runat="server" Text="Acceder al Expediente →" CssClass="btn-dermo-primary" Width="100%" OnClick="btnLogin_Click" />
+                        <asp:Button ID="btnLogin" runat="server" Text="Ingresar →" CssClass="btn-dermo-primary" Width="100%" OnClick="btnLogin_Click" />
                         
                         <!-- MENSAJE DE ERROR O VALIDACION -->
                         <asp:Label ID="lblMensaje" runat="server" ForeColor="#C0392B" Font-Size="13px" style="display: block; margin-top: 14px; text-align: center; font-weight: 500;"></asp:Label>
