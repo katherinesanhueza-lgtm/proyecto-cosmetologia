@@ -1,121 +1,531 @@
-﻿/* Importar fuentes oficiales de tu diseño */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap');
+﻿/* ========================================================
+   ESTILOS OFICIALES - DISTRIBUIDORA DE DERMOCOSMETICA PROFESIONAL
+   Inspirado en la Guia de Diseno y Mockups de Alta Cosmeceutica
+   ======================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,500;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
 
 :root {
     --color-primario: #D7C9B8;
     --color-secundario: #A89B8A;
-    --color-acento: #8B6F56;
-    --color-fondo: #F7F4EE;
-    --color-texto: #2E2E2E;
+    --color-acento: #7A5E47;
+    --color-acento-hover: #634B37;
+    --color-fondo: #F7F5F0;
     --color-blanco: #FFFFFF;
+    --color-texto: #2E2E2E;
+    --color-texto-suave: #736E67;
+    --color-borde-suave: #E8E3DA;
+    --color-pill-bg: #F1ECE5;
+    --color-badge-verde-bg: #E8F8F0;
+    --color-badge-verde-txt: #27AE60;
+    --color-badge-rojo-bg: #FDEDEC;
+    --color-badge-rojo-txt: #C0392B;
+    --color-badge-gris-bg: #F0EFEB;
+    --color-badge-gris-txt: #8A8780;
+}
+
+* {
+    box-sizing: border-box;
 }
 
 body {
     background-color: var(--color-fondo);
     color: var(--color-texto);
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Plus Jakarta Sans', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========================================================
+   TIPOGRAFIA ELEGANTE
+   ======================================================== */
+h1, h2, h3, .font-serif {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--color-texto);
+    margin: 0;
+    font-weight: 600;
+}
+
+.text-acento {
+    color: var(--color-acento);
+}
+
+.text-muted {
+    color: var(--color-texto-suave);
+    font-size: 13px;
+}
+
+/* ========================================================
+   BARRA SUPERIOR (HEADER GLOBAL)
+   ======================================================== */
+.top-header {
+    background-color: var(--color-blanco);
+    border-bottom: 1px solid var(--color-borde-suave);
+    padding: 14px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.brand-block {
+    display: flex;
+    flex-direction: column;
+}
+
+.brand-logo {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    color: var(--color-texto);
+    text-transform: uppercase;
+}
+
+.brand-sub {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--color-texto-suave);
+    font-weight: 600;
+}
+
+.nav-links-menu {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    list-style: none;
     margin: 0;
     padding: 0;
 }
 
-/* Títulos con Playfair Display */
-h1, h2, h3, .titulo-elegante {
-    font-family: 'Playfair Display', serif;
-    color: var(--color-acento);
-    font-weight: 700;
-}
-
-/* Tarjeta / Contenedor blanco minimalista */
-.card-dermocosmetica {
-    background-color: var(--color-blanco);
-    border-radius: 20px;
-    padding: 35px;
-    box-shadow: 0 10px 30px rgba(139, 111, 86, 0.08);
-    border: 1px solid var(--color-primario);
-}
-
-/* Cajas de texto (Inputs) redondeadas */
-.input-dermo {
-    width: 100%;
-    padding: 12px 18px;
-    border: 1.5px solid var(--color-primario);
-    border-radius: 25px;
-    background-color: var(--color-blanco);
-    font-family: 'Montserrat', sans-serif;
+.nav-item-link {
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
     color: var(--color-texto);
-    font-size: 14px;
-    outline: none;
-    box-sizing: border-box;
-    margin-top: 6px;
-    margin-bottom: 16px;
-    transition: all 0.3s ease;
+    padding: 8px 18px;
+    border-radius: 20px;
+    transition: all 0.2s ease;
 }
 
-    .input-dermo:focus {
-        border-color: var(--color-acento);
-        box-shadow: 0 0 8px rgba(139, 111, 86, 0.2);
-    }
+.nav-item-link:hover {
+    color: var(--color-acento);
+    background-color: var(--color-pill-bg);
+}
 
-/* Botón Principal (Marrón elegante con borde redondeado) */
-.btn-principal {
+.nav-item-link.active {
+    background-color: var(--color-pill-bg);
+    color: var(--color-acento);
+    font-weight: 600;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-icon-btn {
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: var(--color-texto-suave);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.header-icon-btn:hover {
+    color: var(--color-acento);
+}
+
+.btn-header-agendar {
     background-color: var(--color-acento);
     color: var(--color-blanco);
     border: none;
-    padding: 12px 28px;
     border-radius: 25px;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 500;
-    font-size: 15px;
+    padding: 9px 22px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
-    .btn-principal:hover {
-        background-color: #725944;
-        transform: translateY(-2px);
-    }
+.btn-header-agendar:hover {
+    background-color: var(--color-acento-hover);
+}
 
-/* Botón Secundario (Borde fino) */
-.btn-secundario {
+.user-avatar-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--color-acento);
+    color: var(--color-blanco);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+}
+
+/* ========================================================
+   TARJETAS Y CONTENEDORES
+   ======================================================== */
+.card-dermo-luxury {
+    background-color: var(--color-blanco);
+    border-radius: 24px;
+    border: 1px solid var(--color-borde-suave);
+    box-shadow: 0 8px 24px rgba(122, 94, 71, 0.05);
+    padding: 32px;
+}
+
+.pill-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--color-pill-bg);
+    color: var(--color-acento);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 20px;
+}
+
+/* ========================================================
+   CAMPOS DE TEXTO E INPUTS CON ICONOS SVG LIMPIOS
+   ======================================================== */
+.form-group-dermo {
+    margin-bottom: 18px;
+    text-align: left;
+}
+
+.form-label-dermo {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--color-texto-suave);
+    margin-bottom: 6px;
+}
+
+.input-icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.field-icon-svg {
+    position: absolute;
+    left: 16px;
+    color: var(--color-secundario);
+    pointer-events: none;
+}
+
+.input-pill-dermo {
+    width: 100%;
+    padding: 13px 20px;
+    border: 1px solid var(--color-borde-suave);
+    border-radius: 25px;
+    background-color: #FAF8F5;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--color-texto);
+    font-size: 14px;
+    outline: none;
+    transition: all 0.25s ease;
+}
+
+.input-pill-dermo.input-with-icon {
+    padding-left: 44px;
+}
+
+.input-pill-dermo:focus {
+    background-color: var(--color-blanco);
+    border-color: var(--color-acento);
+    box-shadow: 0 0 0 3px rgba(122, 94, 71, 0.12);
+}
+
+/* ========================================================
+   BOTONES PRIMARIOS Y SECUNDARIOS
+   ======================================================== */
+.btn-dermo-primary {
+    background-color: var(--color-acento);
+    color: var(--color-blanco);
+    border: none;
+    padding: 14px 28px;
+    border-radius: 30px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-dermo-primary:hover {
+    background-color: var(--color-acento-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(122, 94, 71, 0.2);
+}
+
+.btn-dermo-secondary {
     background-color: transparent;
     color: var(--color-acento);
-    border: 1.5px solid var(--color-acento);
-    padding: 11px 26px;
-    border-radius: 25px;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 500;
+    border: 1.5px solid var(--color-primario);
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
 }
 
-    .btn-secundario:hover {
-        background-color: var(--color-primario);
-        color: var(--color-texto);
-    }
+.btn-dermo-secondary:hover {
+    background-color: var(--color-pill-bg);
+    border-color: var(--color-acento);
+}
 
-/* Tablas con estilo suave */
-.tabla-dermo {
+/* ========================================================
+   SIDEBAR PARA GESTION (DASHBOARDS)
+   ======================================================== */
+.sidebar-dermo {
+    background-color: var(--color-blanco);
+    border-radius: 20px;
+    border: 1px solid var(--color-borde-suave);
+    padding: 24px 18px;
+    height: fit-content;
+}
+
+.sidebar-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: var(--color-texto-suave);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    padding-left: 10px;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 14px;
+    text-decoration: none;
+    color: var(--color-texto);
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+}
+
+.sidebar-item svg {
+    color: var(--color-texto-suave);
+    flex-shrink: 0;
+}
+
+.sidebar-item:hover {
+    background-color: #FAF8F5;
+    color: var(--color-acento);
+}
+
+.sidebar-item:hover svg {
+    color: var(--color-acento);
+}
+
+.sidebar-item.active {
+    background-color: var(--color-pill-bg);
+    color: var(--color-acento);
+    font-weight: 600;
+    border: 1px solid var(--color-primario);
+}
+
+.sidebar-item.active svg {
+    color: var(--color-acento);
+}
+
+/* ========================================================
+   TABLAS Y AVATARES CON INICIALES (MOCKUP STYLE)
+   ======================================================== */
+.table-dermo-container {
+    background-color: var(--color-blanco);
+    border-radius: 20px;
+    border: 1px solid var(--color-borde-suave);
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+}
+
+.table-dermo-modern {
     width: 100%;
     border-collapse: collapse;
-    background-color: var(--color-blanco);
-    border-radius: 12px;
-    overflow: hidden;
-    margin-top: 15px;
 }
 
-    .tabla-dermo th {
-        background-color: var(--color-acento);
-        color: var(--color-blanco);
-        padding: 14px;
-        font-weight: 500;
-        text-align: left;
-    }
+.table-dermo-modern th {
+    background-color: #FAF8F5;
+    color: var(--color-texto-suave);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--color-borde-suave);
+    text-align: left;
+}
 
-    .tabla-dermo td {
-        padding: 12px 14px;
-        border-bottom: 1px solid var(--color-fondo);
-    }
+.table-dermo-modern td {
+    padding: 16px 20px;
+    border-bottom: 1px solid #F5F2EC;
+    font-size: 13px;
+    vertical-align: middle;
+}
 
-    .tabla-dermo tr:hover {
-        background-color: #FAF8F5;
-    }
+.table-dermo-modern tr:hover {
+    background-color: #FCFBF9;
+}
+
+/* Avatar circular con iniciales */
+.avatar-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--color-pill-bg);
+    color: var(--color-acento);
+    font-weight: 700;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    border: 1px solid var(--color-primario);
+    flex-shrink: 0;
+}
+
+/* Badges de estado */
+.badge-status-activo {
+    background-color: var(--color-badge-verde-bg);
+    color: var(--color-badge-verde-txt);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.badge-status-inactivo {
+    background-color: var(--color-badge-gris-bg);
+    color: var(--color-badge-gris-txt);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.tag-pill-sm {
+    background-color: #FAF8F5;
+    border: 1px solid var(--color-borde-suave);
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    color: var(--color-texto-suave);
+    display: inline-block;
+    margin: 2px;
+}
+
+/* Botones de accion limpios sin emojis */
+.btn-action-pill {
+    padding: 5px 12px;
+    border-radius: 14px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid var(--color-borde-suave);
+    background: transparent;
+    transition: all 0.2s;
+    margin-right: 4px;
+    color: var(--color-acento);
+    font-family: inherit;
+}
+
+.btn-action-pill:hover {
+    background-color: var(--color-pill-bg);
+}
+
+.btn-action-pill.btn-delete {
+    color: var(--color-badge-rojo-txt);
+}
+
+.btn-action-pill.btn-delete:hover {
+    background-color: var(--color-badge-rojo-bg);
+    border-color: #FADBD8;
+}
+
+.btn-action-pill.btn-toggle {
+    color: var(--color-texto-suave);
+}
+
+.btn-action-pill.btn-toggle:hover {
+    background-color: #F0EFEB;
+}
+
+/* ========================================================
+   MINI CARDS DE KPIS (PARTE INFERIOR)
+   ======================================================== */
+.kpi-mini-card {
+    background-color: var(--color-blanco);
+    border-radius: 16px;
+    border: 1px solid var(--color-borde-suave);
+    padding: 18px 22px;
+}
+
+.kpi-mini-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--color-texto-suave);
+}
+
+.kpi-mini-value {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--color-texto);
+    margin: 4px 0;
+}
+
+.kpi-mini-sub {
+    font-size: 11px;
+    color: var(--color-texto-suave);
+}

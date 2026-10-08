@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Web.UI.WebControls;
@@ -20,26 +20,104 @@ namespace trabajo_ing_software
 
             if (!IsPostBack)
             {
-                lblBienvenida.Text = "👤 " + Session["NombreUsuario"].ToString();
+                lblBienvenida.Text = Session["NombreUsuario"].ToString();
                 CargarLaboratorios();
             }
         }
 
-        // 1. READ: Listar Laboratorios
+        public string GetIniciales(string nombre)
+        {
+            if (string.IsNullOrWhiteSpace(nombre)) return "LB";
+            string[] partes = nombre.Trim().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (partes.Length >= 2)
+                return (partes[0][0].ToString() + partes[1][0].ToString()).ToUpper();
+            return partes[0].Substring(0, Math.Min(2, partes[0].Length)).ToUpper();
+        }
+
+        protected void txtBuscar_TextChanged(object sender, EventArgs e)
+        {
+            CargarLaboratorios();
+        }
+
+        protected void ddlFiltroPais_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CargarLaboratorios();
+        }
+
+        protected void ddlFiltroEstado_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CargarLaboratorios();
+        }
+
+        // 1. READ: Listar Laboratorios con filtros y cálculo de KPIs
         private void CargarLaboratorios()
         {
-            string query = "SELECT IdLaboratorio, Rut, RazonSocial, Marca, Pais, Contacto, Email, Telefono, DiasPago, Activo FROM Laboratorio ORDER BY IdLaboratorio DESC";
+            string filtro = txtBuscar != null ? txtBuscar.Text.Trim() : "";
+            string pais = ddlFiltroPais != null ? ddlFiltroPais.SelectedValue : "";
+            string estado = ddlFiltroEstado != null ? ddlFiltroEstado.SelectedValue : "";
+
+            string query = "SELECT IdLaboratorio, Rut, RazonSocial, Marca, Pais, Contacto, Email, Telefono, DiasPago, Activo FROM Laboratorio WHERE 1=1";
+
+            if (!string.IsNullOrEmpty(filtro))
+            {
+                query += " AND (RazonSocial LIKE @Filtro OR Marca LIKE @Filtro OR Contacto LIKE @Filtro OR Rut LIKE @Filtro)";
+            }
+            if (!string.IsNullOrEmpty(pais))
+            {
+                query += " AND Pais LIKE @Pais";
+            }
+            if (!string.IsNullOrEmpty(estado))
+            {
+                query += " AND Activo = @Estado";
+            }
+            query += " ORDER BY IdLaboratorio DESC";
 
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 using (SqlCommand cmd = new SqlCommand(query, con))
                 {
+                    if (!string.IsNullOrEmpty(filtro))
+                        cmd.Parameters.AddWithValue("@Filtro", "%" + filtro + "%");
+                    if (!string.IsNullOrEmpty(pais))
+                        cmd.Parameters.AddWithValue("@Pais", "%" + pais + "%");
+                    if (!string.IsNullOrEmpty(estado))
+                        cmd.Parameters.AddWithValue("@Estado", estado == "1");
+
                     using (SqlDataAdapter da = new SqlDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
                         da.Fill(dt);
                         gvLaboratorios.DataSource = dt;
                         gvLaboratorios.DataBind();
+
+                        // Actualización de KPIs en pantalla
+                        if (lblTotalHomologados != null)
+                        {
+                            lblTotalHomologados.Text = dt.Rows.Count.ToString();
+                        }
+
+                        if (lblPlazoPromedio != null)
+                        {
+                            if (dt.Rows.Count > 0)
+                            {
+                                double sumaDias = 0;
+                                int countValidos = 0;
+                                foreach (DataRow row in dt.Rows)
+                                {
+                                    if (row["DiasPago"] != DBNull.Value && double.TryParse(row["DiasPago"].ToString(), out double dias))
+                                    {
+                                        sumaDias += dias;
+                                        countValidos++;
+                                    }
+                                }
+                                int promedio = countValidos > 0 ? (int)Math.Round(sumaDias / countValidos) : 30;
+                                lblPlazoPromedio.Text = promedio.ToString();
+                            }
+                            else
+                            {
+                                lblPlazoPromedio.Text = "0";
+                            }
+                        }
                     }
                 }
             }
@@ -186,7 +264,7 @@ namespace trabajo_ing_software
                             txtTelefono.Text = reader["Telefono"].ToString();
                             txtDiasPago.Text = reader["DiasPago"].ToString();
 
-                            lblTituloForm.InnerText = "✏️ Modificar Laboratorio (ID: " + hfIdLaboratorio.Value + ")";
+                            lblTituloForm.InnerText = "Modificar Laboratorio (ID: " + hfIdLaboratorio.Value + ")";
                             btnGuardar.Text = "Guardar Cambios";
                             btnCancelar.Visible = true;
                             lblMensaje.Text = "";
@@ -255,7 +333,7 @@ namespace trabajo_ing_software
             txtTelefono.Text = "";
             txtDiasPago.Text = "30";
             lblTituloForm.InnerText = "Registrar Nuevo Laboratorio";
-            btnGuardar.Text = "Guardar Laboratorio +";
+            btnGuardar.Text = "Guardar Laboratorio";
             btnCancelar.Visible = false;
         }
 

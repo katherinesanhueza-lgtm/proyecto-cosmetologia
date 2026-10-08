@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Web.UI.WebControls;
@@ -19,19 +19,43 @@ namespace trabajo_ing_software
 
             if (!IsPostBack)
             {
-                lblBienvenida.Text = "👤 " + Session["NombreUsuario"].ToString();
+                lblBienvenida.Text = "" + Session["NombreUsuario"].ToString();
                 CargarUsuarios();
             }
         }
 
-        private void CargarUsuarios()
+        public string GetIniciales(string nombre)
         {
-            string query = "SELECT IdUsuario, Nombre, Correo, Rol, Activo FROM Usuario ORDER BY IdUsuario DESC";
+            if (string.IsNullOrWhiteSpace(nombre)) return "U";
+            string[] partes = nombre.Trim().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (partes.Length >= 2)
+                return (partes[0][0].ToString() + partes[1][0].ToString()).ToUpper();
+            return partes[0].Substring(0, Math.Min(2, partes[0].Length)).ToUpper();
+        }
+
+        protected void txtBuscarUsuario_TextChanged(object sender, EventArgs e)
+        {
+            CargarUsuarios(txtBuscarUsuario.Text.Trim());
+        }
+
+        private void CargarUsuarios(string filtro = "")
+        {
+            string query = "SELECT IdUsuario, Nombre, Correo, Rol, Activo FROM Usuario";
+            if (!string.IsNullOrEmpty(filtro))
+            {
+                query += " WHERE Nombre LIKE @Filtro OR Correo LIKE @Filtro OR Rol LIKE @Filtro";
+            }
+            query += " ORDER BY IdUsuario DESC";
 
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 using (SqlCommand cmd = new SqlCommand(query, con))
                 {
+                    if (!string.IsNullOrEmpty(filtro))
+                    {
+                        cmd.Parameters.AddWithValue("@Filtro", "%" + filtro + "%");
+                    }
+
                     using (SqlDataAdapter da = new SqlDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
@@ -120,7 +144,7 @@ namespace trabajo_ing_software
                     }
                     catch (SqlException ex)
                     {
-                        lblMensaje.Text = (ex.Number == 2627) ? "Ya existe un usuario con ese correo." : "❌ Error: " + ex.Message;
+                        lblMensaje.Text = (ex.Number == 2627) ? "Ya existe un usuario con ese correo." : "Error: " + ex.Message;
                         lblMensaje.ForeColor = System.Drawing.Color.Red;
                     }
                 }
@@ -171,8 +195,8 @@ namespace trabajo_ing_software
                             ddlRol.SelectedValue = reader["Rol"].ToString();
                             txtPassword.Text = ""; // Por seguridad se deja en blanco
 
-                            // Cambiar textos a modo edición
-                            lblTituloForm.InnerText = "✏️ Modificar Usuario (ID: " + hfIdUsuario.Value + ")";
+                            // Cambiar textos a modo edicion
+                            lblTituloForm.InnerText = "Modificar Usuario (ID: " + hfIdUsuario.Value + ")";
                             btnGuardar.Text = "Guardar Cambios";
                             btnCancelar.Visible = true;
                             lblMensaje.Text = "";
@@ -246,7 +270,7 @@ namespace trabajo_ing_software
             txtPassword.Text = "";
             ddlRol.SelectedIndex = 0;
             lblTituloForm.InnerText = "Registrar Nuevo Usuario";
-            btnGuardar.Text = "Guardar Usuario +";
+            btnGuardar.Text = "Guardar Usuario";
             btnCancelar.Visible = false;
         }
 
