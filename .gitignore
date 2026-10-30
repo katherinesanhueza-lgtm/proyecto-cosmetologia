@@ -480,3 +480,5 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+# Documentacion personal de defensa (Privado)
+Manual_*.*

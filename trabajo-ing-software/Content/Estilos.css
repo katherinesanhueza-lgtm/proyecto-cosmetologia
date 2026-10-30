@@ -1,4 +1,4 @@
-﻿/* ========================================================
+/* ========================================================
    ESTILOS OFICIALES - DISTRIBUIDORA DE DERMOCOSMETICA PROFESIONAL
    Inspirado en la Guia de Diseno y Mockups de Alta Cosmeceutica
    ======================================================== */
@@ -200,6 +200,7 @@ h1, h2, h3, .font-serif {
     text-transform: uppercase;
     padding: 6px 14px;
     border-radius: 20px;
+    white-space: nowrap;
 }
 
 /* ========================================================

@@ -23,6 +23,12 @@ namespace trabajo_ing_software
                 return;
             }
 
+            if (!ValidarEmail(correo))
+            {
+                lblMensaje.Text = "El formato del correo electrónico no es válido.";
+                return;
+            }
+
             // 2. Consulta a la tabla Usuario
             string query = "SELECT IdUsuario, Nombre, Rol FROM Usuario WHERE Correo = @Correo AND Password = @Password AND Activo = 1";
 
@@ -41,12 +47,32 @@ namespace trabajo_ing_software
                             if (reader.Read())
                             {
                                 // Usuario encontrado: Guardamos los datos en la Sesión
+                                string rol = reader["Rol"] != null ? reader["Rol"].ToString() : "";
                                 Session["IdUsuario"] = reader["IdUsuario"].ToString();
                                 Session["NombreUsuario"] = reader["Nombre"].ToString();
-                                Session["RolUsuario"] = reader["Rol"].ToString();
+                                Session["RolUsuario"] = rol;
 
-                                // Redireccionamiento a la pagina x que quiera
-                                Response.Redirect("Usuarios.aspx");
+                                // Redireccionamiento segun perfil (RBAC)
+                                if (rol.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    Response.Redirect("Usuarios.aspx");
+                                }
+                                else if (rol.Equals("Bodeguero", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    Response.Redirect("Recepciones.aspx");
+                                }
+                                else if (rol.Equals("Comprador", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    Response.Redirect("OrdenesCompra.aspx");
+                                }
+                                else if (rol.Equals("Contador", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    Response.Redirect("ReporteOrdenesCompra.aspx");
+                                }
+                                else
+                                {
+                                    Response.Redirect("Default.aspx");
+                                }
                             }
                             else
                             {
@@ -60,6 +86,13 @@ namespace trabajo_ing_software
                     }
                 }
             }
+        }
+
+        private bool ValidarEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email)) return false;
+            string patron = @"^[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}$";
+            return System.Text.RegularExpressions.Regex.IsMatch(email.Trim(), patron);
         }
     }
 }

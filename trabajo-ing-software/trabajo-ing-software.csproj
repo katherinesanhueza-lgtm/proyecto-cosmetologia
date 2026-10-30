@@ -124,9 +124,13 @@
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Laboratorios.aspx" />
+    <Content Include="OrdenesCompra.aspx" />
     <Content Include="Login.aspx" />
     <Content Include="Perfiles.aspx" />
     <Content Include="ReporteProveedores.aspx" />
+    <Content Include="ReporteOrdenesCompra.aspx" />
+    <Content Include="Recepciones.aspx" />
+    <Content Include="ReporteIngresos.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
@@ -251,6 +255,35 @@
     </Compile>
     <Compile Include="ReporteProveedores.aspx.designer.cs">
       <DependentUpon>ReporteProveedores.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ConfiguracionGlobal.cs" />
+    <Compile Include="OrdenesCompra.aspx.cs">
+      <DependentUpon>OrdenesCompra.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="OrdenesCompra.aspx.designer.cs">
+      <DependentUpon>OrdenesCompra.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ReporteOrdenesCompra.aspx.cs">
+      <DependentUpon>ReporteOrdenesCompra.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ReporteOrdenesCompra.aspx.designer.cs">
+      <DependentUpon>ReporteOrdenesCompra.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Recepciones.aspx.cs">
+      <DependentUpon>Recepciones.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Recepciones.aspx.designer.cs">
+      <DependentUpon>Recepciones.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ReporteIngresos.aspx.cs">
+      <DependentUpon>ReporteIngresos.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ReporteIngresos.aspx.designer.cs">
+      <DependentUpon>ReporteIngresos.aspx</DependentUpon>
     </Compile>
     <Compile Include="Site.Master.cs">
       <DependentUpon>Site.Master</DependentUpon>

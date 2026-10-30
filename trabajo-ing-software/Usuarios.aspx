@@ -101,11 +101,51 @@
             </div>
             <nav>
                 <ul class="nav-links-menu">
+                    <% 
+                        string rolNav = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
+                        bool esAdmin = rolNav.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
+                        bool esComprador = rolNav.Equals("Comprador", StringComparison.OrdinalIgnoreCase);
+                        bool esBodeguero = rolNav.Equals("Bodeguero", StringComparison.OrdinalIgnoreCase);
+                        bool esContador = rolNav.Equals("Contador", StringComparison.OrdinalIgnoreCase);
+                        bool esVendedor = rolNav.Equals("Vendedor", StringComparison.OrdinalIgnoreCase);
+
+                        // Matriz Oficial RBAC 6.1.2
+                        bool puedeVerCompras = esAdmin || esComprador || esContador;
+                        bool puedeVerInventario = esAdmin || esBodeguero || esComprador || esContador || esVendedor;
+                    %>
                     <li><a href="Default.aspx" class="nav-item-link">Inicio</a></li>
+
+                    <%-- ADMINISTRACIÃ“N (Solo Administrador General) --%>
+                    <% if (esAdmin) { %>
+                    <li><a href="Usuarios.aspx" class="nav-item-link">Usuarios</a></li>
+                    <% } %>
+
+                    <%-- COMPRAS (Admin y Comprador Escritura; Contador Solo Consulta) --%>
+                    <% if (esAdmin || esComprador || esContador) { %>
                     <li><a href="Laboratorios.aspx" class="nav-item-link">Laboratorios</a></li>
-                    <li><a href="ReporteProveedores.aspx" class="nav-item-link">Reporte Proveedores</a></li>
+                    <% } %>
+                    <% if (puedeVerCompras) { %>
+                    <li><a href="OrdenesCompra.aspx" class="nav-item-link">&Oacute;rdenes de Compra</a></li>
+                    <% } %>
+                    <% if (esAdmin || esComprador) { %>
+                    <li><a href="ReporteProveedores.aspx" class="nav-item-link">Reporte Evaluaci&oacute;n</a></li>
+                    <% } %>
+                    <% if (puedeVerCompras) { %>
+                    <li><a href="ReporteOrdenesCompra.aspx" class="nav-item-link">Reporte &Oacute;rdenes</a></li>
+                    <% } %>
+
+                    <%-- INVENTARIO (Bodeguero Escritura; Admin Total; Comprador y Contador Consulta) --%>
+                    <% if (esAdmin || esBodeguero || esComprador) { %>
+                    <li><a href="Recepciones.aspx" class="nav-item-link">Recepci&oacute;n y Lotes</a></li>
+                    <% } %>
+                    <% if (puedeVerInventario) { %>
+                    <li><a href="ReporteIngresos.aspx" class="nav-item-link">Reporte Ingresos</a></li>
+                    <% } %>
+
+                    <%-- ACCESOS (Solo Administrador General) --%>
+                    <% if (esAdmin) { %>
                     <li><a href="Accesos.aspx" class="nav-item-link">Accesos</a></li>
-                    <li><a href="Perfiles.aspx" class="nav-item-link">Perfiles</a></li>
+                    <% } %>
                 </ul>
             </nav>
             <div class="header-actions">
@@ -206,6 +246,8 @@
                                 <asp:ListItem Text="Administrador" Value="Administrador" />
                                 <asp:ListItem Text="Comprador" Value="Comprador" />
                                 <asp:ListItem Text="Vendedor" Value="Vendedor" />
+                                <asp:ListItem Text="Contador" Value="Contador" />
+                                <asp:ListItem Text="Bodeguero" Value="Bodeguero" />
                                 <asp:ListItem Text="Usuario general" Value="Usuario general" />
                             </asp:DropDownList>
                         </div>

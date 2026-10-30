@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Web.UI;
@@ -12,6 +12,35 @@ namespace trabajo_ing_software
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (Session["IdUsuario"] == null)
+            {
+                Response.Redirect("Login.aspx");
+                return;
+            }
+
+            // Control de acceso RBAC: Solo Administrador puede gestionar y asignar perfiles
+            string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
+            if (!rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
+            {
+                if (rolUsuario.Equals("Bodeguero", StringComparison.OrdinalIgnoreCase))
+                {
+                    Response.Redirect("Recepciones.aspx");
+                }
+                else if (rolUsuario.Equals("Comprador", StringComparison.OrdinalIgnoreCase))
+                {
+                    Response.Redirect("OrdenesCompra.aspx");
+                }
+                else if (rolUsuario.Equals("Contador", StringComparison.OrdinalIgnoreCase))
+                {
+                    Response.Redirect("ReporteOrdenesCompra.aspx");
+                }
+                else
+                {
+                    Response.Redirect("Default.aspx");
+                }
+                return;
+            }
+
             if (!IsPostBack)
             {
                 CargarUsuarios();
@@ -82,6 +111,14 @@ namespace trabajo_ing_software
 
         protected void btnGuardarAcceso_Click(object sender, EventArgs e)
         {
+            string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
+            if (!rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
+            {
+                lblMensaje.Text = "Acceso denegado: Solo el Administrador puede asignar perfiles.";
+                lblMensaje.ForeColor = System.Drawing.Color.Red;
+                return;
+            }
+
             if (ddlUsuarios.Items.Count == 0 || ddlPerfiles.Items.Count == 0)
             {
                 lblMensaje.Text = "Faltan usuarios o perfiles en la base de datos.";

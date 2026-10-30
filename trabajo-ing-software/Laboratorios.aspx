@@ -33,9 +33,124 @@
 
         .split-labs-grid {
             display: grid;
-            grid-template-columns: 1.25fr 0.95fr;
+            grid-template-columns: 1.45fr 0.85fr;
             gap: 25px;
             align-items: start;
+        }
+
+        /* Estilos de tabla centrada y armoniosa */
+        .table-dermo-modern th {
+            padding: 14px 12px !important;
+            font-size: 11px !important;
+            letter-spacing: 0.8px !important;
+        }
+        .table-dermo-modern td {
+            padding: 14px 12px !important;
+            vertical-align: middle !important;
+        }
+        .col-center {
+            text-align: center !important;
+            vertical-align: middle !important;
+            white-space: nowrap !important;
+        }
+        .col-left {
+            text-align: left !important;
+            vertical-align: middle !important;
+        }
+
+        /* Badge Plazo de Pago con máximo contraste y centrado */
+        .plazo-badge-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap !important;
+            background-color: #F5EFEB;
+            border: 1px solid #D8C7B5;
+            border-radius: 18px;
+            padding: 6px 14px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+            transition: all 0.2s ease;
+        }
+        .plazo-badge-pill:hover {
+            background-color: #ECE3DA;
+            border-color: #9C8573;
+        }
+
+        /* Tag Marcas Clave */
+        .marca-tag-pill {
+            display: inline-block;
+            background-color: #FAF8F5;
+            border: 1px solid #E4DDD3;
+            border-radius: 14px;
+            padding: 6px 12px;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #4A3B32;
+            text-align: center;
+            line-height: 1.35;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+            max-width: 175px;
+        }
+
+        /* Botones de acción de la tabla centrados y uniformes */
+        .btn-tabla-editar {
+            background: #FFFFFF;
+            border: 1px solid #D5C7B6;
+            color: #5C4533;
+            border-radius: 16px;
+            padding: 4px 14px;
+            font-size: 11px;
+            font-weight: 600;
+            width: 88px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+            display: block;
+        }
+        .btn-tabla-editar:hover {
+            background: #F5EFEB;
+            border-color: #7A5E47;
+            color: #1F1A16;
+        }
+        .btn-tabla-desactivar {
+            background: #FFFBFB;
+            border: 1px solid #EAC4C0;
+            color: #C0392B;
+            border-radius: 16px;
+            padding: 4px 14px;
+            font-size: 11px;
+            font-weight: 600;
+            width: 88px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+            display: block;
+        }
+        .btn-tabla-desactivar:hover {
+            background: #FDEDEC;
+            border-color: #C0392B;
+        }
+        .btn-tabla-activar {
+            background: #F4FBF7;
+            border: 1px solid #A9DFBF;
+            color: #27AE60;
+            border-radius: 16px;
+            padding: 4px 14px;
+            font-size: 11px;
+            font-weight: 600;
+            width: 88px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+            display: block;
+        }
+        .btn-tabla-activar:hover {
+            background: #E8F8F0;
+            border-color: #27AE60;
         }
 
         .form-row-2col {
@@ -76,11 +191,51 @@
             </div>
             <nav>
                 <ul class="nav-links-menu">
+                    <% 
+                        string rolNav = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
+                        bool esAdmin = rolNav.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
+                        bool esComprador = rolNav.Equals("Comprador", StringComparison.OrdinalIgnoreCase);
+                        bool esBodeguero = rolNav.Equals("Bodeguero", StringComparison.OrdinalIgnoreCase);
+                        bool esContador = rolNav.Equals("Contador", StringComparison.OrdinalIgnoreCase);
+                        bool esVendedor = rolNav.Equals("Vendedor", StringComparison.OrdinalIgnoreCase);
+
+                        // Matriz Oficial RBAC 6.1.2
+                        bool puedeVerCompras = esAdmin || esComprador || esContador;
+                        bool puedeVerInventario = esAdmin || esBodeguero || esComprador || esContador || esVendedor;
+                    %>
                     <li><a href="Default.aspx" class="nav-item-link">Inicio</a></li>
+
+                    <%-- ADMINISTRACIÃ“N (Solo Administrador General) --%>
+                    <% if (esAdmin) { %>
                     <li><a href="Usuarios.aspx" class="nav-item-link">Usuarios</a></li>
-                    <li><a href="Laboratorios.aspx" class="nav-item-link active">Laboratorios</a></li>
+                    <% } %>
+
+                    <%-- COMPRAS (Admin y Comprador Escritura; Contador Solo Consulta) --%>
+                    <% if (esAdmin || esComprador || esContador) { %>
+                    <li><a href="Laboratorios.aspx" class="nav-item-link">Laboratorios</a></li>
+                    <% } %>
+                    <% if (puedeVerCompras) { %>
+                    <li><a href="OrdenesCompra.aspx" class="nav-item-link">&Oacute;rdenes de Compra</a></li>
+                    <% } %>
+                    <% if (esAdmin || esComprador) { %>
                     <li><a href="ReporteProveedores.aspx" class="nav-item-link">Reporte Evaluaci&oacute;n</a></li>
+                    <% } %>
+                    <% if (puedeVerCompras) { %>
+                    <li><a href="ReporteOrdenesCompra.aspx" class="nav-item-link">Reporte &Oacute;rdenes</a></li>
+                    <% } %>
+
+                    <%-- INVENTARIO (Bodeguero Escritura; Admin Total; Comprador y Contador Consulta) --%>
+                    <% if (esAdmin || esBodeguero || esComprador) { %>
+                    <li><a href="Recepciones.aspx" class="nav-item-link">Recepci&oacute;n y Lotes</a></li>
+                    <% } %>
+                    <% if (puedeVerInventario) { %>
+                    <li><a href="ReporteIngresos.aspx" class="nav-item-link">Reporte Ingresos</a></li>
+                    <% } %>
+
+                    <%-- ACCESOS (Solo Administrador General) --%>
+                    <% if (esAdmin) { %>
                     <li><a href="Accesos.aspx" class="nav-item-link">Accesos</a></li>
+                    <% } %>
                 </ul>
             </nav>
             <div class="header-actions">
@@ -117,7 +272,7 @@
                 </div>
             </div>
 
-            <!-- BARRA DE FILTROS Y BUSQUEDA DEL MOCKUP -->
+            <!-- BARRA DE FILTROS Y BUSQUEDA -->
             <div class="filter-toolbar-row">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-texto-suave); flex-shrink: 0;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -153,72 +308,75 @@
             <!-- LAYOUT EN 2 COLUMNAS -->
             <div class="split-labs-grid">
 
-                <!-- COLUMNA IZQUIERDA: DIRECTORIO COMERCIAL (TABLA) -->
+                <!-- DIRECTORIO COMERCIAL (TABLA) -->
                 <div>
                     <div class="table-dermo-container">
-                        <div style="padding: 16px 22px; border-bottom: 1px solid var(--color-borde-suave); display: flex; justify-content: space-between; align-items: center;">
-                            <h3 style="font-size: 16px; margin: 0;">Directorio Comercial</h3>
-                            <span class="text-muted" style="font-size: 12px;">Cat&aacute;logo activo</span>
+                        <div style="padding: 16px 22px; border-bottom: 1px solid var(--color-borde-suave); display: flex; justify-content: space-between; align-items: center; background-color: #FCFBF9;">
+                            <h3 style="font-size: 16px; margin: 0; font-family: 'Playfair Display', Georgia, serif; font-weight: 600; color: #2E2E2E;">Directorio Comercial</h3>
+                            <span class="badge-status-activo" style="font-size: 11px; padding: 4px 12px; border-radius: 12px;">Cat&aacute;logo activo</span>
                         </div>
 
                         <asp:GridView ID="gvLaboratorios" runat="server" AutoGenerateColumns="False" 
                             CssClass="table-dermo-modern" GridLines="None" EmptyDataText="No hay laboratorios registrados a&uacute;n."
                             OnRowCommand="gvLaboratorios_RowCommand" DataKeyNames="IdLaboratorio">
                             <Columns>
-                                <asp:TemplateField HeaderText="LABORATORIO">
+                                <asp:TemplateField HeaderText="LABORATORIO" HeaderStyle-CssClass="col-left" ItemStyle-CssClass="col-left">
                                     <ItemTemplate>
                                         <div style="display: flex; align-items: center;">
                                             <div class="avatar-circle">
                                                 <%# GetIniciales(Eval("RazonSocial").ToString()) %>
                                             </div>
                                             <div>
-                                                <div style="font-weight: 700; color: var(--color-texto);">
+                                                <div style="font-weight: 700; color: #2E2E2E; font-size: 13.5px; line-height: 1.3;">
                                                     <%# Eval("RazonSocial") %>
                                                 </div>
-                                                <small class="text-muted"><%# Eval("Pais") %> &middot; RUT: <%# Eval("Rut") %></small>
+                                                <div style="font-size: 11.5px; color: #736E67; margin-top: 3px;">
+                                                    <%# Eval("Pais") %> &middot; RUT: <%# Eval("Rut") %>
+                                                </div>
                                             </div>
                                         </div>
                                     </ItemTemplate>
                                 </asp:TemplateField>
 
-                                <asp:TemplateField HeaderText="REPRESENTANTE">
+                                <asp:TemplateField HeaderText="REPRESENTANTE" HeaderStyle-CssClass="col-left" ItemStyle-CssClass="col-left">
                                     <ItemTemplate>
-                                        <div style="font-weight: 600; font-size: 12px;"><%# Eval("Contacto") %></div>
-                                        <div class="text-muted" style="font-size: 11px;"><%# Eval("Email") %></div>
-                                        <div class="text-muted" style="font-size: 10px;"><%# Eval("Telefono") %></div>
+                                        <div style="font-weight: 600; font-size: 12.5px; color: #3A2A1D;"><%# Eval("Contacto") %></div>
+                                        <div style="font-size: 11px; color: #736E67; margin-top: 2px;"><%# Eval("Email") %></div>
+                                        <div style="font-size: 10.5px; color: #8C827A; margin-top: 1px;"><%# Eval("Telefono") %></div>
                                     </ItemTemplate>
                                 </asp:TemplateField>
 
-                                <asp:TemplateField HeaderText="PLAZO DE PAGO">
+                                <asp:TemplateField HeaderText="PLAZO DE PAGO" HeaderStyle-CssClass="col-center" ItemStyle-CssClass="col-center">
                                     <ItemTemplate>
-                                        <span class="pill-badge" style="font-size: 10px; padding: 4px 10px;">
-                                            <%# Eval("DiasPago") %> d&iacute;as neto
+                                        <span class="plazo-badge-pill" title="Plazo de cr&eacute;dito comercial acordado">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4A3B32" stroke-width="2.2" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                            <strong style="color: #1F1A16 !important; font-size: 13.5px; font-weight: 800; line-height: 1;"><%# Eval("DiasPago") %></strong>
+                                            <span style="color: #4A3B32 !important; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1;">d&iacute;as neto</span>
                                         </span>
                                     </ItemTemplate>
                                 </asp:TemplateField>
 
-                                <asp:TemplateField HeaderText="MARCAS CLAVE">
+                                <asp:TemplateField HeaderText="MARCAS CLAVE" HeaderStyle-CssClass="col-center" ItemStyle-CssClass="col-center">
                                     <ItemTemplate>
-                                        <span class="tag-pill-sm"><%# Eval("Marca") %></span>
+                                        <span class="marca-tag-pill">
+                                            <%# Eval("Marca") %>
+                                        </span>
                                     </ItemTemplate>
                                 </asp:TemplateField>
 
-                                <asp:TemplateField HeaderText="ACCIONES">
+                                <asp:TemplateField HeaderText="ACCIONES" HeaderStyle-CssClass="col-center" ItemStyle-CssClass="col-center">
                                     <ItemTemplate>
-                                        <asp:Button ID="btnEditar" runat="server" Text="Editar" 
-                                            CommandName="Editar" CommandArgument='<%# Eval("IdLaboratorio") %>'
-                                            CssClass="btn-action-pill" ToolTip="Editar laboratorio" />
+                                        <div style="display: inline-flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center;">
+                                            <asp:Button ID="btnEditar" runat="server" Text="Editar" 
+                                                CommandName="Editar" CommandArgument='<%# Eval("IdLaboratorio") %>'
+                                                CssClass="btn-tabla-editar" ToolTip="Editar laboratorio" />
 
-                                        <asp:Button ID="btnCambiarEstado" runat="server" 
-                                            Text='<%# Convert.ToBoolean(Eval("Activo")) ? "Desactivar" : "Activar" %>' 
-                                            CommandName="CambiarEstado" 
-                                            CommandArgument='<%# Eval("IdLaboratorio") + ";" + Eval("Activo") %>'
-                                            CssClass="btn-action-pill btn-toggle" />
-
-                                        <asp:Button ID="btnEliminar" runat="server" Text="Eliminar" 
-                                            CommandName="Eliminar" CommandArgument='<%# Eval("IdLaboratorio") %>'
-                                            CssClass="btn-action-pill btn-delete" ToolTip="Eliminar"
-                                            OnClientClick="return confirm('&iquest;Desea eliminar permanentemente este laboratorio?');" />
+                                            <asp:Button ID="btnCambiarEstado" runat="server" 
+                                                Text='<%# Convert.ToBoolean(Eval("Activo")) ? "Desactivar" : "Activar" %>' 
+                                                CommandName="CambiarEstado" 
+                                                CommandArgument='<%# Eval("IdLaboratorio") + ";" + Eval("Activo") %>'
+                                                CssClass='<%# Convert.ToBoolean(Eval("Activo")) ? "btn-tabla-desactivar" : "btn-tabla-activar" %>' />
+                                        </div>
                                     </ItemTemplate>
                                 </asp:TemplateField>
                             </Columns>
@@ -289,7 +447,7 @@
                         <div class="form-row-2col">
                             <div class="form-group-dermo">
                                 <label class="form-label-dermo">RUT Proveedor *</label>
-                                <asp:TextBox ID="txtRut" runat="server" CssClass="input-pill-dermo" placeholder="76.111.222-3"></asp:TextBox>
+                                <asp:TextBox ID="txtRut" runat="server" CssClass="input-pill-dermo" placeholder="76.111.222-8"></asp:TextBox>
                             </div>
                             <div class="form-group-dermo">
                                 <label class="form-label-dermo">Tel&eacute;fono de Contacto</label>
