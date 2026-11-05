@@ -25,17 +25,66 @@
             margin-bottom: 25px;
         }
 
+        .kpi-card-luxury {
+            background: #FFFFFF;
+            border-radius: 18px;
+            border: 1px solid var(--color-borde-suave);
+            padding: 18px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .kpi-card-luxury:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(122, 94, 71, 0.08);
+        }
+
+        .kpi-icon-wrap {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .kpi-titulo {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: var(--color-texto-suave);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 2px;
+        }
+
+        .kpi-valor {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--color-acento);
+            line-height: 1.2;
+            font-family: 'Playfair Display', Georgia, serif;
+        }
+
+        .kpi-sub {
+            font-size: 11px;
+            color: var(--color-texto-suave);
+            margin-top: 2px;
+        }
+
         .filter-toolbar-row {
-            display: grid;
-            grid-template-columns: 1fr 200px 220px auto;
-            gap: 14px;
+            display: flex;
+            gap: 12px;
             align-items: center;
             background-color: var(--color-blanco);
             border: 1px solid var(--color-borde-suave);
             border-radius: 25px;
-            padding: 8px 18px;
-            margin-bottom: 25px;
+            padding: 8px 16px;
+            margin-bottom: 24px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            flex-wrap: wrap;
         }
 
         .form-oc-card {
@@ -119,6 +168,44 @@
             font-family: 'Playfair Display', Georgia, serif;
         }
 
+        /* Alineaciones de grilla */
+        .col-center {
+            text-align: center !important;
+            vertical-align: middle !important;
+            white-space: nowrap !important;
+        }
+        .col-left {
+            text-align: left !important;
+            vertical-align: middle !important;
+        }
+        .col-right {
+            text-align: right !important;
+            vertical-align: middle !important;
+            white-space: nowrap !important;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Pill Folio OC */
+        .oc-folio-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: #FAF8F5;
+            border: 1px solid #D8C7B5;
+            border-radius: 14px;
+            padding: 5px 12px;
+            font-weight: 700;
+            font-size: 13px;
+            color: #7A5E47;
+            letter-spacing: 0.5px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            transition: all 0.2s ease;
+        }
+        .oc-folio-pill:hover {
+            background-color: #F5EFEB;
+            border-color: #7A5E47;
+        }
+
         /* Badges para Estado de Orden */
         .badge-oc {
             padding: 4px 12px;
@@ -154,6 +241,87 @@
             border: 1px solid #F5B7B1;
         }
 
+        /* Botones de acciÃ³n elegantes y uniformes */
+        .btn-tabla-ver {
+            background: #FFFFFF;
+            border: 1px solid #D5C7B6;
+            color: #5C4533 !important;
+            border-radius: 14px;
+            padding: 5px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            white-space: nowrap;
+        }
+        .btn-tabla-ver:hover {
+            background: #F5EFEB;
+            border-color: #7A5E47;
+            color: #1F1A16 !important;
+        }
+        .btn-tabla-emitir {
+            background: #2980B9;
+            border: 1px solid #2471A3;
+            color: #FFFFFF !important;
+            border-radius: 14px;
+            padding: 5px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            white-space: nowrap;
+        }
+        .btn-tabla-emitir:hover {
+            background: #1F618D;
+        }
+        .btn-tabla-recibir {
+            background: #27AE60;
+            border: 1px solid #229954;
+            color: #FFFFFF !important;
+            border-radius: 14px;
+            padding: 5px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            white-space: nowrap;
+        }
+        .btn-tabla-recibir:hover {
+            background: #1E8449;
+        }
+        .btn-tabla-anular {
+            background: #FFFBFB;
+            border: 1px solid #EAC4C0;
+            color: #C0392B !important;
+            border-radius: 14px;
+            padding: 5px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            white-space: nowrap;
+        }
+        .btn-tabla-anular:hover {
+            background: #FDEDEC;
+            border-color: #C0392B;
+        }
+
         /* Modal Overlay */
         .modal-overlay {
             position: fixed;
@@ -186,7 +354,8 @@
                 grid-template-columns: repeat(2, 1fr);
             }
             .filter-toolbar-row {
-                grid-template-columns: 1fr;
+                flex-direction: column;
+                align-items: stretch;
             }
             .form-grid-3col {
                 grid-template-columns: 1fr;
@@ -290,36 +459,56 @@
 
             <!-- TARJETAS DE INDICADORES (KPIS) -->
             <div class="kpi-row-4col">
-                <div class="kpi-card" style="padding: 16px; border-radius: 16px; background: #fff; border: 1px solid var(--color-borde-suave); box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-                    <div class="kpi-titulo" style="font-size: 11px; color: var(--color-texto-suave); text-transform: uppercase;">Total &Oacute;rdenes</div>
-                    <div class="kpi-valor" style="font-size: 26px; font-weight: 700; color: var(--color-acento); font-family: 'Playfair Display', Georgia, serif;">
-                        <asp:Label ID="lblKpiTotalOC" runat="server" Text="0"></asp:Label>
+                <div class="kpi-card-luxury">
+                    <div class="kpi-icon-wrap" style="background: #F4EFEB; color: #7A5E47;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                     </div>
-                    <div style="font-size: 11px; color: var(--color-texto-suave);">Registradas en sistema</div>
+                    <div>
+                        <div class="kpi-titulo">Total &Oacute;rdenes</div>
+                        <div class="kpi-valor">
+                            <asp:Label ID="lblKpiTotalOC" runat="server" Text="0"></asp:Label>
+                        </div>
+                        <div class="kpi-sub">Registradas en sistema</div>
+                    </div>
                 </div>
 
-                <div class="kpi-card" style="padding: 16px; border-radius: 16px; background: #fff; border: 1px solid var(--color-borde-suave); box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-                    <div class="kpi-titulo" style="font-size: 11px; color: var(--color-texto-suave); text-transform: uppercase;">Emitidas / Tr&aacute;nsito</div>
-                    <div class="kpi-valor" style="font-size: 26px; font-weight: 700; color: #2980B9; font-family: 'Playfair Display', Georgia, serif;">
-                        <asp:Label ID="lblKpiEmitidas" runat="server" Text="0"></asp:Label>
+                <div class="kpi-card-luxury">
+                    <div class="kpi-icon-wrap" style="background: #EBF5FB; color: #2980B9;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
                     </div>
-                    <div style="font-size: 11px; color: #2980B9;">Pendientes de arribo</div>
+                    <div>
+                        <div class="kpi-titulo">Emitidas / Tr&aacute;nsito</div>
+                        <div class="kpi-valor" style="color: #2980B9;">
+                            <asp:Label ID="lblKpiEmitidas" runat="server" Text="0"></asp:Label>
+                        </div>
+                        <div class="kpi-sub" style="color: #2980B9;">Pendientes de arribo</div>
+                    </div>
                 </div>
 
-                <div class="kpi-card" style="padding: 16px; border-radius: 16px; background: #fff; border: 1px solid var(--color-borde-suave); box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-                    <div class="kpi-titulo" style="font-size: 11px; color: var(--color-texto-suave); text-transform: uppercase;">Recepcionadas</div>
-                    <div class="kpi-valor" style="font-size: 26px; font-weight: 700; color: #27AE60; font-family: 'Playfair Display', Georgia, serif;">
-                        <asp:Label ID="lblKpiRecibidas" runat="server" Text="0"></asp:Label>
+                <div class="kpi-card-luxury">
+                    <div class="kpi-icon-wrap" style="background: #EAFAF1; color: #27AE60;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                     </div>
-                    <div style="font-size: 11px; color: #27AE60;">Mercader&iacute;a en bodega</div>
+                    <div>
+                        <div class="kpi-titulo">Recepcionadas</div>
+                        <div class="kpi-valor" style="color: #27AE60;">
+                            <asp:Label ID="lblKpiRecibidas" runat="server" Text="0"></asp:Label>
+                        </div>
+                        <div class="kpi-sub" style="color: #27AE60;">Mercader&iacute;a en bodega</div>
+                    </div>
                 </div>
 
-                <div class="kpi-card" style="padding: 16px; border-radius: 16px; background: #fff; border: 1px solid var(--color-borde-suave); box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-                    <div class="kpi-titulo" style="font-size: 11px; color: var(--color-texto-suave); text-transform: uppercase;">Inversi&oacute;n Comprometida</div>
-                    <div class="kpi-valor" style="font-size: 24px; font-weight: 700; color: var(--color-acento); font-family: 'Playfair Display', Georgia, serif;">
-                        <asp:Label ID="lblKpiTotalMonto" runat="server" Text="$0"></asp:Label>
+                <div class="kpi-card-luxury">
+                    <div class="kpi-icon-wrap" style="background: #FEF9E7; color: #B7821B;">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                     </div>
-                    <div style="font-size: 11px; color: var(--color-texto-suave);">Monto acumulado (con IVA)</div>
+                    <div>
+                        <div class="kpi-titulo">Inversi&oacute;n Comprometida</div>
+                        <div class="kpi-valor">
+                            <asp:Label ID="lblKpiTotalMonto" runat="server" Text=""></asp:Label>
+                        </div>
+                        <div class="kpi-sub">Monto acumulado (con IVA)</div>
+                    </div>
                 </div>
             </div>
 
@@ -475,13 +664,13 @@
 
             <!-- BARRA DE BUSQUEDA Y FILTROS -->
             <div class="filter-toolbar-row">
-                <div style="position: relative; display: flex; align-items: center;">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 14px; color: var(--color-texto-suave);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <asp:TextBox ID="txtBuscar" runat="server" CssClass="input-dermo" placeholder="Buscar por N&deg; OC, laboratorio, RUT..." style="padding-left: 38px; border-radius: 20px;" AutoPostBack="true" OnTextChanged="txtBuscar_TextChanged"></asp:TextBox>
+                <div style="position: relative; display: flex; align-items: center; flex: 1; min-width: 280px;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 14px; color: var(--color-texto-suave); pointer-events: none;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <asp:TextBox ID="txtBuscar" runat="server" CssClass="input-dermo" placeholder="Buscar por N&deg; OC, laboratorio, RUT..." style="padding-left: 38px; border-radius: 20px; width: 100%; box-sizing: border-box;" AutoPostBack="true" OnTextChanged="txtBuscar_TextChanged"></asp:TextBox>
                 </div>
 
                 <div>
-                    <asp:DropDownList ID="ddlFiltroEstado" runat="server" CssClass="select-dermo" style="border-radius: 20px;" AutoPostBack="true" OnSelectedIndexChanged="ddlFiltroEstado_SelectedIndexChanged">
+                    <asp:DropDownList ID="ddlFiltroEstado" runat="server" CssClass="select-dermo" style="border-radius: 20px; min-width: 170px;" AutoPostBack="true" OnSelectedIndexChanged="ddlFiltroEstado_SelectedIndexChanged">
                         <asp:ListItem Value="" Text="Todos los Estados"></asp:ListItem>
                         <asp:ListItem Value="Borrador" Text="Borrador"></asp:ListItem>
                         <asp:ListItem Value="Emitida" Text="Emitida"></asp:ListItem>
@@ -492,35 +681,53 @@
                 </div>
 
                 <div>
-                    <asp:DropDownList ID="ddlFiltroLaboratorio" runat="server" CssClass="select-dermo" style="border-radius: 20px;" AutoPostBack="true" OnSelectedIndexChanged="ddlFiltroLaboratorio_SelectedIndexChanged"></asp:DropDownList>
+                    <asp:DropDownList ID="ddlFiltroLaboratorio" runat="server" CssClass="select-dermo" style="border-radius: 20px; min-width: 200px;" AutoPostBack="true" OnSelectedIndexChanged="ddlFiltroLaboratorio_SelectedIndexChanged"></asp:DropDownList>
                 </div>
 
                 <div>
-                    <asp:Button ID="btnLimpiarFiltros" runat="server" Text="Limpiar" CssClass="btn-dermo-secondary" style="border-radius: 20px; padding: 10px 16px; font-size: 12px;" OnClick="btnLimpiarFiltros_Click" />
+                    <asp:Button ID="btnLimpiarFiltros" runat="server" Text="Limpiar" CssClass="btn-dermo-secondary" style="border-radius: 20px; padding: 10px 18px; font-size: 12px; font-weight: 600;" OnClick="btnLimpiarFiltros_Click" />
                 </div>
             </div>
 
             <!-- TABLA PRINCIPAL DE ORDENES DE COMPRA -->
             <div class="table-dermo-container">
-                <asp:GridView ID="gvOrdenes" runat="server" AutoGenerateColumns="False" CssClass="table-dermo-modern" EmptyDataText="No se encontraron &oacute;rdenes de compra con los filtros seleccionados." OnRowCommand="gvOrdenes_RowCommand">
+                <div style="padding: 16px 22px; border-bottom: 1px solid var(--color-borde-suave); display: flex; justify-content: space-between; align-items: center; background-color: #FCFBF9;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7A5E47" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        <h3 style="font-size: 16px; margin: 0; font-family: 'Playfair Display', Georgia, serif; font-weight: 600; color: #2E2E2E;">Registro de Pedidos y Adquisiciones</h3>
+                    </div>
+                    <span class="badge-status-activo" style="font-size: 11px; padding: 4px 12px; border-radius: 12px;">Gesti&oacute;n Arancelaria</span>
+                </div>
+
+                <asp:GridView ID="gvOrdenes" runat="server" AutoGenerateColumns="False" CssClass="table-dermo-modern" GridLines="None" EmptyDataText="No se encontraron &oacute;rdenes de compra con los filtros seleccionados." OnRowCommand="gvOrdenes_RowCommand">
                     <Columns>
-                        <asp:TemplateField HeaderText="N&deg; &Oacute;rden">
+                        <asp:TemplateField HeaderText="N&deg; &Oacute;RDEN" HeaderStyle-CssClass="col-center" ItemStyle-CssClass="col-center">
                             <ItemTemplate>
-                                <strong style="color: var(--color-acento); font-size: 14px;"><%# Eval("NumeroOC") %></strong>
+                                <span class="oc-folio-pill">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                                    <%# Eval("NumeroOC") %>
+                                </span>
                             </ItemTemplate>
                         </asp:TemplateField>
 
-                        <asp:TemplateField HeaderText="Laboratorio / Proveedor">
+                        <asp:TemplateField HeaderText="LABORATORIO / PROVEEDOR" HeaderStyle-CssClass="col-left" ItemStyle-CssClass="col-left">
                             <ItemTemplate>
-                                <div style="font-weight: 600;"><%# Eval("RazonSocial") %></div>
-                                <div class="text-muted" style="font-size: 11px;">RUT: <%# Eval("Rut") %></div>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div class="avatar-circle">
+                                        <%# GetIniciales(Eval("RazonSocial").ToString()) %>
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: 700; color: #2E2E2E; font-size: 13.5px; line-height: 1.3;"><%# Eval("RazonSocial") %></div>
+                                        <div style="font-size: 11px; color: var(--color-texto-suave); font-family: monospace;">RUT: <%# Eval("Rut") %></div>
+                                    </div>
+                                </div>
                             </ItemTemplate>
                         </asp:TemplateField>
 
-                        <asp:BoundField DataField="Fecha" HeaderText="Fecha Emisi&oacute;n" DataFormatString="{0:dd/MM/yyyy}" />
-                        <asp:BoundField DataField="FechaEsperada" HeaderText="Fecha Esperada" DataFormatString="{0:dd/MM/yyyy}" />
+                        <asp:BoundField DataField="Fecha" HeaderText="FECHA EMISI&Oacute;N" DataFormatString="{0:dd-MM-yyyy}" HeaderStyle-CssClass="col-center" ItemStyle-CssClass="col-center" />
+                        <asp:BoundField DataField="FechaEsperada" HeaderText="FECHA ESPERADA" DataFormatString="{0:dd-MM-yyyy}" HeaderStyle-CssClass="col-center" ItemStyle-CssClass="col-center" />
 
-                        <asp:TemplateField HeaderText="Estado">
+                        <asp:TemplateField HeaderText="ESTADO" HeaderStyle-CssClass="col-center" ItemStyle-CssClass="col-center">
                             <ItemTemplate>
                                 <span class='badge-oc badge-oc-<%# Eval("Estado").ToString().ToLower() %>'>
                                     <%# Eval("Estado") %>
@@ -528,27 +735,31 @@
                             </ItemTemplate>
                         </asp:TemplateField>
 
-                        <asp:BoundField DataField="Neto" HeaderText="Neto" DataFormatString="{0:C0}" />
-                        <asp:BoundField DataField="Iva" HeaderText="IVA" DataFormatString="{0:C0}" />
-                        <asp:TemplateField HeaderText="Total (CLP)">
+                        <asp:BoundField DataField="Neto" HeaderText="NETO" DataFormatString="{0:C0}" HeaderStyle-CssClass="col-right" ItemStyle-CssClass="col-right" />
+                        <asp:BoundField DataField="Iva" HeaderText="IVA" DataFormatString="{0:C0}" HeaderStyle-CssClass="col-right" ItemStyle-CssClass="col-right" />
+                        <asp:TemplateField HeaderText="TOTAL (CLP)" HeaderStyle-CssClass="col-right" ItemStyle-CssClass="col-right">
                             <ItemTemplate>
-                                <strong style="font-family: 'Playfair Display', serif; font-size: 15px; color: var(--color-texto);"><%# string.Format("{0:C0}", Eval("Total")) %></strong>
+                                <strong style="font-family: 'Playfair Display', Georgia, serif; font-size: 15px; color: #2E2E2E;"><%# string.Format("{0:C0}", Eval("Total")) %></strong>
                             </ItemTemplate>
                         </asp:TemplateField>
 
-                        <asp:TemplateField HeaderText="Acciones">
+                        <asp:TemplateField HeaderText="ACCIONES" HeaderStyle-CssClass="col-center" ItemStyle-CssClass="col-center">
                             <ItemTemplate>
-                                <div style="display: flex; gap: 8px; align-items: center;">
-                                    <asp:LinkButton ID="btnVer" runat="server" CommandName="VerDetalle" CommandArgument='<%# Eval("IdOC") %>' CssClass="btn-dermo-secondary" style="padding: 4px 10px; font-size: 11px; text-decoration: none;">
+                                <div style="display: flex; gap: 6px; align-items: center; justify-content: center;">
+                                    <asp:LinkButton ID="btnVer" runat="server" CommandName="VerDetalle" CommandArgument='<%# Eval("IdOC") %>' CssClass="btn-tabla-ver" ToolTip="Ver Comprobante">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                                         Ver Detalle
                                     </asp:LinkButton>
-                                    <asp:LinkButton ID="btnAprobar" runat="server" CommandName="AprobarOC" CommandArgument='<%# Eval("IdOC") %>' Visible='<%# Eval("Estado").ToString() == "Borrador" %>' CssClass="btn-dermo-primary" style="padding: 4px 10px; font-size: 11px; text-decoration: none;">
+                                    <asp:LinkButton ID="btnAprobar" runat="server" CommandName="AprobarOC" CommandArgument='<%# Eval("IdOC") %>' Visible='<%# Eval("Estado").ToString() == "Borrador" %>' CssClass="btn-tabla-emitir" ToolTip="Emitir a Laboratorio">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                                         Emitir
                                     </asp:LinkButton>
-                                    <asp:LinkButton ID="btnRecibir" runat="server" CommandName="RecibirOC" CommandArgument='<%# Eval("IdOC") %>' Visible='<%# Eval("Estado").ToString() == "Emitida" || Eval("Estado").ToString() == "Parcial" %>' CssClass="btn-dermo-primary" style="padding: 4px 10px; font-size: 11px; text-decoration: none; background: #27AE60;">
+                                    <asp:LinkButton ID="btnRecibir" runat="server" CommandName="RecibirOC" CommandArgument='<%# Eval("IdOC") %>' Visible='<%# Eval("Estado").ToString() == "Emitida" || Eval("Estado").ToString() == "Parcial" %>' CssClass="btn-tabla-recibir" ToolTip="Registrar Recepci&oacute;n">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                         Recibir
                                     </asp:LinkButton>
-                                    <asp:LinkButton ID="btnAnular" runat="server" CommandName="AnularOC" CommandArgument='<%# Eval("IdOC") %>' Visible='<%# Eval("Estado").ToString() != "Anulada" && Eval("Estado").ToString() != "Recibida" %>' OnClientClick="return confirm('¿Seguro que deseas anular esta orden de compra?');" style="color: #C0392B; text-decoration: none; font-size: 11px; font-weight: 600;">
+                                    <asp:LinkButton ID="btnAnular" runat="server" CommandName="AnularOC" CommandArgument='<%# Eval("IdOC") %>' Visible='<%# Eval("Estado").ToString() != "Anulada" && Eval("Estado").ToString() != "Recibida" %>' OnClientClick="return confirm('¿Seguro que deseas anular esta orden de compra?');" CssClass="btn-tabla-anular" ToolTip="Anular Orden">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                                         Anular
                                     </asp:LinkButton>
                                 </div>

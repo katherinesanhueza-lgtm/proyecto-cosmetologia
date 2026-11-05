@@ -46,6 +46,15 @@ namespace trabajo_ing_software
         }
 
         #region Inicialización y Estructura Temporal de Ítems
+        public string GetIniciales(string nombre)
+        {
+            if (string.IsNullOrWhiteSpace(nombre)) return "OC";
+            string[] partes = nombre.Trim().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (partes.Length >= 2)
+                return (partes[0][0].ToString() + partes[1][0].ToString()).ToUpper();
+            return partes[0].Substring(0, Math.Min(2, partes[0].Length)).ToUpper();
+        }
+
         private void InicializarTablaDetalle()
         {
             DataTable dt = new DataTable();
