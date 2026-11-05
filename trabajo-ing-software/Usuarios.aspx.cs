@@ -17,21 +17,80 @@ namespace trabajo_ing_software
                 return;
             }
 
+            // Control de acceso RBAC: Solo Administrador puede ver y administrar usuarios
+            string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
+            if (!rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
+            {
+                ConfiguracionGlobal.RedirigirSegunRol(Response, rolUsuario);
+                return;
+            }
+
             if (!IsPostBack)
             {
-                lblBienvenida.Text = "👤 " + Session["NombreUsuario"].ToString();
+                lblBienvenida.Text = "" + Session["NombreUsuario"].ToString();
                 CargarUsuarios();
             }
         }
 
-        private void CargarUsuarios()
+        private void RedirigirSegunRol(string rol)
         {
-            string query = "SELECT IdUsuario, Nombre, Correo, Rol, Activo FROM Usuario ORDER BY IdUsuario DESC";
+            if (rol.Equals("Bodeguero", StringComparison.OrdinalIgnoreCase))
+            {
+                Response.Redirect("Recepciones.aspx");
+            }
+            else if (rol.Equals("Comprador", StringComparison.OrdinalIgnoreCase))
+            {
+                Response.Redirect("OrdenesCompra.aspx");
+            }
+            else if (rol.Equals("Contador", StringComparison.OrdinalIgnoreCase))
+            {
+                Response.Redirect("ReporteOrdenesCompra.aspx");
+            }
+            else
+            {
+                Response.Redirect("Default.aspx");
+            }
+        }
+
+        public string GetIniciales(string nombre)
+        {
+            if (string.IsNullOrWhiteSpace(nombre)) return "U";
+            string[] partes = nombre.Trim().Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            if (partes.Length >= 2)
+                return (partes[0][0].ToString() + partes[1][0].ToString()).ToUpper();
+            return partes[0].Substring(0, Math.Min(2, partes[0].Length)).ToUpper();
+        }
+
+        private bool ValidarEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email)) return false;
+            string patron = @"^[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}$";
+            return System.Text.RegularExpressions.Regex.IsMatch(email.Trim(), patron);
+        }
+
+        protected void txtBuscarUsuario_TextChanged(object sender, EventArgs e)
+        {
+            CargarUsuarios(txtBuscarUsuario.Text.Trim());
+        }
+
+        private void CargarUsuarios(string filtro = "")
+        {
+            string query = "SELECT IdUsuario, Nombre, Correo, Rol, Activo FROM Usuario";
+            if (!string.IsNullOrEmpty(filtro))
+            {
+                query += " WHERE Nombre LIKE @Filtro OR Correo LIKE @Filtro OR Rol LIKE @Filtro";
+            }
+            query += " ORDER BY IdUsuario DESC";
 
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 using (SqlCommand cmd = new SqlCommand(query, con))
                 {
+                    if (!string.IsNullOrEmpty(filtro))
+                    {
+                        cmd.Parameters.AddWithValue("@Filtro", "%" + filtro + "%");
+                    }
+
                     using (SqlDataAdapter da = new SqlDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
@@ -46,6 +105,14 @@ namespace trabajo_ing_software
         // GUARDAR O ACTUALIZAR
         protected void btnGuardar_Click(object sender, EventArgs e)
         {
+            string rolSesion = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
+            if (!rolSesion.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
+            {
+                lblMensaje.Text = "Acceso denegado: Solo el Administrador puede crear o modificar usuarios.";
+                lblMensaje.ForeColor = System.Drawing.Color.Red;
+                return;
+            }
+
             string nombre = txtNombre.Text.Trim();
             string correo = txtCorreo.Text.Trim();
             string password = txtPassword.Text.Trim();
@@ -54,6 +121,14 @@ namespace trabajo_ing_software
             if (string.IsNullOrEmpty(nombre) || string.IsNullOrEmpty(correo) || string.IsNullOrEmpty(rol))
             {
                 lblMensaje.Text = "Nombre, correo y rol son obligatorios.";
+                lblMensaje.ForeColor = System.Drawing.Color.Red;
+                return;
+            }
+
+            // Validar formato de correo electrónico
+            if (!ValidarEmail(correo))
+            {
+                lblMensaje.Text = "El formato del correo electrónico no es válido (Ej: usuario@dermo.cl).";
                 lblMensaje.ForeColor = System.Drawing.Color.Red;
                 return;
             }
@@ -71,6 +146,12 @@ namespace trabajo_ing_software
                     if (string.IsNullOrEmpty(password))
                     {
                         lblMensaje.Text = "La contraseña es obligatoria para nuevos usuarios.";
+                        lblMensaje.ForeColor = System.Drawing.Color.Red;
+                        return;
+                    }
+                    if (password.Length < 4)
+                    {
+                        lblMensaje.Text = "La contraseña debe tener al menos 4 caracteres.";
                         lblMensaje.ForeColor = System.Drawing.Color.Red;
                         return;
                     }
@@ -120,7 +201,7 @@ namespace trabajo_ing_software
                     }
                     catch (SqlException ex)
                     {
-                        lblMensaje.Text = (ex.Number == 2627) ? "Ya existe un usuario con ese correo." : "❌ Error: " + ex.Message;
+                        lblMensaje.Text = (ex.Number == 2627) ? "Ya existe un usuario con ese correo." : "Error: " + ex.Message;
                         lblMensaje.ForeColor = System.Drawing.Color.Red;
                     }
                 }
@@ -171,8 +252,8 @@ namespace trabajo_ing_software
                             ddlRol.SelectedValue = reader["Rol"].ToString();
                             txtPassword.Text = ""; // Por seguridad se deja en blanco
 
-                            // Cambiar textos a modo edición
-                            lblTituloForm.InnerText = "✏️ Modificar Usuario (ID: " + hfIdUsuario.Value + ")";
+                            // Cambiar textos a modo edicion
+                            lblTituloForm.InnerText = "Modificar Usuario (ID: " + hfIdUsuario.Value + ")";
                             btnGuardar.Text = "Guardar Cambios";
                             btnCancelar.Visible = true;
                             lblMensaje.Text = "";
@@ -246,7 +327,7 @@ namespace trabajo_ing_software
             txtPassword.Text = "";
             ddlRol.SelectedIndex = 0;
             lblTituloForm.InnerText = "Registrar Nuevo Usuario";
-            btnGuardar.Text = "Guardar Usuario +";
+            btnGuardar.Text = "Guardar Usuario";
             btnCancelar.Visible = false;
         }
 
