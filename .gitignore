@@ -480,3 +480,8 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Configuracion y respaldos locales de inventario
+/Cosmetologia/Web.ConnectionStrings.local.config
+/Cosmetologia/Web.local.config
+/Cosmetologia/App_Data/antes_inventario.sql
