@@ -1,4 +1,4 @@
-ï»¿using System;
+using System;
 using System.Data;
 using System.Configuration;
 using MySql.Data.MySqlClient;
@@ -10,7 +10,7 @@ namespace trabajo_ing_software
 {
     public partial class ReporteIngresos : System.Web.UI.Page
     {
-        private string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=1234;";
+        private string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=;";
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -218,7 +218,7 @@ namespace trabajo_ing_software
                         da.Fill(dt);
 
                         StringBuilder sb = new StringBuilder();
-                        sb.AppendLine("NÂ° RecepciÃ³n;NÂ° OC;GuÃ­a Despacho;Proveedor;RUT;Fecha RecepciÃ³n;SKU;Producto;Variante;Lote;Vencimiento;Cantidad;Costo Unitario ($);Total LÃ­nea ($)");
+                        sb.AppendLine("N° Recepción;N° OC;Guía Despacho;Proveedor;RUT;Fecha Recepción;SKU;Producto;Variante;Lote;Vencimiento;Cantidad;Costo Unitario ($);Total Línea ($)");
 
                         foreach (DataRow dr in dt.Rows)
                         {

@@ -1,4 +1,4 @@
-锘縰sing System;
+using System;
 using System.Data;
 using System.Configuration;
 using MySql.Data.MySqlClient;
@@ -9,7 +9,7 @@ namespace trabajo_ing_software
 {
     public partial class Recepciones : System.Web.UI.Page
     {
-        private string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=1234;";
+        private string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=;";
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -135,7 +135,7 @@ namespace trabajo_ing_software
                 }
             }
 
-            // 2. Cargar L铆neas de Productos Pendientes
+            // 2. Cargar L韓eas de Productos Pendientes
             string queryItems = @"SELECT doc.IdDetalleOC, doc.IdVariante, v.Sku, p.Nombre AS Producto, v.NombreVariante,
                                          doc.CantidadPedida,
                                          IFNULL(doc.CantidadRecibida, 0) AS CantidadRecibida,
@@ -165,7 +165,7 @@ namespace trabajo_ing_software
         }
         #endregion
 
-        #region Registro de Recepci贸n y Asignaci贸n de Lotes (Transaccional)
+        #region Registro de Recepci髇 y Asignaci髇 de Lotes (Transaccional)
         protected void btnAprobarRecepcion_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(ddlOrdenCompra.SelectedValue))
@@ -177,14 +177,14 @@ namespace trabajo_ing_software
             string guia = txtGuiaDespacho.Text.Trim();
             if (string.IsNullOrEmpty(guia))
             {
-                MostrarMensaje("Debe ingresar el n煤mero de Gu铆a de Despacho o Factura del proveedor (RF-COM-05).", false);
+                MostrarMensaje("Debe ingresar el n鷐ero de Gu韆 de Despacho o Factura del proveedor (RF-COM-05).", false);
                 return;
             }
 
             DateTime fechaRec;
             if (!DateTime.TryParse(txtFechaRecepcion.Text, out fechaRec))
             {
-                MostrarMensaje("Ingrese una fecha de recepci贸n v谩lida.", false);
+                MostrarMensaje("Ingrese una fecha de recepci髇 v醠ida.", false);
                 return;
             }
 
@@ -211,20 +211,20 @@ namespace trabajo_ing_software
 
                     if (string.IsNullOrWhiteSpace(txtLote.Text))
                     {
-                        MostrarMensaje("Debe asignar un n煤mero de lote para cada producto que ingrese (RF-COM-06).", false);
+                        MostrarMensaje("Debe asignar un n鷐ero de lote para cada producto que ingrese (RF-COM-06).", false);
                         return;
                     }
 
                     DateTime fechaVenc;
                     if (!DateTime.TryParse(txtVenc.Text, out fechaVenc))
                     {
-                        MostrarMensaje("Debe indicar una fecha de vencimiento v谩lida para los lotes ingresados.", false);
+                        MostrarMensaje("Debe indicar una fecha de vencimiento v醠ida para los lotes ingresados.", false);
                         return;
                     }
 
                     if (fechaVenc <= DateTime.Today)
                     {
-                        MostrarMensaje("Pol铆tica FEFO: La fecha de vencimiento del lote debe ser posterior al d铆a de hoy.", false);
+                        MostrarMensaje("Pol韙ica FEFO: La fecha de vencimiento del lote debe ser posterior al d韆 de hoy.", false);
                         return;
                     }
 
@@ -323,7 +323,7 @@ namespace trabajo_ing_software
                                     cmdUpdDet.ExecuteNonQuery();
                                 }
 
-                                // D. Actualizar Stock F铆sico en VarianteProducto
+                                // D. Actualizar Stock F韘ico en VarianteProducto
                                 string queryUpdStock = @"UPDATE VarianteProducto 
                                                          SET StockTotal = IFNULL(StockTotal, 0) + @Cant 
                                                          WHERE IdVariante = @IdVar";
@@ -366,7 +366,7 @@ namespace trabajo_ing_software
                             cmdUpdOC.ExecuteNonQuery();
                         }
 
-                        // Actualizar estado de la recepci贸n si fue parcial
+                        // Actualizar estado de la recepci髇 si fue parcial
                         if (!ordenCompleta)
                         {
                             string queryUpdRec = "UPDATE RecepcionCompra SET Estado = 'Parcial' WHERE IdRecepcion = @IdRec";
@@ -379,7 +379,7 @@ namespace trabajo_ing_software
 
                         trans.Commit();
 
-                        MostrarMensaje("Recepci贸n REC-" + idRecepcion.ToString("D4") + " aprobada exitosamente. Se ingresaron " + totalItemsRecibiendo + " unidades a bodega con sus respectivos lotes (RF-COM-05 / RF-COM-06).", true);
+                        MostrarMensaje("Recepci髇 REC-" + idRecepcion.ToString("D4") + " aprobada exitosamente. Se ingresaron " + totalItemsRecibiendo + " unidades a bodega con sus respectivos lotes (RF-COM-05 / RF-COM-06).", true);
                         pnlFormularioRec.Visible = false;
 
                         LimpiarFormulario();
@@ -390,7 +390,7 @@ namespace trabajo_ing_software
                     catch (Exception ex)
                     {
                         trans.Rollback();
-                        MostrarMensaje("Error al procesar el ingreso de mercader铆a: " + ex.Message, false);
+                        MostrarMensaje("Error al procesar el ingreso de mercader韆: " + ex.Message, false);
                     }
                 }
             }
@@ -406,7 +406,7 @@ namespace trabajo_ing_software
         }
         #endregion
 
-        #region Visualizaci贸n y Listado de Recepciones Hist贸ricas
+        #region Visualizaci髇 y Listado de Recepciones Hist髍icas
         private void CargarRecepciones()
         {
             string filtro = txtBuscar.Text.Trim();

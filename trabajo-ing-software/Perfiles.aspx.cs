@@ -1,4 +1,4 @@
-Ôªøusing System;
+using System;
 using System.Data;
 using System.Configuration;
 using MySql.Data.MySqlClient;
@@ -9,7 +9,7 @@ namespace trabajo_ing_software
 {
     public partial class Perfiles : System.Web.UI.Page
     {
-        string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=1234;";
+        string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=;";
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -58,7 +58,7 @@ namespace trabajo_ing_software
                 }
             }
 
-            lblMensaje.Text = "Perfil guardado con √©xito.";
+            lblMensaje.Text = "Perfil guardado con Èxito.";
             lblMensaje.ForeColor = System.Drawing.Color.Green;
 
             txtNombrePerfil.Text = "";
@@ -84,7 +84,7 @@ namespace trabajo_ing_software
                     }
                     catch (MySqlException)
                     {
-                        lblMensaje.Text = "No se puede eliminar este perfil porque est√° asignado a uno o m√°s usuarios.";
+                        lblMensaje.Text = "No se puede eliminar este perfil porque est· asignado a uno o m·s usuarios.";
                         lblMensaje.ForeColor = System.Drawing.Color.Red;
                     }
                 }

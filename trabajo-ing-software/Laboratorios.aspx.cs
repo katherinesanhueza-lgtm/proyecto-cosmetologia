@@ -1,4 +1,4 @@
-ï»¿using System;
+using System;
 using System.Data;
 using System.Configuration;
 using MySql.Data.MySqlClient;
@@ -8,11 +8,11 @@ namespace trabajo_ing_software
 {
     public partial class Laboratorios : System.Web.UI.Page
     {
-        string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=1234;";
+        string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=;";
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            // Seguridad: verificar sesiÃ³n
+            // Seguridad: verificar sesión
             if (Session["IdUsuario"] == null)
             {
                 Response.Redirect("Login.aspx");
@@ -64,7 +64,7 @@ namespace trabajo_ing_software
             CargarLaboratorios();
         }
 
-        // 1. READ: Listar Laboratorios con filtros y cÃ¡lculo de KPIs
+        // 1. READ: Listar Laboratorios con filtros y cálculo de KPIs
         private void CargarLaboratorios()
         {
             string filtro = txtBuscar != null ? txtBuscar.Text.Trim() : "";
@@ -105,7 +105,7 @@ namespace trabajo_ing_software
                         gvLaboratorios.DataSource = dt;
                         gvLaboratorios.DataBind();
 
-                        // ActualizaciÃ³n de KPIs en pantalla
+                        // Actualización de KPIs en pantalla
                         if (lblTotalHomologados != null)
                         {
                             lblTotalHomologados.Text = dt.Rows.Count.ToString();
@@ -138,7 +138,7 @@ namespace trabajo_ing_software
             }
         }
 
-        // 2. VALIDACIONES DE NEGOCIO: RUT, EMAIL Y TELÃ‰FONO
+        // 2. VALIDACIONES DE NEGOCIO: RUT, EMAIL Y TELÉFONO
         private bool ValidarRut(string rut)
         {
             if (string.IsNullOrWhiteSpace(rut)) return false;
@@ -146,22 +146,22 @@ namespace trabajo_ing_software
             // Limpiar puntos, espacios y guiones
             string limpio = rut.Replace(".", "").Replace("-", "").Trim().ToUpper();
 
-            // Longitud vÃ¡lida para RUT chileno (entre 7 y 9 caracteres: cuerpo de 6 a 8 dÃ­gitos + dÃ­gito verificador)
+            // Longitud válida para RUT chileno (entre 7 y 9 caracteres: cuerpo de 6 a 8 dígitos + dígito verificador)
             if (limpio.Length < 7 || limpio.Length > 9) return false;
 
             string cuerpo = limpio.Substring(0, limpio.Length - 1);
             char dv = limpio[limpio.Length - 1];
 
-            // El cuerpo debe ser estrictamente numÃ©rico
+            // El cuerpo debe ser estrictamente numérico
             if (!long.TryParse(cuerpo, out long rutNumero) || rutNumero <= 0) return false;
 
-            // El dÃ­gito verificador debe ser un nÃºmero o la letra 'K'
+            // El dígito verificador debe ser un número o la letra 'K'
             if (!char.IsDigit(dv) && dv != 'K') return false;
 
             return true;
         }
 
-        // Algoritmo matemÃ¡tico oficial MÃ³dulo 11 (para cÃ¡lculo y defensa tÃ©cnica)
+        // Algoritmo matemático oficial Módulo 11 (para cálculo y defensa técnica)
         public static char CalcularDigitoVerificador(string cuerpo)
         {
             int suma = 0;
@@ -198,21 +198,21 @@ namespace trabajo_ing_software
         private bool ValidarEmail(string email)
         {
             if (string.IsNullOrWhiteSpace(email)) return false;
-            // ExpresiÃ³n regular estÃ¡ndar para formato correo@dominio.ext
+            // Expresión regular estándar para formato correo@dominio.ext
             string patron = @"^[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}$";
             return System.Text.RegularExpressions.Regex.IsMatch(email.Trim(), patron);
         }
 
         private bool ValidarTelefono(string telefono)
         {
-            if (string.IsNullOrWhiteSpace(telefono)) return true; // TelÃ©fono es opcional
+            if (string.IsNullOrWhiteSpace(telefono)) return true; // Teléfono es opcional
 
-            // Permite solo caracteres telefÃ³nicos vÃ¡lidos (+, espacios, guiones, dÃ­gitos, parÃ©ntesis)
+            // Permite solo caracteres telefónicos válidos (+, espacios, guiones, dígitos, paréntesis)
             string patron = @"^[\+]?[(]?[0-9]{1,4}[)]?[-\s\./0-9]{6,15}$";
             if (!System.Text.RegularExpressions.Regex.IsMatch(telefono.Trim(), patron))
                 return false;
 
-            // Debe contener entre 8 y 15 dÃ­gitos reales
+            // Debe contener entre 8 y 15 dígitos reales
             int digitos = 0;
             foreach (char c in telefono)
             {
@@ -237,42 +237,42 @@ namespace trabajo_ing_software
             // 1. Campos obligatorios
             if (string.IsNullOrEmpty(rut) || string.IsNullOrEmpty(razonSocial) || string.IsNullOrEmpty(marca) || string.IsNullOrEmpty(email))
             {
-                lblMensaje.Text = "RUT, RazÃ³n Social, Marca y Email son obligatorios.";
+                lblMensaje.Text = "RUT, Razón Social, Marca y Email son obligatorios.";
                 lblMensaje.ForeColor = System.Drawing.Color.Red;
                 return;
             }
 
-            // 2. ValidaciÃ³n de RUT con MÃ³dulo 11
+            // 2. Validación de RUT con Módulo 11
             if (!ValidarRut(rut))
             {
-                lblMensaje.Text = "El RUT ingresado no es vÃ¡lido. Verifica el formato y dÃ­gito verificador (Ej: 12.345.678-5 o 76.111.222-8).";
+                lblMensaje.Text = "El RUT ingresado no es válido. Verifica el formato y dígito verificador (Ej: 12.345.678-5 o 76.111.222-8).";
                 lblMensaje.ForeColor = System.Drawing.Color.Red;
                 return;
             }
 
-            // Formatear RUT estÃ¡ndar (ej: 76.111.222-8)
+            // Formatear RUT estándar (ej: 76.111.222-8)
             rut = FormatearRut(rut);
 
-            // 3. ValidaciÃ³n de Correo ElectrÃ³nico
+            // 3. Validación de Correo Electrónico
             if (!ValidarEmail(email))
             {
-                lblMensaje.Text = "El formato del correo electrÃ³nico no es vÃ¡lido (Ej: compras@laboratorio.com).";
+                lblMensaje.Text = "El formato del correo electrónico no es válido (Ej: compras@laboratorio.com).";
                 lblMensaje.ForeColor = System.Drawing.Color.Red;
                 return;
             }
 
-            // 4. ValidaciÃ³n de TelÃ©fono (opcional, pero si se escribe debe ser vÃ¡lido)
+            // 4. Validación de Teléfono (opcional, pero si se escribe debe ser válido)
             if (!ValidarTelefono(telefono))
             {
-                lblMensaje.Text = "El telÃ©fono no es vÃ¡lido. Debe contener entre 8 y 15 dÃ­gitos (Ej: +56 9 1234 5678).";
+                lblMensaje.Text = "El teléfono no es válido. Debe contener entre 8 y 15 dígitos (Ej: +56 9 1234 5678).";
                 lblMensaje.ForeColor = System.Drawing.Color.Red;
                 return;
             }
 
-            // 5. ValidaciÃ³n de DÃ­as de Pago
+            // 5. Validación de Días de Pago
             if (!int.TryParse(diasTexto, out int diasPago) || diasPago < 0 || diasPago > 365)
             {
-                lblMensaje.Text = "Los dÃ­as de pago deben ser un nÃºmero positivo entre 0 y 365.";
+                lblMensaje.Text = "Los días de pago deben ser un número positivo entre 0 y 365.";
                 lblMensaje.ForeColor = System.Drawing.Color.Red;
                 return;
             }
@@ -316,7 +316,7 @@ namespace trabajo_ing_software
                         con.Open();
                         cmd.ExecuteNonQuery();
 
-                        lblMensaje.Text = esEdicion ? "Laboratorio modificado con Ã©xito." : "Laboratorio registrado con Ã©xito.";
+                        lblMensaje.Text = esEdicion ? "Laboratorio modificado con éxito." : "Laboratorio registrado con éxito.";
                         lblMensaje.ForeColor = System.Drawing.Color.Green;
 
                         LimpiarFormulario();
@@ -429,7 +429,7 @@ namespace trabajo_ing_software
                     }
                     catch (MySqlException)
                     {
-                        lblMensaje.Text = "No se puede eliminar este laboratorio porque ya tiene Ã³rdenes de compra asociadas. Puedes usar 'Desactivar'.";
+                        lblMensaje.Text = "No se puede eliminar este laboratorio porque ya tiene órdenes de compra asociadas. Puedes usar 'Desactivar'.";
                         lblMensaje.ForeColor = System.Drawing.Color.Red;
                     }
                 }

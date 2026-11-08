@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Configuration;
 using MySql.Data.MySqlClient;
@@ -9,7 +9,7 @@ namespace trabajo_ing_software
 {
     public partial class Accesos : System.Web.UI.Page
     {
-        string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=1234;";
+        string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=;";
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -141,7 +141,7 @@ namespace trabajo_ing_software
                 }
             }
 
-            lblMensaje.Text = "Acceso actualizado con éxito.";
+            lblMensaje.Text = "Acceso actualizado con �xito.";
             lblMensaje.ForeColor = System.Drawing.Color.Green;
             CargarTablaAccesos();
         }

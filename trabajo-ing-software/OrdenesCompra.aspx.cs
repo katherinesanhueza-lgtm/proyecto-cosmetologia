@@ -1,4 +1,4 @@
-Ôªøusing System;
+using System;
 using System.Data;
 using System.Configuration;
 using MySql.Data.MySqlClient;
@@ -9,11 +9,11 @@ namespace trabajo_ing_software
 {
     public partial class OrdenesCompra : System.Web.UI.Page
     {
-        private string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=1234;";
+        private string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=;";
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            // Verificaci√≥n de seguridad de sesi√≥n
+            // VerificaciÛn de seguridad de sesiÛn
             if (Session["IdUsuario"] == null)
             {
                 Response.Redirect("Login.aspx");
@@ -22,7 +22,7 @@ namespace trabajo_ing_software
 
             ActualizarTextosIvaDinamicos();
 
-            // Control de acceso por perfil (RBAC): S√≥lo Administrador y Contador pueden gestionar par√°metros legales
+            // Control de acceso por perfil (RBAC): SÛlo Administrador y Contador pueden gestionar par·metros legales
             string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
             btnAbrirConfig.Visible = rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase) || 
                                      rolUsuario.Equals("Contador", StringComparison.OrdinalIgnoreCase);
@@ -46,7 +46,7 @@ namespace trabajo_ing_software
             }
         }
 
-        #region Inicializaci√≥n y Estructura Temporal de √çtems
+        #region InicializaciÛn y Estructura Temporal de Õtems
         public string GetIniciales(string nombre)
         {
             if (string.IsNullOrWhiteSpace(nombre)) return "OC";
@@ -80,7 +80,7 @@ namespace trabajo_ing_software
         }
         #endregion
 
-        #region Carga de Datos y Cat√°logos
+        #region Carga de Datos y Cat·logos
         private void CargarLaboratoriosFiltro()
         {
             ddlFiltroLaboratorio.Items.Clear();
@@ -189,7 +189,7 @@ namespace trabajo_ing_software
                             {
                                 lblInfoRut.Text = dr["Rut"].ToString();
                                 int dias = dr["DiasPago"] != DBNull.Value ? Convert.ToInt32(dr["DiasPago"]) : 30;
-                                lblInfoDiasPago.Text = dias + " d√≠as de cr√©dito";
+                                lblInfoDiasPago.Text = dias + " dÌas de crÈdito";
                                 lblInfoContacto.Text = dr["Contacto"].ToString();
                                 lblInfoPais.Text = dr["Pais"].ToString();
 
@@ -244,21 +244,21 @@ namespace trabajo_ing_software
         {
             if (string.IsNullOrEmpty(ddlProductoVariante.SelectedValue))
             {
-                MostrarMensaje("Debe seleccionar un producto del cat√°logo para agregarlo a la orden.", false);
+                MostrarMensaje("Debe seleccionar un producto del cat·logo para agregarlo a la orden.", false);
                 return;
             }
 
             int cantidad;
             if (!int.TryParse(txtCantidad.Text, out cantidad) || cantidad <= 0)
             {
-                MostrarMensaje("Ingrese una cantidad v√°lida mayor a 0.", false);
+                MostrarMensaje("Ingrese una cantidad v·lida mayor a 0.", false);
                 return;
             }
 
             decimal costo;
             if (!decimal.TryParse(txtCostoUnitario.Text, out costo) || costo < 0)
             {
-                MostrarMensaje("Ingrese un costo unitario v√°lido.", false);
+                MostrarMensaje("Ingrese un costo unitario v·lido.", false);
                 return;
             }
 
@@ -319,7 +319,7 @@ namespace trabajo_ing_software
 
             RecalcularTotalesFinancieros();
 
-            // Restablecer inputs de √≠tem
+            // Restablecer inputs de Ìtem
             ddlProductoVariante.SelectedIndex = 0;
             txtCantidad.Text = "1";
             txtCostoUnitario.Text = "";
@@ -353,7 +353,7 @@ namespace trabajo_ing_software
                 neto += Convert.ToDecimal(row["Subtotal"]);
             }
 
-            // C√°lculo din√°mico seg√∫n tasa de IVA consultada desde ConfiguracionGlobal (Ajuste L√≥gico RF-COM-04)
+            // C·lculo din·mico seg˙n tasa de IVA consultada desde ConfiguracionGlobal (Ajuste LÛgico RF-COM-04)
             decimal iva = neto * ConfiguracionGlobal.TasaIva;
             decimal total = neto + iva;
 
@@ -382,7 +382,7 @@ namespace trabajo_ing_software
             DateTime fechaEmision;
             if (!DateTime.TryParse(txtFechaEmision.Text, out fechaEmision))
             {
-                MostrarMensaje("Seleccione una fecha de emisi√≥n v√°lida.", false);
+                MostrarMensaje("Seleccione una fecha de emisiÛn v·lida.", false);
                 return;
             }
 
@@ -397,7 +397,7 @@ namespace trabajo_ing_software
             {
                 neto += Convert.ToDecimal(row["Subtotal"]);
             }
-            // C√°lculo din√°mico seg√∫n tasa de IVA consultada desde ConfiguracionGlobal (Ajuste L√≥gico RF-COM-04)
+            // C·lculo din·mico seg˙n tasa de IVA consultada desde ConfiguracionGlobal (Ajuste LÛgico RF-COM-04)
             decimal iva = neto * ConfiguracionGlobal.TasaIva;
             decimal total = neto + iva;
 
@@ -497,7 +497,7 @@ namespace trabajo_ing_software
         }
         #endregion
 
-        #region Visualizaci√≥n y Listado de √ìrdenes (GridView Principal)
+        #region VisualizaciÛn y Listado de ”rdenes (GridView Principal)
         private void ActualizarTextosIvaDinamicos()
         {
             decimal tasa = ConfiguracionGlobal.TasaIva;
@@ -690,7 +690,7 @@ namespace trabajo_ing_software
                             {
                                 lblModalIvaPct.Text = (ConfiguracionGlobal.TasaIva * 100m).ToString("0.#");
                             }
-                            // Inyecci√≥n din√°mica de Jefatura de Compras bajo la firma (Ajuste L√≥gico)
+                            // InyecciÛn din·mica de Jefatura de Compras bajo la firma (Ajuste LÛgico)
                             lblModalFirmaJefe.Text = ConfiguracionGlobal.NombreJefeCompras;
                         }
                     }
@@ -786,13 +786,13 @@ namespace trabajo_ing_software
             }
         }
 
-        #region Configuraci√≥n Global (Admin / Contador)
+        #region ConfiguraciÛn Global (Admin / Contador)
         protected void btnAbrirConfig_Click(object sender, EventArgs e)
         {
             string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
             if (!rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase) && !rolUsuario.Equals("Contador", StringComparison.OrdinalIgnoreCase))
             {
-                MostrarMensaje("Acceso restringido: Solo el Administrador y el Contador pueden configurar par√°metros globales.", false);
+                MostrarMensaje("Acceso restringido: Solo el Administrador y el Contador pueden configurar par·metros globales.", false);
                 return;
             }
 
@@ -818,7 +818,7 @@ namespace trabajo_ing_software
             string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
             if (!rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase) && !rolUsuario.Equals("Contador", StringComparison.OrdinalIgnoreCase))
             {
-                lblConfigMensaje.Text = "No tiene permisos para modificar par√°metros globales.";
+                lblConfigMensaje.Text = "No tiene permisos para modificar par·metros globales.";
                 lblConfigMensaje.ForeColor = System.Drawing.Color.Red;
                 return;
             }
@@ -826,7 +826,7 @@ namespace trabajo_ing_software
             string ivaIngresado = txtConfigIva.Text.Trim().Replace("%", "").Replace(",", ".");
             if (!decimal.TryParse(ivaIngresado, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal tasaDecimal) || tasaDecimal <= 0)
             {
-                lblConfigMensaje.Text = "Ingrese una tasa de IVA v√°lida (ej: 19 o 20).";
+                lblConfigMensaje.Text = "Ingrese una tasa de IVA v·lida (ej: 19 o 20).";
                 lblConfigMensaje.ForeColor = System.Drawing.Color.Red;
                 return;
             }
@@ -842,7 +842,7 @@ namespace trabajo_ing_software
 
             if (string.IsNullOrEmpty(jefeCompras))
             {
-                lblConfigMensaje.Text = "El nombre de la Jefatura de Compras no puede estar vac√≠o.";
+                lblConfigMensaje.Text = "El nombre de la Jefatura de Compras no puede estar vacÌo.";
                 lblConfigMensaje.ForeColor = System.Drawing.Color.Red;
                 return;
             }
@@ -871,8 +871,8 @@ namespace trabajo_ing_software
                     pDecimal.Value = tasaDecimal;
 
                     cmd.Parameters.AddWithValue("@JefeCompras", jefeCompras);
-                    cmd.Parameters.AddWithValue("@JefeVentas", string.IsNullOrEmpty(jefeVentas) ? "Camilo Rodr√≠guez Salda√±a" : jefeVentas);
-                    cmd.Parameters.AddWithValue("@JefeInventario", string.IsNullOrEmpty(jefeInventario) ? "Katherine Sanhueza Hern√°ndez" : jefeInventario);
+                    cmd.Parameters.AddWithValue("@JefeVentas", string.IsNullOrEmpty(jefeVentas) ? "Camilo RodrÌguez SaldaÒa" : jefeVentas);
+                    cmd.Parameters.AddWithValue("@JefeInventario", string.IsNullOrEmpty(jefeInventario) ? "Katherine Sanhueza Hern·ndez" : jefeInventario);
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -883,7 +883,7 @@ namespace trabajo_ing_software
             RecalcularTotalesFinancieros();
 
             string pctStr = (tasaDecimal * 100m).ToString("0.#");
-            lblConfigMensaje.Text = "¬°Par√°metros actualizados! La nueva tasa (" + pctStr + "%) se aplic√≥ exitosamente a la grilla y los c√°lculos.";
+            lblConfigMensaje.Text = "°Par·metros actualizados! La nueva tasa (" + pctStr + "%) se aplicÛ exitosamente a la grilla y los c·lculos.";
             lblConfigMensaje.ForeColor = System.Drawing.Color.Green;
             lblIvaActualDb.Text = pctStr + "% (" + tasaDecimal.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + " en BD)";
         }

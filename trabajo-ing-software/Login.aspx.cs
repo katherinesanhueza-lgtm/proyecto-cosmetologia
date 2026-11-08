@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Configuration;
 using MySql.Data.MySqlClient;
 
@@ -6,7 +6,7 @@ namespace trabajo_ing_software
 {
     public partial class Login : System.Web.UI.Page
     {
-        string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=1234;";
+        string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=;";
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -17,7 +17,7 @@ namespace trabajo_ing_software
             string correo = txtCorreo.Text.Trim();
             string clave = txtPassword.Text.Trim();
 
-            // 1. Validaciones básicas de entrada
+            // 1. Validaciones b�sicas de entrada
             if (string.IsNullOrEmpty(correo) || string.IsNullOrEmpty(clave))
             {
                 lblMensaje.Text = "Por favor, completa todos los campos.";
@@ -26,7 +26,7 @@ namespace trabajo_ing_software
 
             if (!ValidarEmail(correo))
             {
-                lblMensaje.Text = "El formato del correo electrónico no es válido.";
+                lblMensaje.Text = "El formato del correo electr�nico no es v�lido.";
                 return;
             }
 
@@ -47,7 +47,7 @@ namespace trabajo_ing_software
                         {
                             if (reader.Read())
                             {
-                                // Usuario encontrado: Guardamos los datos en la Sesión
+                                // Usuario encontrado: Guardamos los datos en la Sesi�n
                                 string rol = reader["Rol"] != null ? reader["Rol"].ToString() : "";
                                 Session["IdUsuario"] = reader["IdUsuario"].ToString();
                                 Session["NombreUsuario"] = reader["Nombre"].ToString();
@@ -77,13 +77,13 @@ namespace trabajo_ing_software
                             }
                             else
                             {
-                                lblMensaje.Text = "Correo o contraseña incorrectos, o usuario inactivo.";
+                                lblMensaje.Text = "Correo o contrase�a incorrectos, o usuario inactivo.";
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        lblMensaje.Text = "Error de conexión: " + ex.Message;
+                        lblMensaje.Text = "Error de conexi�n: " + ex.Message;
                     }
                 }
             }

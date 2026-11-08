@@ -1,4 +1,4 @@
-Ôªøusing System;
+using System;
 using System.Data;
 using System.Configuration;
 using MySql.Data.MySqlClient;
@@ -10,7 +10,7 @@ namespace trabajo_ing_software
 {
     public partial class ReporteOrdenesCompra : System.Web.UI.Page
     {
-        private string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=1234;";
+        private string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=;";
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -37,7 +37,7 @@ namespace trabajo_ing_software
                 lblBienvenida.Text = Session["NombreUsuario"] != null ? Session["NombreUsuario"].ToString() : "Usuario";
                 lblAuditor.Text = lblBienvenida.Text;
 
-                // Inyecci√≥n din√°mica de jefaturas de m√≥dulos para firmas formales desde ConfiguracionGlobal
+                // InyecciÛn din·mica de jefaturas de mÛdulos para firmas formales desde ConfiguracionGlobal
                 lblFirmaCompras.Text = ConfiguracionGlobal.NombreJefeCompras;
                 lblFirmaVentas.Text = ConfiguracionGlobal.NombreJefeVentas;
                 lblFirmaInventario.Text = ConfiguracionGlobal.NombreJefeInventario;
@@ -235,7 +235,7 @@ namespace trabajo_ing_software
                         string pctStr = (tasa * 100m).ToString("0.#");
 
                         StringBuilder sb = new StringBuilder();
-                        sb.AppendLine(string.Format("N¬∞ Orden;Proveedor;RUT;Fecha Emisi√≥n;Fecha Entrega;Estado;√çtems;Neto ($);IVA {0}% ($);Total ($)", pctStr));
+                        sb.AppendLine(string.Format("N∞ Orden;Proveedor;RUT;Fecha EmisiÛn;Fecha Entrega;Estado;Õtems;Neto ($);IVA {0}% ($);Total ($)", pctStr));
 
                         foreach (DataRow dr in dt.Rows)
                         {

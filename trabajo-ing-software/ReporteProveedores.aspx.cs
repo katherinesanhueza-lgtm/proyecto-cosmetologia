@@ -1,4 +1,4 @@
-ï»¿using System;
+using System;
 using System.Data;
 using System.Configuration;
 using MySql.Data.MySqlClient;
@@ -7,7 +7,7 @@ namespace trabajo_ing_software
 {
     public partial class ReporteProveedores : System.Web.UI.Page
     {
-        string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=1234;";
+        string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=;";
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -64,7 +64,7 @@ namespace trabajo_ing_software
                     }
                 }
 
-                // 2. Ajuste BI: Lead Time Global (DÃ­as promedio entre OC y RecepciÃ³n)
+                // 2. Ajuste BI: Lead Time Global (Días promedio entre OC y Recepción)
                 string queryLeadTime = @"
                     SELECT IFNULL(AVG(DATEDIFF(rc.FechaRecepcion, oc.Fecha)), 0)
                     FROM RecepcionCompra rc
@@ -113,12 +113,12 @@ namespace trabajo_ing_software
             }
         }
 
-        // 2. Cargar la tabla analÃ­tica con mÃ©tricas de BI por proveedor
+        // 2. Cargar la tabla analítica con métricas de BI por proveedor
         private void CargarTablaReporte()
         {
             using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                // Consulta analÃ­tica completa con BI
+                // Consulta analítica completa con BI
                 string queryReporte = @"
                     SELECT 
                         l.IdLaboratorio,
@@ -143,7 +143,7 @@ namespace trabajo_ing_software
                             WHEN (COUNT(DISTINCT rc.IdRecepcion) * 100.0 / COUNT(DISTINCT oc.IdOC)) >= 90 
                                  AND (CASE WHEN COUNT(DISTINCT rc.IdRecepcion) = 0 THEN 0.0 ELSE (COUNT(DISTINCT dp.IdDevolucion) * 100.0 / COUNT(DISTINCT rc.IdRecepcion)) END) < 5 THEN 'Excelente'
                             WHEN (COUNT(DISTINCT rc.IdRecepcion) * 100.0 / COUNT(DISTINCT oc.IdOC)) >= 70 THEN 'Aceptable'
-                            ELSE 'CrÃ­tico'
+                            ELSE 'Crítico'
                         END AS Calificacion
                     FROM Laboratorio l
                     LEFT JOIN OrdenCompra oc ON l.IdLaboratorio = oc.IdLaboratorio
@@ -175,7 +175,7 @@ namespace trabajo_ing_software
                 return "<span style='color: #8C827A; font-size: 11px;'>Sin recepciones</span>";
             }
             double dias = Convert.ToDouble(val);
-            return $"<strong>{dias:F1}</strong> <span style='font-size: 11px; color: #8C827A;'>dÃ­as</span>";
+            return $"<strong>{dias:F1}</strong> <span style='font-size: 11px; color: #8C827A;'>días</span>";
         }
 
         // Formato para Tasa de Defectos (BI)
@@ -203,7 +203,7 @@ namespace trabajo_ing_software
             }
         }
 
-        // MÃ©todo auxiliar para pintar los badges de calificaciÃ³n
+        // Método auxiliar para pintar los badges de calificación
         public string GetClaseCalificacion(string calificacion)
         {
             switch (calificacion)

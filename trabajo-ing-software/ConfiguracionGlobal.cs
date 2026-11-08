@@ -13,7 +13,7 @@ namespace trabajo_ing_software
     {
         private static string connectionString => ConfigurationManager.ConnectionStrings["DefaultConnection"] != null 
             ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString 
-            : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=1234;";
+            : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=;";
 
         // Fallbacks seguros en memoria por defecto
         private static decimal _tasaIva = 0.19m;

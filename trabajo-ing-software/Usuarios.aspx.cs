@@ -1,4 +1,4 @@
-ï»¿using System;
+using System;
 using System.Data;
 using System.Configuration;
 using MySql.Data.MySqlClient;
@@ -8,7 +8,7 @@ namespace trabajo_ing_software
 {
     public partial class Usuarios : System.Web.UI.Page
     {
-        string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=1234;";
+        string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=;";
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -126,15 +126,15 @@ namespace trabajo_ing_software
                 return;
             }
 
-            // Validar formato de correo electrÃ³nico
+            // Validar formato de correo electrónico
             if (!ValidarEmail(correo))
             {
-                lblMensaje.Text = "El formato del correo electrÃ³nico no es vÃ¡lido (Ej: usuario@dermo.cl).";
+                lblMensaje.Text = "El formato del correo electrónico no es válido (Ej: usuario@dermo.cl).";
                 lblMensaje.ForeColor = System.Drawing.Color.Red;
                 return;
             }
 
-            // Â¿Estamos creando o editando?
+            // ¿Estamos creando o editando?
             bool esEdicion = !string.IsNullOrEmpty(hfIdUsuario.Value);
 
             using (MySqlConnection con = new MySqlConnection(connectionString))
@@ -146,13 +146,13 @@ namespace trabajo_ing_software
                     // CREATE: Crear nuevo usuario
                     if (string.IsNullOrEmpty(password))
                     {
-                        lblMensaje.Text = "La contraseÃ±a es obligatoria para nuevos usuarios.";
+                        lblMensaje.Text = "La contraseña es obligatoria para nuevos usuarios.";
                         lblMensaje.ForeColor = System.Drawing.Color.Red;
                         return;
                     }
                     if (password.Length < 4)
                     {
-                        lblMensaje.Text = "La contraseÃ±a debe tener al menos 4 caracteres.";
+                        lblMensaje.Text = "La contraseña debe tener al menos 4 caracteres.";
                         lblMensaje.ForeColor = System.Drawing.Color.Red;
                         return;
                     }
@@ -163,12 +163,12 @@ namespace trabajo_ing_software
                     // UPDATE: Modificar usuario existente
                     if (string.IsNullOrEmpty(password))
                     {
-                        // Si dejÃ³ la clave vacÃ­a, no cambiamos la clave actual
+                        // Si dejó la clave vacía, no cambiamos la clave actual
                         query = "UPDATE Usuario SET Nombre=@Nombre, Correo=@Correo, Rol=@Rol WHERE IdUsuario=@IdUsuario";
                     }
                     else
                     {
-                        // Si escribiÃ³ clave nueva, la actualizamos
+                        // Si escribió clave nueva, la actualizamos
                         query = "UPDATE Usuario SET Nombre=@Nombre, Correo=@Correo, Password=@Password, Rol=@Rol WHERE IdUsuario=@IdUsuario";
                     }
                 }
@@ -194,7 +194,7 @@ namespace trabajo_ing_software
                         con.Open();
                         cmd.ExecuteNonQuery();
 
-                        lblMensaje.Text = esEdicion ? "Usuario modificado con Ã©xito." : "Usuario creado con Ã©xito.";
+                        lblMensaje.Text = esEdicion ? "Usuario modificado con éxito." : "Usuario creado con éxito.";
                         lblMensaje.ForeColor = System.Drawing.Color.Green;
 
                         LimpiarFormulario();
@@ -282,10 +282,10 @@ namespace trabajo_ing_software
 
         private void EliminarUsuario(int idUsuario)
         {
-            // Seguridad: no dejar que el usuario se elimine a sÃ­ mismo
+            // Seguridad: no dejar que el usuario se elimine a sí mismo
             if (Session["IdUsuario"].ToString() == idUsuario.ToString())
             {
-                lblMensaje.Text = "No puedes eliminar tu propio usuario mientras tienes la sesiÃ³n activa.";
+                lblMensaje.Text = "No puedes eliminar tu propio usuario mientras tienes la sesión activa.";
                 lblMensaje.ForeColor = System.Drawing.Color.Red;
                 return;
             }
@@ -302,13 +302,13 @@ namespace trabajo_ing_software
                         con.Open();
                         cmd.ExecuteNonQuery();
 
-                        lblMensaje.Text = "Usuario eliminado con Ã©xito.";
+                        lblMensaje.Text = "Usuario eliminado con éxito.";
                         lblMensaje.ForeColor = System.Drawing.Color.Green;
                         CargarUsuarios();
                     }
                     catch (MySqlException)
                     {
-                        lblMensaje.Text = "No se puede eliminar este usuario porque ya tiene registros o compras asociadas. En su lugar, usa el botÃ³n 'Desactivar'.";
+                        lblMensaje.Text = "No se puede eliminar este usuario porque ya tiene registros o compras asociadas. En su lugar, usa el botón 'Desactivar'.";
                         lblMensaje.ForeColor = System.Drawing.Color.Red;
                     }
                 }
