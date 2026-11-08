@@ -145,19 +145,10 @@
                     <% if (puedeVerCompras) { %>
                     <li><a href="OrdenesCompra.aspx" class="nav-item-link">&Oacute;rdenes de Compra</a></li>
                     <% } %>
-                    <% if (esAdmin || esComprador) { %>
-                    <li><a href="ReporteProveedores.aspx" class="nav-item-link">Reporte Evaluaci&oacute;n</a></li>
-                    <% } %>
-                    <% if (puedeVerCompras) { %>
-                    <li><a href="ReporteOrdenesCompra.aspx" class="nav-item-link">Reporte &Oacute;rdenes</a></li>
-                    <% } %>
 
                     <%-- INVENTARIO (Bodeguero Escritura; Admin Total; Comprador y Contador Consulta) --%>
                     <% if (esAdmin || esBodeguero || esComprador) { %>
                     <li><a href="Recepciones.aspx" class="nav-item-link">Recepci&oacute;n y Lotes</a></li>
-                    <% } %>
-                    <% if (puedeVerInventario) { %>
-                    <li><a href="ReporteIngresos.aspx" class="nav-item-link">Reporte Ingresos</a></li>
                     <% } %>
 
                     <%-- ACCESOS (Solo Administrador General) --%>
@@ -186,6 +177,7 @@
                     <p class="text-muted" style="margin-top: 4px;">Monitoreo anal&iacute;tico de pedidos pendientes, recibidos y anulados, con liquidaci&oacute;n de IVA Cr&eacute;dito Fiscal (RF-COM-11 / RNF-14).</p>
                 </div>
                 <div style="display: flex; gap: 10px;">
+                    <a href="OrdenesCompra.aspx" class="btn-dermo-secondary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>Volver a &Oacute;rdenes</a>
                     <button type="button" onclick="exportarPDF();" class="btn-dermo-primary" style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
                         Descargar PDF

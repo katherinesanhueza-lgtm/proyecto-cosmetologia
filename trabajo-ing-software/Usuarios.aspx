@@ -153,19 +153,10 @@
                     <% if (puedeVerCompras) { %>
                     <li><a href="OrdenesCompra.aspx" class="nav-item-link">&Oacute;rdenes de Compra</a></li>
                     <% } %>
-                    <% if (esAdmin || esComprador) { %>
-                    <li><a href="ReporteProveedores.aspx" class="nav-item-link">Reporte Evaluaci&oacute;n</a></li>
-                    <% } %>
-                    <% if (puedeVerCompras) { %>
-                    <li><a href="ReporteOrdenesCompra.aspx" class="nav-item-link">Reporte &Oacute;rdenes</a></li>
-                    <% } %>
 
                     <%-- INVENTARIO (Bodeguero Escritura; Admin Total; Comprador y Contador Consulta) --%>
                     <% if (esAdmin || esBodeguero || esComprador) { %>
                     <li><a href="Recepciones.aspx" class="nav-item-link">Recepci&oacute;n y Lotes</a></li>
-                    <% } %>
-                    <% if (puedeVerInventario) { %>
-                    <li><a href="ReporteIngresos.aspx" class="nav-item-link">Reporte Ingresos</a></li>
                     <% } %>
 
                     <%-- ACCESOS (Solo Administrador General) --%>

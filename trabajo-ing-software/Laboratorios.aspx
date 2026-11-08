@@ -217,19 +217,10 @@
                     <% if (puedeVerCompras) { %>
                     <li><a href="OrdenesCompra.aspx" class="nav-item-link">&Oacute;rdenes de Compra</a></li>
                     <% } %>
-                    <% if (esAdmin || esComprador) { %>
-                    <li><a href="ReporteProveedores.aspx" class="nav-item-link">Reporte Evaluaci&oacute;n</a></li>
-                    <% } %>
-                    <% if (puedeVerCompras) { %>
-                    <li><a href="ReporteOrdenesCompra.aspx" class="nav-item-link">Reporte &Oacute;rdenes</a></li>
-                    <% } %>
 
                     <%-- INVENTARIO (Bodeguero Escritura; Admin Total; Comprador y Contador Consulta) --%>
                     <% if (esAdmin || esBodeguero || esComprador) { %>
                     <li><a href="Recepciones.aspx" class="nav-item-link">Recepci&oacute;n y Lotes</a></li>
-                    <% } %>
-                    <% if (puedeVerInventario) { %>
-                    <li><a href="ReporteIngresos.aspx" class="nav-item-link">Reporte Ingresos</a></li>
                     <% } %>
 
                     <%-- ACCESOS (Solo Administrador General) --%>
@@ -263,7 +254,7 @@
                         </p>
                     </div>
                     <div style="display: flex; gap: 12px;">
-                        <a href="ReporteProveedores.aspx" class="btn-dermo-secondary" style="text-decoration: none; display: inline-flex; align-items: center;">Exportar Cat&aacute;logo (Reporte)</a>
+                        <a href="ReporteProveedores.aspx" class="btn-dermo-secondary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>Reporte de Evaluaci&oacute;n</a>
                         <asp:Button ID="btnIrReporte" runat="server" Visible="false" OnClick="btnIrReporte_Click" />
                         <button type="button" class="btn-dermo-primary" onclick="nuevoLaboratorioFocus();">
                             + Agregar Nuevo Laboratorio
