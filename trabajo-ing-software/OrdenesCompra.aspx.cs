@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Data;
 using System.Configuration;
 using MySql.Data.MySqlClient;
@@ -13,7 +13,7 @@ namespace trabajo_ing_software
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            // Verificación de seguridad de sesión
+            // Verificaciï¿½n de seguridad de sesiï¿½n
             if (Session["IdUsuario"] == null)
             {
                 Response.Redirect("Login.aspx");
@@ -22,7 +22,7 @@ namespace trabajo_ing_software
 
             ActualizarTextosIvaDinamicos();
 
-            // Control de acceso por perfil (RBAC): Sólo Administrador y Contador pueden gestionar parámetros legales
+            // Control de acceso por perfil (RBAC): Sï¿½lo Administrador y Contador pueden gestionar parï¿½metros legales
             string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
             btnAbrirConfig.Visible = rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase) || 
                                      rolUsuario.Equals("Contador", StringComparison.OrdinalIgnoreCase);
@@ -46,7 +46,7 @@ namespace trabajo_ing_software
             }
         }
 
-        #region Inicialización y Estructura Temporal de Ítems
+        #region Inicializaciï¿½n y Estructura Temporal de ï¿½tems
         public string GetIniciales(string nombre)
         {
             if (string.IsNullOrWhiteSpace(nombre)) return "OC";
@@ -80,7 +80,7 @@ namespace trabajo_ing_software
         }
         #endregion
 
-        #region Carga de Datos y Catálogos
+        #region Carga de Datos y Catï¿½logos
         private void CargarLaboratoriosFiltro()
         {
             ddlFiltroLaboratorio.Items.Clear();
@@ -189,7 +189,7 @@ namespace trabajo_ing_software
                             {
                                 lblInfoRut.Text = dr["Rut"].ToString();
                                 int dias = dr["DiasPago"] != DBNull.Value ? Convert.ToInt32(dr["DiasPago"]) : 30;
-                                lblInfoDiasPago.Text = dias + " días de crédito";
+                                lblInfoDiasPago.Text = dias + " dï¿½as de crï¿½dito";
                                 lblInfoContacto.Text = dr["Contacto"].ToString();
                                 lblInfoPais.Text = dr["Pais"].ToString();
 
@@ -244,21 +244,21 @@ namespace trabajo_ing_software
         {
             if (string.IsNullOrEmpty(ddlProductoVariante.SelectedValue))
             {
-                MostrarMensaje("Debe seleccionar un producto del catálogo para agregarlo a la orden.", false);
+                MostrarMensaje("Debe seleccionar un producto del catï¿½logo para agregarlo a la orden.", false);
                 return;
             }
 
             int cantidad;
             if (!int.TryParse(txtCantidad.Text, out cantidad) || cantidad <= 0)
             {
-                MostrarMensaje("Ingrese una cantidad válida mayor a 0.", false);
+                MostrarMensaje("Ingrese una cantidad vï¿½lida mayor a 0.", false);
                 return;
             }
 
             decimal costo;
             if (!decimal.TryParse(txtCostoUnitario.Text, out costo) || costo < 0)
             {
-                MostrarMensaje("Ingrese un costo unitario válido.", false);
+                MostrarMensaje("Ingrese un costo unitario vï¿½lido.", false);
                 return;
             }
 
@@ -319,7 +319,7 @@ namespace trabajo_ing_software
 
             RecalcularTotalesFinancieros();
 
-            // Restablecer inputs de ítem
+            // Restablecer inputs de ï¿½tem
             ddlProductoVariante.SelectedIndex = 0;
             txtCantidad.Text = "1";
             txtCostoUnitario.Text = "";
@@ -353,7 +353,7 @@ namespace trabajo_ing_software
                 neto += Convert.ToDecimal(row["Subtotal"]);
             }
 
-            // Cálculo dinámico según tasa de IVA consultada desde ConfiguracionGlobal (Ajuste Lógico RF-COM-04)
+            // Cï¿½lculo dinï¿½mico segï¿½n tasa de IVA consultada desde ConfiguracionGlobal (Ajuste Lï¿½gico RF-COM-04)
             decimal iva = neto * ConfiguracionGlobal.TasaIva;
             decimal total = neto + iva;
 
@@ -382,7 +382,7 @@ namespace trabajo_ing_software
             DateTime fechaEmision;
             if (!DateTime.TryParse(txtFechaEmision.Text, out fechaEmision))
             {
-                MostrarMensaje("Seleccione una fecha de emisión válida.", false);
+                MostrarMensaje("Seleccione una fecha de emisiï¿½n vï¿½lida.", false);
                 return;
             }
 
@@ -397,7 +397,7 @@ namespace trabajo_ing_software
             {
                 neto += Convert.ToDecimal(row["Subtotal"]);
             }
-            // Cálculo dinámico según tasa de IVA consultada desde ConfiguracionGlobal (Ajuste Lógico RF-COM-04)
+            // Cï¿½lculo dinï¿½mico segï¿½n tasa de IVA consultada desde ConfiguracionGlobal (Ajuste Lï¿½gico RF-COM-04)
             decimal iva = neto * ConfiguracionGlobal.TasaIva;
             decimal total = neto + iva;
 
@@ -497,7 +497,7 @@ namespace trabajo_ing_software
         }
         #endregion
 
-        #region Visualización y Listado de Órdenes (GridView Principal)
+        #region Visualizaciï¿½n y Listado de ï¿½rdenes (GridView Principal)
         private void ActualizarTextosIvaDinamicos()
         {
             decimal tasa = ConfiguracionGlobal.TasaIva;
@@ -690,7 +690,7 @@ namespace trabajo_ing_software
                             {
                                 lblModalIvaPct.Text = (ConfiguracionGlobal.TasaIva * 100m).ToString("0.#");
                             }
-                            // Inyección dinámica de Jefatura de Compras bajo la firma (Ajuste Lógico)
+                            // Inyecciï¿½n dinï¿½mica de Jefatura de Compras bajo la firma (Ajuste Lï¿½gico)
                             lblModalFirmaJefe.Text = ConfiguracionGlobal.NombreJefeCompras;
                         }
                     }
@@ -786,107 +786,86 @@ namespace trabajo_ing_software
             }
         }
 
-        #region Configuración Global (Admin / Contador)
-        protected void btnAbrirConfig_Click(object sender, EventArgs e)
-        {
-            string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
-            if (!rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase) && !rolUsuario.Equals("Contador", StringComparison.OrdinalIgnoreCase))
-            {
-                MostrarMensaje("Acceso restringido: Solo el Administrador y el Contador pueden configurar parámetros globales.", false);
-                return;
-            }
-
-            decimal iva = ConfiguracionGlobal.TasaIva;
-            txtConfigIva.Text = (iva * 100m).ToString("0.0");
-            lblIvaActualDb.Text = (iva * 100m).ToString("0.0") + "% (" + iva.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + " en BD)";
-
-            txtConfigJefeCompras.Text = ConfiguracionGlobal.NombreJefeCompras;
-            txtConfigJefeVentas.Text = ConfiguracionGlobal.NombreJefeVentas;
-            txtConfigJefeInventario.Text = ConfiguracionGlobal.NombreJefeInventario;
-
-            lblConfigMensaje.Text = "";
-            pnlModalConfig.Visible = true;
-        }
-
-        protected void btnCerrarConfig_Click(object sender, EventArgs e)
-        {
-            pnlModalConfig.Visible = false;
-        }
-
-        protected void btnGuardarConfig_Click(object sender, EventArgs e)
-        {
-            string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
-            if (!rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase) && !rolUsuario.Equals("Contador", StringComparison.OrdinalIgnoreCase))
-            {
-                lblConfigMensaje.Text = "No tiene permisos para modificar parámetros globales.";
-                lblConfigMensaje.ForeColor = System.Drawing.Color.Red;
-                return;
-            }
-
-            string ivaIngresado = txtConfigIva.Text.Trim().Replace("%", "").Replace(",", ".");
-            if (!decimal.TryParse(ivaIngresado, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal tasaDecimal) || tasaDecimal <= 0)
-            {
-                lblConfigMensaje.Text = "Ingrese una tasa de IVA válida (ej: 19 o 20).";
-                lblConfigMensaje.ForeColor = System.Drawing.Color.Red;
-                return;
-            }
-
-            if (tasaDecimal > 1.0m)
-            {
-                tasaDecimal = tasaDecimal / 100m;
-            }
-
-            string jefeCompras = txtConfigJefeCompras.Text.Trim();
-            string jefeVentas = txtConfigJefeVentas.Text.Trim();
-            string jefeInventario = txtConfigJefeInventario.Text.Trim();
-
-            if (string.IsNullOrEmpty(jefeCompras))
-            {
-                lblConfigMensaje.Text = "El nombre de la Jefatura de Compras no puede estar vacío.";
-                lblConfigMensaje.ForeColor = System.Drawing.Color.Red;
-                return;
-            }
-
-            using (MySqlConnection con = new MySqlConnection(connectionString))
-            {
-                con.Open();
-                string sql = @"
-                    UPDATE ConfiguracionGlobal SET Valor = @TasaIva WHERE Clave = 'TasaIva';
-                    UPDATE ConfiguracionGlobal SET Valor = @JefeCompras WHERE Clave = 'NombreJefeCompras';
-                    UPDATE ConfiguracionGlobal SET Valor = @JefeVentas WHERE Clave = 'NombreJefeVentas';
-                    UPDATE ConfiguracionGlobal SET Valor = @JefeInventario WHERE Clave = 'NombreJefeInventario';
-                    
-                    UPDATE OrdenCompra 
-                    SET Iva = ROUND(Neto * @TasaDecimal, 0),
-                        Total = Neto + ROUND(Neto * @TasaDecimal, 0)
-                    WHERE Estado <> 'Anulada';";
-
-                using (MySqlCommand cmd = new MySqlCommand(sql, con))
-                {
-                    cmd.Parameters.AddWithValue("@TasaIva", tasaDecimal.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
-                    
-                    MySqlParameter pDecimal = cmd.Parameters.Add("@TasaDecimal", MySqlDbType.Decimal);
-                    pDecimal.Precision = 18;
-                    pDecimal.Scale = 4;
-                    pDecimal.Value = tasaDecimal;
-
-                    cmd.Parameters.AddWithValue("@JefeCompras", jefeCompras);
-                    cmd.Parameters.AddWithValue("@JefeVentas", string.IsNullOrEmpty(jefeVentas) ? "Camilo Rodríguez Saldaña" : jefeVentas);
-                    cmd.Parameters.AddWithValue("@JefeInventario", string.IsNullOrEmpty(jefeInventario) ? "Katherine Sanhueza Hernández" : jefeInventario);
-                    cmd.ExecuteNonQuery();
-                }
-            }
-
-            ActualizarTextosIvaDinamicos();
-            CargarOrdenes();
-            CalcularKPIs();
-            RecalcularTotalesFinancieros();
-
-            string pctStr = (tasaDecimal * 100m).ToString("0.#");
-            lblConfigMensaje.Text = "¡Parámetros actualizados! La nueva tasa (" + pctStr + "%) se aplicó exitosamente a la grilla y los cálculos.";
-            lblConfigMensaje.ForeColor = System.Drawing.Color.Green;
-            lblIvaActualDb.Text = pctStr + "% (" + tasaDecimal.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + " en BD)";
-        }
+        #region ConfiguraciÃ³n Global - Tasa de IVA (Admin / Contador)
+        protected void btnAbrirConfig_Click(object sender, EventArgs e)
+        {
+            string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
+            if (!rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase) && !rolUsuario.Equals("Contador", StringComparison.OrdinalIgnoreCase))
+            {
+                MostrarMensaje("Acceso restringido: Solo el Administrador y el Contador pueden configurar la tasa de IVA.", false);
+                return;
+            }
+
+            decimal iva = ConfiguracionGlobal.TasaIva;
+            txtConfigIva.Text = (iva * 100m).ToString("0.0");
+            lblIvaActualDb.Text = (iva * 100m).ToString("0.0") + "% (" + iva.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + " en BD)";
+
+            lblConfigMensaje.Text = "";
+            pnlModalConfig.Visible = true;
+        }
+
+        protected void btnCerrarConfig_Click(object sender, EventArgs e)
+        {
+            pnlModalConfig.Visible = false;
+        }
+
+        protected void btnGuardarConfig_Click(object sender, EventArgs e)
+        {
+            string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
+            if (!rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase) && !rolUsuario.Equals("Contador", StringComparison.OrdinalIgnoreCase))
+            {
+                lblConfigMensaje.Text = "No tiene permisos para modificar la tasa de IVA.";
+                lblConfigMensaje.ForeColor = System.Drawing.Color.Red;
+                return;
+            }
+
+            string ivaIngresado = txtConfigIva.Text.Trim().Replace("%", "").Replace(",", ".");
+            if (!decimal.TryParse(ivaIngresado, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal tasaDecimal) || tasaDecimal <= 0)
+            {
+                lblConfigMensaje.Text = "Ingrese una tasa de IVA vÃ¡lida (ej: 19 o 20).";
+                lblConfigMensaje.ForeColor = System.Drawing.Color.Red;
+                return;
+            }
+
+            if (tasaDecimal > 1.0m)
+            {
+                tasaDecimal = tasaDecimal / 100m;
+            }
+
+            using (MySqlConnection con = new MySqlConnection(connectionString))
+            {
+                con.Open();
+                string sql = @"
+                    UPDATE ConfiguracionGlobal SET Valor = @TasaIva WHERE Clave = 'TasaIva';
+                    
+                    UPDATE OrdenCompra 
+                    SET Iva = ROUND(Neto * @TasaDecimal, 0),
+                        Total = Neto + ROUND(Neto * @TasaDecimal, 0)
+                    WHERE Estado <> 'Anulada';";
+
+                using (MySqlCommand cmd = new MySqlCommand(sql, con))
+                {
+                    cmd.Parameters.AddWithValue("@TasaIva", tasaDecimal.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
+                    
+                    MySqlParameter pDecimal = cmd.Parameters.Add("@TasaDecimal", MySqlDbType.Decimal);
+                    pDecimal.Precision = 18;
+                    pDecimal.Scale = 4;
+                    pDecimal.Value = tasaDecimal;
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+
+            ActualizarTextosIvaDinamicos();
+            CargarOrdenes();
+            CalcularKPIs();
+            RecalcularTotalesFinancieros();
+
+            string pctStr = (tasaDecimal * 100m).ToString("0.#");
+            lblConfigMensaje.Text = "Â¡Tasa de IVA actualizada! La nueva tasa (" + pctStr + "%) se aplicÃ³ exitosamente a todas las Ã³rdenes y cÃ¡lculos.";
+            lblConfigMensaje.ForeColor = System.Drawing.Color.Green;
+            lblIvaActualDb.Text = pctStr + "% (" + tasaDecimal.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + " en BD)";
+        }
         #endregion
 
         protected void btnLogout_Click(object sender, EventArgs e)

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Configuration;
 using MySql.Data.MySqlClient;
 
@@ -97,7 +97,13 @@ namespace trabajo_ing_software
             set => _nombreJefeInventario = value;
         }
 
-        /// <summary>
+                /// <summary>
+        /// Recarga parametros (las propiedades consultan directamente la base de datos).
+        /// </summary>
+        public static void Recargar()
+        {
+        }
+/// <summary>
         /// Redirección segura según perfil operativo (RBAC).
         /// </summary>
         public static void RedirigirSegunRol(System.Web.HttpResponse response, string rol)

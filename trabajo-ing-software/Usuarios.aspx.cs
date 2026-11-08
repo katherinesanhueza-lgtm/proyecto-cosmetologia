@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Data;
 using System.Configuration;
 using MySql.Data.MySqlClient;
@@ -126,15 +126,15 @@ namespace trabajo_ing_software
                 return;
             }
 
-            // Validar formato de correo electrónico
+            // Validar formato de correo electrï¿½nico
             if (!ValidarEmail(correo))
             {
-                lblMensaje.Text = "El formato del correo electrónico no es válido (Ej: usuario@dermo.cl).";
+                lblMensaje.Text = "El formato del correo electrï¿½nico no es vï¿½lido (Ej: usuario@dermo.cl).";
                 lblMensaje.ForeColor = System.Drawing.Color.Red;
                 return;
             }
 
-            // ¿Estamos creando o editando?
+            // ï¿½Estamos creando o editando?
             bool esEdicion = !string.IsNullOrEmpty(hfIdUsuario.Value);
 
             using (MySqlConnection con = new MySqlConnection(connectionString))
@@ -146,13 +146,13 @@ namespace trabajo_ing_software
                     // CREATE: Crear nuevo usuario
                     if (string.IsNullOrEmpty(password))
                     {
-                        lblMensaje.Text = "La contraseña es obligatoria para nuevos usuarios.";
+                        lblMensaje.Text = "La contraseï¿½a es obligatoria para nuevos usuarios.";
                         lblMensaje.ForeColor = System.Drawing.Color.Red;
                         return;
                     }
                     if (password.Length < 4)
                     {
-                        lblMensaje.Text = "La contraseña debe tener al menos 4 caracteres.";
+                        lblMensaje.Text = "La contraseï¿½a debe tener al menos 4 caracteres.";
                         lblMensaje.ForeColor = System.Drawing.Color.Red;
                         return;
                     }
@@ -163,12 +163,12 @@ namespace trabajo_ing_software
                     // UPDATE: Modificar usuario existente
                     if (string.IsNullOrEmpty(password))
                     {
-                        // Si dejó la clave vacía, no cambiamos la clave actual
+                        // Si dejï¿½ la clave vacï¿½a, no cambiamos la clave actual
                         query = "UPDATE Usuario SET Nombre=@Nombre, Correo=@Correo, Rol=@Rol WHERE IdUsuario=@IdUsuario";
                     }
                     else
                     {
-                        // Si escribió clave nueva, la actualizamos
+                        // Si escribiï¿½ clave nueva, la actualizamos
                         query = "UPDATE Usuario SET Nombre=@Nombre, Correo=@Correo, Password=@Password, Rol=@Rol WHERE IdUsuario=@IdUsuario";
                     }
                 }
@@ -194,7 +194,7 @@ namespace trabajo_ing_software
                         con.Open();
                         cmd.ExecuteNonQuery();
 
-                        lblMensaje.Text = esEdicion ? "Usuario modificado con éxito." : "Usuario creado con éxito.";
+                        lblMensaje.Text = esEdicion ? "Usuario modificado con ï¿½xito." : "Usuario creado con ï¿½xito.";
                         lblMensaje.ForeColor = System.Drawing.Color.Green;
 
                         LimpiarFormulario();
@@ -282,10 +282,10 @@ namespace trabajo_ing_software
 
         private void EliminarUsuario(int idUsuario)
         {
-            // Seguridad: no dejar que el usuario se elimine a sí mismo
+            // Seguridad: no dejar que el usuario se elimine a sï¿½ mismo
             if (Session["IdUsuario"].ToString() == idUsuario.ToString())
             {
-                lblMensaje.Text = "No puedes eliminar tu propio usuario mientras tienes la sesión activa.";
+                lblMensaje.Text = "No puedes eliminar tu propio usuario mientras tienes la sesiï¿½n activa.";
                 lblMensaje.ForeColor = System.Drawing.Color.Red;
                 return;
             }
@@ -302,13 +302,13 @@ namespace trabajo_ing_software
                         con.Open();
                         cmd.ExecuteNonQuery();
 
-                        lblMensaje.Text = "Usuario eliminado con éxito.";
+                        lblMensaje.Text = "Usuario eliminado con ï¿½xito.";
                         lblMensaje.ForeColor = System.Drawing.Color.Green;
                         CargarUsuarios();
                     }
                     catch (MySqlException)
                     {
-                        lblMensaje.Text = "No se puede eliminar este usuario porque ya tiene registros o compras asociadas. En su lugar, usa el botón 'Desactivar'.";
+                        lblMensaje.Text = "No se puede eliminar este usuario porque ya tiene registros o compras asociadas. En su lugar, usa el botï¿½n 'Desactivar'.";
                         lblMensaje.ForeColor = System.Drawing.Color.Red;
                     }
                 }
@@ -337,6 +337,66 @@ namespace trabajo_ing_software
             Response.Redirect("Laboratorios.aspx");
         }
 
+        #region ConfiguraciÃ³n Institucional - Firmas de Jefatura
+        protected void btnAbrirJefaturas_Click(object sender, EventArgs e)
+        {
+            txtJefeCompras.Text = ConfiguracionGlobal.NombreJefeCompras;
+            txtJefeVentas.Text = ConfiguracionGlobal.NombreJefeVentas;
+            txtJefeInventario.Text = ConfiguracionGlobal.NombreJefeInventario;
+            lblMensajeJefaturas.Text = "";
+            pnlModalJefaturas.Visible = true;
+        }
+
+        protected void btnCerrarJefaturas_Click(object sender, EventArgs e)
+        {
+            pnlModalJefaturas.Visible = false;
+        }
+
+        protected void btnGuardarJefaturas_Click(object sender, EventArgs e)
+        {
+            string jefeCompras = txtJefeCompras.Text.Trim();
+            string jefeVentas = txtJefeVentas.Text.Trim();
+            string jefeInventario = txtJefeInventario.Text.Trim();
+
+            if (string.IsNullOrEmpty(jefeCompras))
+            {
+                lblMensajeJefaturas.Text = "El nombre de la Jefatura de Compras no puede estar vacÃ­o.";
+                lblMensajeJefaturas.ForeColor = System.Drawing.Color.Red;
+                return;
+            }
+
+            try
+            {
+                using (MySqlConnection con = new MySqlConnection(connectionString))
+                {
+                    con.Open();
+                    string sql = @"
+                        UPDATE ConfiguracionGlobal SET Valor = @JefeCompras WHERE Clave = 'NombreJefeCompras';
+                        UPDATE ConfiguracionGlobal SET Valor = @JefeVentas WHERE Clave = 'NombreJefeVentas';
+                        UPDATE ConfiguracionGlobal SET Valor = @JefeInventario WHERE Clave = 'NombreJefeInventario';";
+
+                    using (MySqlCommand cmd = new MySqlCommand(sql, con))
+                    {
+                        cmd.Parameters.AddWithValue("@JefeCompras", jefeCompras);
+                        cmd.Parameters.AddWithValue("@JefeVentas", string.IsNullOrEmpty(jefeVentas) ? "Camilo RodrÃ­guez SaldaÃ±a" : jefeVentas);
+                        cmd.Parameters.AddWithValue("@JefeInventario", string.IsNullOrEmpty(jefeInventario) ? "Katherine Sanhueza HernÃ¡ndez" : jefeInventario);
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+
+                ConfiguracionGlobal.Recargar();
+                pnlModalJefaturas.Visible = false;
+
+                lblMensaje.Text = "Â¡Firmas oficiales de jefatura actualizadas con Ã©xito!";
+                lblMensaje.ForeColor = System.Drawing.Color.Green;
+            }
+            catch (Exception ex)
+            {
+                lblMensajeJefaturas.Text = "Error al guardar firmas: " + ex.Message;
+                lblMensajeJefaturas.ForeColor = System.Drawing.Color.Red;
+            }
+        }
+        #endregion
         protected void btnLogout_Click(object sender, EventArgs e)
         {
             Session.Clear();

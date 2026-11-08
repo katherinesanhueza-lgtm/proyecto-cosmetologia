@@ -451,7 +451,7 @@
                     </a>
                     <asp:LinkButton ID="btnAbrirConfig" runat="server" CssClass="btn-dermo-secondary" OnClick="btnAbrirConfig_Click" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                        Par&aacute;metros (IVA &amp; Firmas)
+                        Tasa de IVA Legal (%)
                     </asp:LinkButton>
                     <asp:Button ID="btnToggleForm" runat="server" Text="Nueva &Oacute;rden de Compra" CssClass="btn-dermo-primary" OnClick="btnToggleForm_Click" />
                 </div>
@@ -842,19 +842,19 @@
             </div>
         </asp:Panel>
 
-        <!-- MODAL DE CONFIGURACIÓN GLOBAL (ADMINISTRADOR / CONTADOR) -->
+                <!-- MODAL DE CONFIGURACIÓN DE TASA DE IVA (ADMINISTRADOR / CONTADOR) -->
         <asp:Panel ID="pnlModalConfig" runat="server" Visible="false" CssClass="modal-overlay">
-            <div class="modal-content-card" style="max-width: 580px;">
+            <div class="modal-content-card" style="max-width: 480px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-borde-suave); padding-bottom: 14px; margin-bottom: 20px;">
                     <div>
-                        <span class="pill-badge" style="font-size: 10px; padding: 3px 10px;">AJUSTES DEL SISTEMA</span>
-                        <h2 style="font-size: 20px; margin-top: 4px; color: var(--color-texto);">Par&aacute;metros Globales (IVA &amp; Firmas)</h2>
+                        <span class="pill-badge" style="font-size: 10px; padding: 3px 10px;">AJUSTE TRIBUTARIO</span>
+                        <h2 style="font-size: 20px; margin-top: 4px; color: var(--color-texto);">Tasa de IVA Legal (%)</h2>
                     </div>
                     <asp:Button ID="btnCerrarConfig" runat="server" Text="Cerrar" CssClass="btn-dermo-secondary" style="padding: 6px 14px; font-size: 12px;" OnClick="btnCerrarConfig_Click" />
                 </div>
 
                 <p class="text-muted" style="font-size: 13px; line-height: 1.5; margin-bottom: 20px;">
-                    Administraci&oacute;n de par&aacute;metros tributarios e institucionales en <code>ConfiguracionGlobal</code>. Los cambios se aplican de forma inmediata a todos los c&aacute;lculos, comprobantes y reportes sin necesidad de modificar c&oacute;digo.
+                    Par&aacute;metro tributario legal en Chile (RF-COM-04) registrado en <code>ConfiguracionGlobal</code>. Aplica de forma inmediata al c&aacute;lculo de impuestos en todas las &oacute;rdenes de compra.
                 </p>
 
                 <div class="form-group-dermo">
@@ -863,31 +863,16 @@
                         <asp:TextBox ID="txtConfigIva" runat="server" CssClass="input-pill-dermo" style="max-width: 140px; font-weight: 700; text-align: center;" placeholder="19.0"></asp:TextBox>
                         <span style="font-size: 13px; color: var(--color-texto-suave); font-weight: 600;">% (Ejemplo: 19 para 19%, 20 para 20%)</span>
                     </div>
-                    <small style="font-size: 11px; color: #736E67; display: block; margin-top: 4px;">
+                    <small style="font-size: 11px; color: #736E67; display: block; margin-top: 6px;">
                         Actualmente registrado en BD: <asp:Label ID="lblIvaActualDb" runat="server" Font-Bold="true" ForeColor="#7A5E47"></asp:Label>
                     </small>
                 </div>
 
-                <div class="form-group-dermo" style="margin-top: 16px;">
-                    <label class="label-dermo" style="font-weight: 700;">Jefatura M&oacute;dulo de Compras y Abastecimiento</label>
-                    <asp:TextBox ID="txtConfigJefeCompras" runat="server" CssClass="input-pill-dermo" placeholder="Nombre completo para firmas de OC"></asp:TextBox>
-                </div>
-
-                <div class="form-group-dermo" style="margin-top: 14px;">
-                    <label class="label-dermo" style="font-weight: 700;">Jefatura M&oacute;dulo de Ventas y Facturaci&oacute;n</label>
-                    <asp:TextBox ID="txtConfigJefeVentas" runat="server" CssClass="input-pill-dermo" placeholder="Nombre completo para firmas de reportes"></asp:TextBox>
-                </div>
-
-                <div class="form-group-dermo" style="margin-top: 14px;">
-                    <label class="label-dermo" style="font-weight: 700;">Jefatura M&oacute;dulo de Inventario y Kardex</label>
-                    <asp:TextBox ID="txtConfigJefeInventario" runat="server" CssClass="input-pill-dermo" placeholder="Nombre completo para firmas de reportes"></asp:TextBox>
-                </div>
-
-                <asp:Label ID="lblConfigMensaje" runat="server" Font-Size="12.5px" style="display: block; margin-top: 12px;"></asp:Label>
+                <asp:Label ID="lblConfigMensaje" runat="server" Font-Size="12.5px" style="display: block; margin-top: 14px;"></asp:Label>
 
                 <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; border-top: 1px solid var(--color-borde-suave); padding-top: 15px;">
                     <asp:Button ID="btnCancelarConfig" runat="server" Text="Cancelar" CssClass="btn-dermo-secondary" OnClick="btnCerrarConfig_Click" />
-                    <asp:Button ID="btnGuardarConfig" runat="server" Text="Guardar Par&aacute;metros" CssClass="btn-dermo-primary" OnClick="btnGuardarConfig_Click" />
+                    <asp:Button ID="btnGuardarConfig" runat="server" Text="Guardar Tasa IVA" CssClass="btn-dermo-primary" OnClick="btnGuardarConfig_Click" />
                 </div>
             </div>
         </asp:Panel>

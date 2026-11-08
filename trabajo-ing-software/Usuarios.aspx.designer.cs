@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 // <generado automáticamente>
 //     Este código fue generado por una herramienta.
 //
@@ -139,5 +139,15 @@ namespace trabajo_ing_software
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.GridView gvUsuarios;
+
+        protected global::System.Web.UI.WebControls.LinkButton btnAbrirJefaturas;
+        protected global::System.Web.UI.WebControls.Panel pnlModalJefaturas;
+        protected global::System.Web.UI.WebControls.Button btnCerrarJefaturas;
+        protected global::System.Web.UI.WebControls.TextBox txtJefeCompras;
+        protected global::System.Web.UI.WebControls.TextBox txtJefeVentas;
+        protected global::System.Web.UI.WebControls.TextBox txtJefeInventario;
+        protected global::System.Web.UI.WebControls.Label lblMensajeJefaturas;
+        protected global::System.Web.UI.WebControls.Button btnCancelarJefaturas;
+        protected global::System.Web.UI.WebControls.Button btnGuardarJefaturas;
     }
 }
