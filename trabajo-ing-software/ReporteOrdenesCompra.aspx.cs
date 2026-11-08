@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
-using System.Data.SqlClient;
+using System.Configuration;
+using MySql.Data.MySqlClient;
 using System.Text;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -9,7 +10,7 @@ namespace trabajo_ing_software
 {
     public partial class ReporteOrdenesCompra : System.Web.UI.Page
     {
-        private string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ingsofDB;Integrated Security=True;TrustServerCertificate=True;";
+        private string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=1234;";
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -71,12 +72,12 @@ namespace trabajo_ing_software
             ddlLaboratorio.Items.Add(new ListItem("Todos los Laboratorios", ""));
 
             string query = "SELECT IdLaboratorio, RazonSocial FROM Laboratorio WHERE Activo = 1 ORDER BY RazonSocial ASC";
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     con.Open();
-                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
                     {
                         while (dr.Read())
                         {
@@ -99,7 +100,7 @@ namespace trabajo_ing_software
 
             string query = @"SELECT oc.IdOC, oc.NumeroOC, l.RazonSocial, l.Rut, oc.Fecha, oc.FechaEsperada, oc.Estado,
                                     oc.Neto, oc.Iva, oc.Total,
-                                    ISNULL((SELECT SUM(doc.CantidadPedida) FROM DetalleOrdenCompra doc WHERE doc.IdOC = oc.IdOC), 0) AS ItemsTotales
+                                    IFNULL((SELECT SUM(doc.CantidadPedida) FROM DetalleOrdenCompra doc WHERE doc.IdOC = oc.IdOC), 0) AS ItemsTotales
                              FROM OrdenCompra oc
                              INNER JOIN Laboratorio l ON oc.IdLaboratorio = l.IdLaboratorio
                              WHERE 1=1";
@@ -115,9 +116,9 @@ namespace trabajo_ing_software
 
             query += " ORDER BY oc.Fecha DESC, oc.IdOC DESC";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     if (fDesde != DateTime.MinValue)
                         cmd.Parameters.AddWithValue("@FDesde", fDesde);
@@ -128,7 +129,7 @@ namespace trabajo_ing_software
                     if (!string.IsNullOrEmpty(estado))
                         cmd.Parameters.AddWithValue("@Estado", estado);
 
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    using (MySqlDataAdapter da = new MySqlDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
                         da.Fill(dt);
@@ -195,7 +196,7 @@ namespace trabajo_ing_software
             string estado = ddlEstado.SelectedValue;
 
             string query = @"SELECT oc.NumeroOC, l.RazonSocial, l.Rut, oc.Fecha, oc.FechaEsperada, oc.Estado,
-                                    ISNULL((SELECT SUM(doc.CantidadPedida) FROM DetalleOrdenCompra doc WHERE doc.IdOC = oc.IdOC), 0) AS ItemsTotales,
+                                    IFNULL((SELECT SUM(doc.CantidadPedida) FROM DetalleOrdenCompra doc WHERE doc.IdOC = oc.IdOC), 0) AS ItemsTotales,
                                     oc.Neto, oc.Iva, oc.Total
                              FROM OrdenCompra oc
                              INNER JOIN Laboratorio l ON oc.IdLaboratorio = l.IdLaboratorio
@@ -212,9 +213,9 @@ namespace trabajo_ing_software
 
             query += " ORDER BY oc.Fecha DESC";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     if (fDesde != DateTime.MinValue)
                         cmd.Parameters.AddWithValue("@FDesde", fDesde);
@@ -225,7 +226,7 @@ namespace trabajo_ing_software
                     if (!string.IsNullOrEmpty(estado))
                         cmd.Parameters.AddWithValue("@Estado", estado);
 
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    using (MySqlDataAdapter da = new MySqlDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
                         da.Fill(dt);

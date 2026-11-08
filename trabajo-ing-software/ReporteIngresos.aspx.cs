@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
-using System.Data.SqlClient;
+using System.Configuration;
+using MySql.Data.MySqlClient;
 using System.Text;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -9,7 +10,7 @@ namespace trabajo_ing_software
 {
     public partial class ReporteIngresos : System.Web.UI.Page
     {
-        private string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ingsofDB;Integrated Security=True;TrustServerCertificate=True;";
+        private string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=1234;";
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -48,12 +49,12 @@ namespace trabajo_ing_software
             ddlLaboratorio.Items.Add(new ListItem("Todos los Laboratorios", ""));
 
             string query = "SELECT IdLaboratorio, RazonSocial FROM Laboratorio WHERE Activo = 1 ORDER BY RazonSocial ASC";
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     con.Open();
-                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
                     {
                         while (dr.Read())
                         {
@@ -78,7 +79,7 @@ namespace trabajo_ing_software
                                     r.FechaRecepcion, v.Sku, p.Nombre AS Producto, v.NombreVariante,
                                     dr.NumeroLote, dr.FechaVencimiento, dr.Cantidad, dr.CostoUnitario,
                                     (dr.Cantidad * dr.CostoUnitario) AS SubtotalLinea,
-                                    ISNULL(lot.Estado, 'Disponible') AS EstadoLote
+                                    IFNULL(lot.Estado, 'Disponible') AS EstadoLote
                              FROM DetalleRecepcion dr
                              INNER JOIN RecepcionCompra r ON dr.IdRecepcion = r.IdRecepcion
                              INNER JOIN OrdenCompra oc ON r.IdOC = oc.IdOC
@@ -99,9 +100,9 @@ namespace trabajo_ing_software
 
             query += " ORDER BY r.FechaRecepcion DESC, r.IdRecepcion DESC";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     if (fDesde != DateTime.MinValue)
                         cmd.Parameters.AddWithValue("@FDesde", fDesde);
@@ -112,7 +113,7 @@ namespace trabajo_ing_software
                     if (!string.IsNullOrEmpty(estadoLote))
                         cmd.Parameters.AddWithValue("@EstadoLote", estadoLote);
 
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    using (MySqlDataAdapter da = new MySqlDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
                         da.Fill(dt);
@@ -198,9 +199,9 @@ namespace trabajo_ing_software
 
             query += " ORDER BY r.FechaRecepcion DESC";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     if (fDesde != DateTime.MinValue)
                         cmd.Parameters.AddWithValue("@FDesde", fDesde);
@@ -211,7 +212,7 @@ namespace trabajo_ing_software
                     if (!string.IsNullOrEmpty(estadoLote))
                         cmd.Parameters.AddWithValue("@EstadoLote", estadoLote);
 
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    using (MySqlDataAdapter da = new MySqlDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
                         da.Fill(dt);
