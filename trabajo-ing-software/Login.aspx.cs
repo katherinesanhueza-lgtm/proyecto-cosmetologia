@@ -1,11 +1,12 @@
 ﻿using System;
-using System.Data.SqlClient;
+using System.Configuration;
+using MySql.Data.MySqlClient;
 
 namespace trabajo_ing_software
 {
     public partial class Login : System.Web.UI.Page
     {
-        string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ingsofDB;Integrated Security=True;TrustServerCertificate=True;";
+        string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=;";
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -32,9 +33,9 @@ namespace trabajo_ing_software
             // 2. Consulta a la tabla Usuario
             string query = "SELECT IdUsuario, Nombre, Rol FROM Usuario WHERE Correo = @Correo AND Password = @Password AND Activo = 1";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@Correo", correo);
                     cmd.Parameters.AddWithValue("@Password", clave);
@@ -42,7 +43,7 @@ namespace trabajo_ing_software
                     try
                     {
                         con.Open();
-                        using (SqlDataReader reader = cmd.ExecuteReader())
+                        using (MySqlDataReader reader = cmd.ExecuteReader())
                         {
                             if (reader.Read())
                             {
@@ -53,26 +54,7 @@ namespace trabajo_ing_software
                                 Session["RolUsuario"] = rol;
 
                                 // Redireccionamiento segun perfil (RBAC)
-                                if (rol.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    Response.Redirect("Usuarios.aspx");
-                                }
-                                else if (rol.Equals("Bodeguero", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    Response.Redirect("Recepciones.aspx");
-                                }
-                                else if (rol.Equals("Comprador", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    Response.Redirect("OrdenesCompra.aspx");
-                                }
-                                else if (rol.Equals("Contador", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    Response.Redirect("ReporteOrdenesCompra.aspx");
-                                }
-                                else
-                                {
-                                    Response.Redirect("Default.aspx");
-                                }
+                                Response.Redirect("Default.aspx");
                             }
                             else
                             {

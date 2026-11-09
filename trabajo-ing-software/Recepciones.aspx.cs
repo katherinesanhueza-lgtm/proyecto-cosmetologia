@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
-using System.Data.SqlClient;
+using System.Configuration;
+using MySql.Data.MySqlClient;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -8,7 +9,7 @@ namespace trabajo_ing_software
 {
     public partial class Recepciones : System.Web.UI.Page
     {
-        private string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ingsofDB;Integrated Security=True;TrustServerCertificate=True;";
+        private string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=;";
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -33,25 +34,48 @@ namespace trabajo_ing_software
                 txtFechaRecepcion.Text = DateTime.Today.ToString("yyyy-MM-dd");
 
                 CargarOrdenesCompraPendientes();
+                CargarBodegas();
                 CargarLaboratoriosFiltro();
                 CargarRecepciones();
-                CalcularKPIs();
+                CalcularKPIs();
+                if (int.TryParse(Request.QueryString["orden"], out int orden)
+                    && ddlOrdenCompra.Items.FindByValue(orden.ToString()) != null)
+                {
+                    ddlOrdenCompra.SelectedValue = orden.ToString();
+                    pnlFormularioRec.Visible = true;
+                    CargarDetalleOrdenParaRecepcion(orden);
+                }
             }
         }
 
         #region Carga de Datos y Selectores
+        private void CargarBodegas()
+        {
+            using (var conexion = new MySqlConnection(connectionString))
+            using (var adaptador = new MySqlDataAdapter("SELECT IdBodega, Nombre FROM bodega WHERE Activo=1 ORDER BY Nombre", conexion))
+            {
+                var bodegas = new DataTable();
+                adaptador.Fill(bodegas);
+                ddlBodega.DataSource = bodegas;
+                ddlBodega.DataTextField = "Nombre";
+                ddlBodega.DataValueField = "IdBodega";
+                ddlBodega.DataBind();
+                ddlBodega.Items.Insert(0, new ListItem("Selecciona una bodega", ""));
+            }
+        }
+
         private void CargarLaboratoriosFiltro()
         {
             ddlFiltroLaboratorio.Items.Clear();
             ddlFiltroLaboratorio.Items.Add(new ListItem("Todos los Laboratorios", ""));
 
             string query = "SELECT IdLaboratorio, RazonSocial FROM Laboratorio WHERE Activo = 1 ORDER BY RazonSocial ASC";
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     con.Open();
-                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
                     {
                         while (dr.Read())
                         {
@@ -73,12 +97,12 @@ namespace trabajo_ing_software
                              WHERE oc.Estado IN ('Emitida', 'Parcial')
                              ORDER BY oc.IdOC DESC";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     con.Open();
-                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
                     {
                         while (dr.Read())
                         {
@@ -113,13 +137,13 @@ namespace trabajo_ing_software
                                 INNER JOIN Laboratorio l ON oc.IdLaboratorio = l.IdLaboratorio
                                 WHERE oc.IdOC = @IdOC";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(queryCab, con))
+                using (MySqlCommand cmd = new MySqlCommand(queryCab, con))
                 {
                     cmd.Parameters.AddWithValue("@IdOC", idOC);
                     con.Open();
-                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
                     {
                         if (dr.Read())
                         {
@@ -137,22 +161,22 @@ namespace trabajo_ing_software
             // 2. Cargar Líneas de Productos Pendientes
             string queryItems = @"SELECT doc.IdDetalleOC, doc.IdVariante, v.Sku, p.Nombre AS Producto, v.NombreVariante,
                                          doc.CantidadPedida,
-                                         ISNULL(doc.CantidadRecibida, 0) AS CantidadRecibida,
-                                         (doc.CantidadPedida - ISNULL(doc.CantidadRecibida, 0)) AS CantidadPendiente,
+                                         IFNULL(doc.CantidadRecibida, 0) AS CantidadRecibida,
+                                         (doc.CantidadPedida - IFNULL(doc.CantidadRecibida, 0)) AS CantidadPendiente,
                                          doc.CostoUnitario,
-                                         ('LOT-' + v.Sku + '-' + CAST(YEAR(GETDATE()) AS VARCHAR)) AS SugerenciaLote,
-                                         CONVERT(VARCHAR(10), DATEADD(year, 2, GETDATE()), 120) AS SugerenciaVencimiento
+                                         CONCAT('LOT-', v.Sku, '-', YEAR(NOW())) AS SugerenciaLote,
+                                         DATE_FORMAT(DATE_ADD(NOW(), INTERVAL 2 YEAR), '%Y-%m-%d') AS SugerenciaVencimiento
                                   FROM DetalleOrdenCompra doc
                                   INNER JOIN VarianteProducto v ON doc.IdVariante = v.IdVariante
                                   INNER JOIN Producto p ON v.IdProducto = p.IdProducto
-                                  WHERE doc.IdOC = @IdOC AND (doc.CantidadPedida - ISNULL(doc.CantidadRecibida, 0)) > 0";
+                                  WHERE doc.IdOC = @IdOC AND (doc.CantidadPedida - IFNULL(doc.CantidadRecibida, 0)) > 0";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(queryItems, con))
+                using (MySqlCommand cmd = new MySqlCommand(queryItems, con))
                 {
                     cmd.Parameters.AddWithValue("@IdOC", idOC);
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    using (MySqlDataAdapter da = new MySqlDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
                         da.Fill(dt);
@@ -165,8 +189,13 @@ namespace trabajo_ing_software
         #endregion
 
         #region Registro de Recepción y Asignación de Lotes (Transaccional)
-        protected void btnAprobarRecepcion_Click(object sender, EventArgs e)
-        {
+        protected void btnAprobarRecepcion_Click(object sender, EventArgs e)
+        {
+            if (!int.TryParse(ddlBodega.SelectedValue, out int idBodega) || idBodega <= 0)
+            {
+                MostrarMensaje("Selecciona la bodega que recibirá los productos.", false);
+                return;
+            }
             if (string.IsNullOrEmpty(ddlOrdenCompra.SelectedValue))
             {
                 MostrarMensaje("Debe seleccionar una orden de compra para recepcionar.", false);
@@ -241,20 +270,28 @@ namespace trabajo_ing_software
             int idUsuario = Convert.ToInt32(Session["IdUsuario"]);
 
             // EJECUCION TRANSACCIONAL ACID
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
                 con.Open();
-                using (SqlTransaction trans = con.BeginTransaction())
+                using (MySqlTransaction trans = con.BeginTransaction())
                 {
                     try
                     {
+                        using (var orden = new MySqlCommand(
+                            "SELECT IdOC FROM ordencompra WHERE IdOC=@id AND Estado IN ('Emitida','Parcial') FOR UPDATE", con, trans))
+                        {
+                            orden.Parameters.AddWithValue("@id", idOC);
+                            if (orden.ExecuteScalar() == null)
+                                throw new InvalidOperationException("La orden ya no admite recepciones.");
+                        }
+
                         // 1. Insertar Cabecera en RecepcionCompra
                         string queryRec = @"INSERT INTO RecepcionCompra (IdOC, GuiaDespacho, FechaRecepcion, Estado, IdUsuario)
                                             VALUES (@IdOC, @Guia, @Fecha, 'Completa', @IdUsuario);
-                                            SELECT SCOPE_IDENTITY();";
+                                            SELECT LAST_INSERT_ID();";
 
                         int idRecepcion = 0;
-                        using (SqlCommand cmd = new SqlCommand(queryRec, con, trans))
+                        using (MySqlCommand cmd = new MySqlCommand(queryRec, con, trans))
                         {
                             cmd.Parameters.AddWithValue("@IdOC", idOC);
                             cmd.Parameters.AddWithValue("@Guia", guia);
@@ -285,7 +322,8 @@ namespace trabajo_ing_software
                                 // A. DetalleRecepcion
                                 string queryDetRec = @"INSERT INTO DetalleRecepcion (IdRecepcion, IdDetalleOC, IdVariante, NumeroLote, FechaVencimiento, Cantidad, CostoUnitario)
                                                        VALUES (@IdRec, @IdDetOC, @IdVar, @NumLote, @Venc, @Cant, @Costo)";
-                                using (SqlCommand cmdDet = new SqlCommand(queryDetRec, con, trans))
+                                int detalleRecepcion;
+                                using (MySqlCommand cmdDet = new MySqlCommand(queryDetRec, con, trans))
                                 {
                                     cmdDet.Parameters.AddWithValue("@IdRec", idRecepcion);
                                     cmdDet.Parameters.AddWithValue("@IdDetOC", idDetalleOC);
@@ -294,55 +332,37 @@ namespace trabajo_ing_software
                                     cmdDet.Parameters.AddWithValue("@Venc", fechaVenc);
                                     cmdDet.Parameters.AddWithValue("@Cant", cant);
                                     cmdDet.Parameters.AddWithValue("@Costo", costo);
-                                    cmdDet.ExecuteNonQuery();
-                                }
-
-                                // B. Alta de Lote en Inventario (RF-COM-06 / FEFO)
-                                string queryLote = @"INSERT INTO Lote (IdVariante, NumeroLote, FechaIngreso, FechaVencimiento, CostoUnitario, CantidadInicial, CantidadDisponible, Estado)
-                                                     VALUES (@IdVar, @NumLote, @FechaIng, @Venc, @Costo, @Cant, @Cant, 'Disponible')";
-                                using (SqlCommand cmdLote = new SqlCommand(queryLote, con, trans))
-                                {
-                                    cmdLote.Parameters.AddWithValue("@IdVar", idVar);
-                                    cmdLote.Parameters.AddWithValue("@NumLote", numLote);
-                                    cmdLote.Parameters.AddWithValue("@FechaIng", fechaRec);
-                                    cmdLote.Parameters.AddWithValue("@Venc", fechaVenc);
-                                    cmdLote.Parameters.AddWithValue("@Costo", costo);
-                                    cmdLote.Parameters.AddWithValue("@Cant", cant);
-                                    cmdLote.ExecuteNonQuery();
+                                    cmdDet.ExecuteNonQuery();
+                                    detalleRecepcion = checked((int)cmdDet.LastInsertedId);
                                 }
 
                                 // C. Actualizar CantidadRecibida en DetalleOrdenCompra
                                 string queryUpdDetOC = @"UPDATE DetalleOrdenCompra 
-                                                         SET CantidadRecibida = ISNULL(CantidadRecibida, 0) + @Cant 
-                                                         WHERE IdDetalleOC = @IdDetOC";
-                                using (SqlCommand cmdUpdDet = new SqlCommand(queryUpdDetOC, con, trans))
+                                                         SET CantidadRecibida = IFNULL(CantidadRecibida, 0) + @Cant 
+                                                         WHERE IdDetalleOC = @IdDetOC AND IdOC=@IdOC AND IdVariante=@IdVar AND CantidadPedida-IFNULL(CantidadRecibida,0)>=@Cant";
+                                using (MySqlCommand cmdUpdDet = new MySqlCommand(queryUpdDetOC, con, trans))
                                 {
                                     cmdUpdDet.Parameters.AddWithValue("@Cant", cant);
                                     cmdUpdDet.Parameters.AddWithValue("@IdDetOC", idDetalleOC);
-                                    cmdUpdDet.ExecuteNonQuery();
+                                    cmdUpdDet.Parameters.AddWithValue("@IdOC", idOC);
+                                    cmdUpdDet.Parameters.AddWithValue("@IdVar", idVar);
+                                    if (cmdUpdDet.ExecuteNonQuery() != 1)
+                                        throw new InvalidOperationException("La cantidad pendiente cambió. Vuelve a seleccionar la orden.");
                                 }
 
-                                // D. Actualizar Stock Físico en VarianteProducto
-                                string queryUpdStock = @"UPDATE VarianteProducto 
-                                                         SET StockTotal = ISNULL(StockTotal, 0) + @Cant 
-                                                         WHERE IdVariante = @IdVar";
-                                using (SqlCommand cmdUpdStock = new SqlCommand(queryUpdStock, con, trans))
-                                {
-                                    cmdUpdStock.Parameters.AddWithValue("@Cant", cant);
-                                    cmdUpdStock.Parameters.AddWithValue("@IdVar", idVar);
-                                    cmdUpdStock.ExecuteNonQuery();
-                                }
+                                RecepcionInventario.Ingresar(con, trans, idVar, idBodega, detalleRecepcion,
+                                    idUsuario, numLote, fechaRec, fechaVenc, cant, costo);
                             }
                         }
 
                         // 3. Evaluar Estado Global de la Orden de Compra (Recibida o Parcial)
-                        string queryCheckOC = @"SELECT SUM(CantidadPedida) AS Pedidas, SUM(ISNULL(CantidadRecibida, 0)) AS Recibidas 
+                        string queryCheckOC = @"SELECT SUM(CantidadPedida) AS Pedidas, SUM(IFNULL(CantidadRecibida, 0)) AS Recibidas 
                                                 FROM DetalleOrdenCompra WHERE IdOC = @IdOC";
                         bool ordenCompleta = false;
-                        using (SqlCommand cmdCheck = new SqlCommand(queryCheckOC, con, trans))
+                        using (MySqlCommand cmdCheck = new MySqlCommand(queryCheckOC, con, trans))
                         {
                             cmdCheck.Parameters.AddWithValue("@IdOC", idOC);
-                            using (SqlDataReader dr = cmdCheck.ExecuteReader())
+                            using (MySqlDataReader dr = cmdCheck.ExecuteReader())
                             {
                                 if (dr.Read())
                                 {
@@ -358,7 +378,7 @@ namespace trabajo_ing_software
 
                         string nuevoEstadoOC = ordenCompleta ? "Recibida" : "Parcial";
                         string queryUpdOC = "UPDATE OrdenCompra SET Estado = @Estado WHERE IdOC = @IdOC";
-                        using (SqlCommand cmdUpdOC = new SqlCommand(queryUpdOC, con, trans))
+                        using (MySqlCommand cmdUpdOC = new MySqlCommand(queryUpdOC, con, trans))
                         {
                             cmdUpdOC.Parameters.AddWithValue("@Estado", nuevoEstadoOC);
                             cmdUpdOC.Parameters.AddWithValue("@IdOC", idOC);
@@ -369,14 +389,14 @@ namespace trabajo_ing_software
                         if (!ordenCompleta)
                         {
                             string queryUpdRec = "UPDATE RecepcionCompra SET Estado = 'Parcial' WHERE IdRecepcion = @IdRec";
-                            using (SqlCommand cmdUpdRec = new SqlCommand(queryUpdRec, con, trans))
+                            using (MySqlCommand cmdUpdRec = new MySqlCommand(queryUpdRec, con, trans))
                             {
                                 cmdUpdRec.Parameters.AddWithValue("@IdRec", idRecepcion);
                                 cmdUpdRec.ExecuteNonQuery();
                             }
                         }
 
-                        trans.Commit();
+                        using (var cuenta = VentaInventario.Comando(con, trans, @"INSERT INTO cuentaporpagar                            (IdRecepcion,IdLaboratorio,Monto,Estado,IdUsuario)                            SELECT r.IdRecepcion,oc.IdLaboratorio,                                ROUND(SUM(d.Cantidad*d.CostoUnitario)*(1+COALESCE(oc.Iva/NULLIF(oc.Neto,0),0)),2),                                'Pendiente',@p1                            FROM recepcioncompra r JOIN ordencompra oc ON oc.IdOC=r.IdOC                            JOIN detallerecepcion d ON d.IdRecepcion=r.IdRecepcion                            WHERE r.IdRecepcion=@p0                            GROUP BY r.IdRecepcion,oc.IdLaboratorio,oc.Iva,oc.Neto", idRecepcion,idUsuario))                        {                            if (cuenta.ExecuteNonQuery() != 1)                                throw new InvalidOperationException("No se pudo crear la cuenta por pagar de la recepción.");                        }                        trans.Commit();
 
                         MostrarMensaje("Recepción REC-" + idRecepcion.ToString("D4") + " aprobada exitosamente. Se ingresaron " + totalItemsRecibiendo + " unidades a bodega con sus respectivos lotes (RF-COM-05 / RF-COM-06).", true);
                         pnlFormularioRec.Visible = false;
@@ -412,8 +432,8 @@ namespace trabajo_ing_software
             string idLab = ddlFiltroLaboratorio.SelectedValue;
 
             string query = @"SELECT r.IdRecepcion, oc.NumeroOC, l.RazonSocial, l.Rut, r.GuiaDespacho, r.FechaRecepcion, r.Estado,
-                                    ISNULL((SELECT SUM(dr.Cantidad) FROM DetalleRecepcion dr WHERE dr.IdRecepcion = r.IdRecepcion), 0) AS TotalUnidades,
-                                    ISNULL((SELECT SUM(dr.Cantidad * dr.CostoUnitario) FROM DetalleRecepcion dr WHERE dr.IdRecepcion = r.IdRecepcion), 0) AS MontoValorizado
+                                    IFNULL((SELECT SUM(dr.Cantidad) FROM DetalleRecepcion dr WHERE dr.IdRecepcion = r.IdRecepcion), 0) AS TotalUnidades,
+                                    IFNULL((SELECT SUM(dr.Cantidad * dr.CostoUnitario) FROM DetalleRecepcion dr WHERE dr.IdRecepcion = r.IdRecepcion), 0) AS MontoValorizado
                              FROM RecepcionCompra r
                              INNER JOIN OrdenCompra oc ON r.IdOC = oc.IdOC
                              INNER JOIN Laboratorio l ON oc.IdLaboratorio = l.IdLaboratorio
@@ -430,16 +450,16 @@ namespace trabajo_ing_software
 
             query += " ORDER BY r.IdRecepcion DESC";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     if (!string.IsNullOrEmpty(filtro))
                         cmd.Parameters.AddWithValue("@Filtro", "%" + filtro + "%");
                     if (!string.IsNullOrEmpty(idLab))
                         cmd.Parameters.AddWithValue("@IdLab", idLab);
 
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    using (MySqlDataAdapter da = new MySqlDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
                         da.Fill(dt);
@@ -454,17 +474,17 @@ namespace trabajo_ing_software
         {
             string query = @"SELECT 
                                 COUNT(*) AS TotalRec,
-                                ISNULL((SELECT SUM(Cantidad) FROM DetalleRecepcion), 0) AS Unidades,
-                                ISNULL((SELECT COUNT(*) FROM Lote WHERE Estado = 'Disponible'), 0) AS LotesActivos,
-                                ISNULL((SELECT SUM(Cantidad * CostoUnitario) FROM DetalleRecepcion), 0) AS Valorizado
+                                IFNULL((SELECT SUM(Cantidad) FROM DetalleRecepcion), 0) AS Unidades,
+                                IFNULL((SELECT COUNT(*) FROM Lote WHERE Estado = 'Disponible'), 0) AS LotesActivos,
+                                IFNULL((SELECT SUM(Cantidad * CostoUnitario) FROM DetalleRecepcion), 0) AS Valorizado
                              FROM RecepcionCompra";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     con.Open();
-                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
                     {
                         if (dr.Read())
                         {
@@ -495,13 +515,13 @@ namespace trabajo_ing_software
                                 INNER JOIN Laboratorio l ON oc.IdLaboratorio = l.IdLaboratorio
                                 WHERE r.IdRecepcion = @IdRec";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(queryCab, con))
+                using (MySqlCommand cmd = new MySqlCommand(queryCab, con))
                 {
                     cmd.Parameters.AddWithValue("@IdRec", idRec);
                     con.Open();
-                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
                     {
                         if (dr.Read())
                         {
@@ -523,12 +543,12 @@ namespace trabajo_ing_software
                                 INNER JOIN Producto p ON v.IdProducto = p.IdProducto
                                 WHERE dr.IdRecepcion = @IdRec";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(queryDet, con))
+                using (MySqlCommand cmd = new MySqlCommand(queryDet, con))
                 {
                     cmd.Parameters.AddWithValue("@IdRec", idRec);
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    using (MySqlDataAdapter da = new MySqlDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
                         da.Fill(dt);

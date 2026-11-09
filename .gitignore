@@ -480,5 +480,9 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
-# Documentacion personal de defensa (Privado)
-Manual_*.*
+
+# Configuracion y respaldos locales de inventario
+/Cosmetologia/Web.ConnectionStrings.local.config
+/Cosmetologia/Web.local.config
+/Cosmetologia/App_Data/antes_inventario.sql
+/trabajo-ing-software/Web.ConnectionStrings.local.config

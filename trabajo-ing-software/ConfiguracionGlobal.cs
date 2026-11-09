@@ -1,17 +1,19 @@
-using System;
+﻿using System;
 using System.Configuration;
-using System.Data.SqlClient;
+using MySql.Data.MySqlClient;
 
 namespace trabajo_ing_software
 {
     /// <summary>
     /// Clase centralizada para administración de parámetros institucionales (RF-COM-04 / RNF-13).
     /// Elimina el uso de variables fijas quemadas (hardcoded) en el código fuente.
-    /// Permite inyección dinámica de tasas y firmas de jefaturas de módulos desde la base de datos.
+    /// Permite inyección dinámica de tasas y firmas de jefaturas de módulos desde la base de datos MySQL.
     /// </summary>
     public static class ConfiguracionGlobal
     {
-        private static string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ingsofDB;Integrated Security=True;TrustServerCertificate=True;";
+        private static string connectionString => ConfigurationManager.ConnectionStrings["DefaultConnection"] != null 
+            ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString 
+            : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=;";
 
         // Fallbacks seguros en memoria por defecto
         private static decimal _tasaIva = 0.19m;
@@ -26,11 +28,11 @@ namespace trabajo_ing_software
         {
             try
             {
-                using (SqlConnection con = new SqlConnection(connectionString))
+                using (MySqlConnection con = new MySqlConnection(connectionString))
                 {
                     con.Open();
-                    string sql = "SELECT TOP 1 Valor FROM ConfiguracionGlobal WHERE Clave = @Clave";
-                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    string sql = "SELECT Valor FROM ConfiguracionGlobal WHERE Clave = @Clave LIMIT 1";
+                    using (MySqlCommand cmd = new MySqlCommand(sql, con))
                     {
                         cmd.Parameters.AddWithValue("@Clave", clave);
                         object res = cmd.ExecuteScalar();
@@ -95,7 +97,13 @@ namespace trabajo_ing_software
             set => _nombreJefeInventario = value;
         }
 
-        /// <summary>
+                /// <summary>
+        /// Recarga parametros (las propiedades consultan directamente la base de datos).
+        /// </summary>
+        public static void Recargar()
+        {
+        }
+/// <summary>
         /// Redirección segura según perfil operativo (RBAC).
         /// </summary>
         public static void RedirigirSegunRol(System.Web.HttpResponse response, string rol)

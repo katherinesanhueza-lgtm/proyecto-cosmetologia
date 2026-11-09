@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
-using System.Data.SqlClient;
+using System.Configuration;
+using MySql.Data.MySqlClient;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -8,11 +9,11 @@ namespace trabajo_ing_software
 {
     public partial class OrdenesCompra : System.Web.UI.Page
     {
-        private string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ingsofDB;Integrated Security=True;TrustServerCertificate=True;";
+        private string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=;";
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            // Verificación de seguridad de sesión
+            // Verificaci�n de seguridad de sesi�n
             if (Session["IdUsuario"] == null)
             {
                 Response.Redirect("Login.aspx");
@@ -21,7 +22,7 @@ namespace trabajo_ing_software
 
             ActualizarTextosIvaDinamicos();
 
-            // Control de acceso por perfil (RBAC): Sólo Administrador y Contador pueden gestionar parámetros legales
+            // Control de acceso por perfil (RBAC): S�lo Administrador y Contador pueden gestionar par�metros legales
             string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
             btnAbrirConfig.Visible = rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase) || 
                                      rolUsuario.Equals("Contador", StringComparison.OrdinalIgnoreCase);
@@ -45,7 +46,7 @@ namespace trabajo_ing_software
             }
         }
 
-        #region Inicialización y Estructura Temporal de Ítems
+        #region Inicializaci�n y Estructura Temporal de �tems
         public string GetIniciales(string nombre)
         {
             if (string.IsNullOrWhiteSpace(nombre)) return "OC";
@@ -79,19 +80,19 @@ namespace trabajo_ing_software
         }
         #endregion
 
-        #region Carga de Datos y Catálogos
+        #region Carga de Datos y Cat�logos
         private void CargarLaboratoriosFiltro()
         {
             ddlFiltroLaboratorio.Items.Clear();
             ddlFiltroLaboratorio.Items.Add(new ListItem("Todos los Laboratorios", ""));
 
             string query = "SELECT IdLaboratorio, RazonSocial FROM Laboratorio WHERE Activo = 1 ORDER BY RazonSocial ASC";
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     con.Open();
-                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
                     {
                         while (dr.Read())
                         {
@@ -108,12 +109,12 @@ namespace trabajo_ing_software
             ddlLaboratorio.Items.Add(new ListItem("-- Seleccione un Laboratorio --", ""));
 
             string query = "SELECT IdLaboratorio, RazonSocial FROM Laboratorio WHERE Activo = 1 ORDER BY RazonSocial ASC";
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     con.Open();
-                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
                     {
                         while (dr.Read())
                         {
@@ -129,18 +130,18 @@ namespace trabajo_ing_software
             ddlProductoVariante.Items.Clear();
             ddlProductoVariante.Items.Add(new ListItem("-- Seleccionar Insumo / Producto --", ""));
 
-            string query = @"SELECT v.IdVariante, v.Sku, p.Nombre AS Producto, v.NombreVariante, ISNULL(v.CostoPromedio, 0) AS CostoPromedio
+            string query = @"SELECT v.IdVariante, v.Sku, p.Nombre AS Producto, v.NombreVariante, IFNULL(v.CostoPromedio, 0) AS CostoPromedio
                              FROM VarianteProducto v
                              INNER JOIN Producto p ON v.IdProducto = p.IdProducto
                              WHERE v.Activo = 1 AND p.Activo = 1
                              ORDER BY p.Nombre, v.NombreVariante";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     con.Open();
-                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
                     {
                         while (dr.Read())
                         {
@@ -155,10 +156,10 @@ namespace trabajo_ing_software
 
         private string GenerarSiguienteNumeroOC()
         {
-            string query = "SELECT ISNULL(MAX(IdOC), 0) + 1 AS SiguienteId FROM OrdenCompra";
-            using (SqlConnection con = new SqlConnection(connectionString))
+            string query = "SELECT IFNULL(MAX(IdOC), 0) + 1 AS SiguienteId FROM OrdenCompra";
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     con.Open();
                     int siguiente = Convert.ToInt32(cmd.ExecuteScalar());
@@ -176,19 +177,19 @@ namespace trabajo_ing_software
                 int idLab = Convert.ToInt32(ddlLaboratorio.SelectedValue);
                 string query = "SELECT Rut, DiasPago, Contacto, Pais FROM Laboratorio WHERE IdLaboratorio = @IdLab";
 
-                using (SqlConnection con = new SqlConnection(connectionString))
+                using (MySqlConnection con = new MySqlConnection(connectionString))
                 {
-                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    using (MySqlCommand cmd = new MySqlCommand(query, con))
                     {
                         cmd.Parameters.AddWithValue("@IdLab", idLab);
                         con.Open();
-                        using (SqlDataReader dr = cmd.ExecuteReader())
+                        using (MySqlDataReader dr = cmd.ExecuteReader())
                         {
                             if (dr.Read())
                             {
                                 lblInfoRut.Text = dr["Rut"].ToString();
                                 int dias = dr["DiasPago"] != DBNull.Value ? Convert.ToInt32(dr["DiasPago"]) : 30;
-                                lblInfoDiasPago.Text = dias + " días de crédito";
+                                lblInfoDiasPago.Text = dias + " d�as de cr�dito";
                                 lblInfoContacto.Text = dr["Contacto"].ToString();
                                 lblInfoPais.Text = dr["Pais"].ToString();
 
@@ -216,11 +217,11 @@ namespace trabajo_ing_software
             if (!string.IsNullOrEmpty(ddlProductoVariante.SelectedValue))
             {
                 int idVariante = Convert.ToInt32(ddlProductoVariante.SelectedValue);
-                string query = "SELECT ISNULL(CostoPromedio, 0) AS Costo FROM VarianteProducto WHERE IdVariante = @IdVar";
+                string query = "SELECT IFNULL(CostoPromedio, 0) AS Costo FROM VarianteProducto WHERE IdVariante = @IdVar";
 
-                using (SqlConnection con = new SqlConnection(connectionString))
+                using (MySqlConnection con = new MySqlConnection(connectionString))
                 {
-                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    using (MySqlCommand cmd = new MySqlCommand(query, con))
                     {
                         cmd.Parameters.AddWithValue("@IdVar", idVariante);
                         con.Open();
@@ -243,21 +244,21 @@ namespace trabajo_ing_software
         {
             if (string.IsNullOrEmpty(ddlProductoVariante.SelectedValue))
             {
-                MostrarMensaje("Debe seleccionar un producto del catálogo para agregarlo a la orden.", false);
+                MostrarMensaje("Debe seleccionar un producto del cat�logo para agregarlo a la orden.", false);
                 return;
             }
 
             int cantidad;
             if (!int.TryParse(txtCantidad.Text, out cantidad) || cantidad <= 0)
             {
-                MostrarMensaje("Ingrese una cantidad válida mayor a 0.", false);
+                MostrarMensaje("Ingrese una cantidad v�lida mayor a 0.", false);
                 return;
             }
 
             decimal costo;
             if (!decimal.TryParse(txtCostoUnitario.Text, out costo) || costo < 0)
             {
-                MostrarMensaje("Ingrese un costo unitario válido.", false);
+                MostrarMensaje("Ingrese un costo unitario v�lido.", false);
                 return;
             }
 
@@ -271,13 +272,13 @@ namespace trabajo_ing_software
                              INNER JOIN Producto p ON v.IdProducto = p.IdProducto
                              WHERE v.IdVariante = @IdVar";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@IdVar", idVar);
                     con.Open();
-                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
                     {
                         if (dr.Read())
                         {
@@ -318,7 +319,7 @@ namespace trabajo_ing_software
 
             RecalcularTotalesFinancieros();
 
-            // Restablecer inputs de ítem
+            // Restablecer inputs de �tem
             ddlProductoVariante.SelectedIndex = 0;
             txtCantidad.Text = "1";
             txtCostoUnitario.Text = "";
@@ -352,7 +353,7 @@ namespace trabajo_ing_software
                 neto += Convert.ToDecimal(row["Subtotal"]);
             }
 
-            // Cálculo dinámico según tasa de IVA consultada desde ConfiguracionGlobal (Ajuste Lógico RF-COM-04)
+            // C�lculo din�mico seg�n tasa de IVA consultada desde ConfiguracionGlobal (Ajuste L�gico RF-COM-04)
             decimal iva = neto * ConfiguracionGlobal.TasaIva;
             decimal total = neto + iva;
 
@@ -381,7 +382,7 @@ namespace trabajo_ing_software
             DateTime fechaEmision;
             if (!DateTime.TryParse(txtFechaEmision.Text, out fechaEmision))
             {
-                MostrarMensaje("Seleccione una fecha de emisión válida.", false);
+                MostrarMensaje("Seleccione una fecha de emisi�n v�lida.", false);
                 return;
             }
 
@@ -396,7 +397,7 @@ namespace trabajo_ing_software
             {
                 neto += Convert.ToDecimal(row["Subtotal"]);
             }
-            // Cálculo dinámico según tasa de IVA consultada desde ConfiguracionGlobal (Ajuste Lógico RF-COM-04)
+            // C�lculo din�mico seg�n tasa de IVA consultada desde ConfiguracionGlobal (Ajuste L�gico RF-COM-04)
             decimal iva = neto * ConfiguracionGlobal.TasaIva;
             decimal total = neto + iva;
 
@@ -410,19 +411,19 @@ namespace trabajo_ing_software
 
             int idUsuario = Convert.ToInt32(Session["IdUsuario"]);
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
                 con.Open();
-                using (SqlTransaction trans = con.BeginTransaction())
+                using (MySqlTransaction trans = con.BeginTransaction())
                 {
                     try
                     {
                         string queryCabecera = @"INSERT INTO OrdenCompra (NumeroOC, IdLaboratorio, Fecha, FechaEsperada, Estado, Neto, Iva, Total, IdUsuario)
                                                  VALUES (@NumeroOC, @IdLab, @Fecha, @FechaEsp, @Estado, @Neto, @Iva, @Total, @IdUsuario);
-                                                 SELECT SCOPE_IDENTITY();";
+                                                 SELECT LAST_INSERT_ID();";
 
                         int idOC = 0;
-                        using (SqlCommand cmd = new SqlCommand(queryCabecera, con, trans))
+                        using (MySqlCommand cmd = new MySqlCommand(queryCabecera, con, trans))
                         {
                             cmd.Parameters.AddWithValue("@NumeroOC", numOC);
                             cmd.Parameters.AddWithValue("@IdLab", idLab);
@@ -442,7 +443,7 @@ namespace trabajo_ing_software
 
                         foreach (DataRow row in dt.Rows)
                         {
-                            using (SqlCommand cmdDet = new SqlCommand(queryDetalle, con, trans))
+                            using (MySqlCommand cmdDet = new MySqlCommand(queryDetalle, con, trans))
                             {
                                 int cantidadPedida = Convert.ToInt32(row["CantidadPedida"]);
                                 int cantidadRecibida = (estado == "Recibida") ? cantidadPedida : 0;
@@ -496,7 +497,7 @@ namespace trabajo_ing_software
         }
         #endregion
 
-        #region Visualización y Listado de Órdenes (GridView Principal)
+        #region Visualizaci�n y Listado de �rdenes (GridView Principal)
         private void ActualizarTextosIvaDinamicos()
         {
             decimal tasa = ConfiguracionGlobal.TasaIva;
@@ -544,9 +545,9 @@ namespace trabajo_ing_software
 
             query += " ORDER BY oc.IdOC DESC";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     if (!string.IsNullOrEmpty(filtro))
                         cmd.Parameters.AddWithValue("@Filtro", "%" + filtro + "%");
@@ -555,7 +556,7 @@ namespace trabajo_ing_software
                     if (!string.IsNullOrEmpty(idLab))
                         cmd.Parameters.AddWithValue("@IdLab", idLab);
 
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    using (MySqlDataAdapter da = new MySqlDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
                         da.Fill(dt);
@@ -570,17 +571,17 @@ namespace trabajo_ing_software
         {
             string query = @"SELECT 
                                 COUNT(*) AS TotalOC,
-                                ISNULL(SUM(CASE WHEN Estado = 'Emitida' OR Estado = 'Parcial' THEN 1 ELSE 0 END), 0) AS Emitidas,
-                                ISNULL(SUM(CASE WHEN Estado = 'Recibida' THEN 1 ELSE 0 END), 0) AS Recibidas,
-                                ISNULL(SUM(Total), 0) AS TotalMonto
+                                IFNULL(SUM(CASE WHEN Estado = 'Emitida' OR Estado = 'Parcial' THEN 1 ELSE 0 END), 0) AS Emitidas,
+                                IFNULL(SUM(CASE WHEN Estado = 'Recibida' THEN 1 ELSE 0 END), 0) AS Recibidas,
+                                IFNULL(SUM(Total), 0) AS TotalMonto
                              FROM OrdenCompra";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     con.Open();
-                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
                     {
                         if (dr.Read())
                         {
@@ -609,7 +610,11 @@ namespace trabajo_ing_software
             else if (e.CommandName == "RecibirOC")
             {
                 int idOC = Convert.ToInt32(e.CommandArgument);
-                ActualizarEstadoOrden(idOC, "Recibida");
+                string rol = Convert.ToString(Session["RolUsuario"]);
+                if (string.Equals(rol, "Administrador", StringComparison.OrdinalIgnoreCase))
+                    Response.Redirect("Recepciones.aspx?orden=" + idOC);
+                else
+                    MostrarMensaje("El encargado de bodega debe registrar la recepción para actualizar el inventario.", false);
             }
             else if (e.CommandName == "AnularOC")
             {
@@ -620,30 +625,21 @@ namespace trabajo_ing_software
 
         private void ActualizarEstadoOrden(int idOC, string nuevoEstado)
         {
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
                 con.Open();
-                using (SqlTransaction trans = con.BeginTransaction())
+                using (MySqlTransaction trans = con.BeginTransaction())
                 {
                     try
                     {
                         string query = "UPDATE OrdenCompra SET Estado = @Estado WHERE IdOC = @IdOC";
-                        using (SqlCommand cmd = new SqlCommand(query, con, trans))
+                        using (MySqlCommand cmd = new MySqlCommand(query, con, trans))
                         {
                             cmd.Parameters.AddWithValue("@Estado", nuevoEstado);
                             cmd.Parameters.AddWithValue("@IdOC", idOC);
                             cmd.ExecuteNonQuery();
-                        }
+                        }
 
-                        if (nuevoEstado == "Recibida")
-                        {
-                            string queryDet = "UPDATE DetalleOrdenCompra SET CantidadRecibida = CantidadPedida WHERE IdOC = @IdOC";
-                            using (SqlCommand cmdDet = new SqlCommand(queryDet, con, trans))
-                            {
-                                cmdDet.Parameters.AddWithValue("@IdOC", idOC);
-                                cmdDet.ExecuteNonQuery();
-                            }
-                        }
 
                         trans.Commit();
                         MostrarMensaje("Orden de compra actualizada al estado: " + nuevoEstado + ".", true);
@@ -666,13 +662,13 @@ namespace trabajo_ing_software
                                 INNER JOIN Laboratorio l ON oc.IdLaboratorio = l.IdLaboratorio
                                 WHERE oc.IdOC = @IdOC";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(queryCab, con))
+                using (MySqlCommand cmd = new MySqlCommand(queryCab, con))
                 {
                     cmd.Parameters.AddWithValue("@IdOC", idOC);
                     con.Open();
-                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    using (MySqlDataReader dr = cmd.ExecuteReader())
                     {
                         if (dr.Read())
                         {
@@ -689,7 +685,7 @@ namespace trabajo_ing_software
                             {
                                 lblModalIvaPct.Text = (ConfiguracionGlobal.TasaIva * 100m).ToString("0.#");
                             }
-                            // Inyección dinámica de Jefatura de Compras bajo la firma (Ajuste Lógico)
+                            // Inyecci�n din�mica de Jefatura de Compras bajo la firma (Ajuste L�gico)
                             lblModalFirmaJefe.Text = ConfiguracionGlobal.NombreJefeCompras;
                         }
                     }
@@ -697,19 +693,19 @@ namespace trabajo_ing_software
             }
 
             string queryDet = @"SELECT v.Sku, p.Nombre AS Producto, v.NombreVariante, doc.CantidadPedida, 
-                                       ISNULL(doc.CantidadRecibida, 0) AS CantidadRecibida, doc.CostoUnitario,
+                                       IFNULL(doc.CantidadRecibida, 0) AS CantidadRecibida, doc.CostoUnitario,
                                        (doc.CantidadPedida * doc.CostoUnitario) AS SubtotalLinea
                                 FROM DetalleOrdenCompra doc
                                 INNER JOIN VarianteProducto v ON doc.IdVariante = v.IdVariante
                                 INNER JOIN Producto p ON v.IdProducto = p.IdProducto
                                 WHERE doc.IdOC = @IdOC";
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                using (SqlCommand cmd = new SqlCommand(queryDet, con))
+                using (MySqlCommand cmd = new MySqlCommand(queryDet, con))
                 {
                     cmd.Parameters.AddWithValue("@IdOC", idOC);
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    using (MySqlDataAdapter da = new MySqlDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
                         da.Fill(dt);
@@ -785,107 +781,86 @@ namespace trabajo_ing_software
             }
         }
 
-        #region Configuración Global (Admin / Contador)
-        protected void btnAbrirConfig_Click(object sender, EventArgs e)
-        {
-            string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
-            if (!rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase) && !rolUsuario.Equals("Contador", StringComparison.OrdinalIgnoreCase))
-            {
-                MostrarMensaje("Acceso restringido: Solo el Administrador y el Contador pueden configurar parámetros globales.", false);
-                return;
-            }
-
-            decimal iva = ConfiguracionGlobal.TasaIva;
-            txtConfigIva.Text = (iva * 100m).ToString("0.0");
-            lblIvaActualDb.Text = (iva * 100m).ToString("0.0") + "% (" + iva.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + " en BD)";
-
-            txtConfigJefeCompras.Text = ConfiguracionGlobal.NombreJefeCompras;
-            txtConfigJefeVentas.Text = ConfiguracionGlobal.NombreJefeVentas;
-            txtConfigJefeInventario.Text = ConfiguracionGlobal.NombreJefeInventario;
-
-            lblConfigMensaje.Text = "";
-            pnlModalConfig.Visible = true;
-        }
-
-        protected void btnCerrarConfig_Click(object sender, EventArgs e)
-        {
-            pnlModalConfig.Visible = false;
-        }
-
-        protected void btnGuardarConfig_Click(object sender, EventArgs e)
-        {
-            string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
-            if (!rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase) && !rolUsuario.Equals("Contador", StringComparison.OrdinalIgnoreCase))
-            {
-                lblConfigMensaje.Text = "No tiene permisos para modificar parámetros globales.";
-                lblConfigMensaje.ForeColor = System.Drawing.Color.Red;
-                return;
-            }
-
-            string ivaIngresado = txtConfigIva.Text.Trim().Replace("%", "").Replace(",", ".");
-            if (!decimal.TryParse(ivaIngresado, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal tasaDecimal) || tasaDecimal <= 0)
-            {
-                lblConfigMensaje.Text = "Ingrese una tasa de IVA válida (ej: 19 o 20).";
-                lblConfigMensaje.ForeColor = System.Drawing.Color.Red;
-                return;
-            }
-
-            if (tasaDecimal > 1.0m)
-            {
-                tasaDecimal = tasaDecimal / 100m;
-            }
-
-            string jefeCompras = txtConfigJefeCompras.Text.Trim();
-            string jefeVentas = txtConfigJefeVentas.Text.Trim();
-            string jefeInventario = txtConfigJefeInventario.Text.Trim();
-
-            if (string.IsNullOrEmpty(jefeCompras))
-            {
-                lblConfigMensaje.Text = "El nombre de la Jefatura de Compras no puede estar vacío.";
-                lblConfigMensaje.ForeColor = System.Drawing.Color.Red;
-                return;
-            }
-
-            using (SqlConnection con = new SqlConnection(connectionString))
-            {
-                con.Open();
-                string sql = @"
-                    UPDATE ConfiguracionGlobal SET Valor = @TasaIva WHERE Clave = 'TasaIva';
-                    UPDATE ConfiguracionGlobal SET Valor = @JefeCompras WHERE Clave = 'NombreJefeCompras';
-                    UPDATE ConfiguracionGlobal SET Valor = @JefeVentas WHERE Clave = 'NombreJefeVentas';
-                    UPDATE ConfiguracionGlobal SET Valor = @JefeInventario WHERE Clave = 'NombreJefeInventario';
-                    
-                    UPDATE OrdenCompra 
-                    SET Iva = ROUND(Neto * @TasaDecimal, 0),
-                        Total = Neto + ROUND(Neto * @TasaDecimal, 0)
-                    WHERE Estado <> 'Anulada';";
-
-                using (SqlCommand cmd = new SqlCommand(sql, con))
-                {
-                    cmd.Parameters.AddWithValue("@TasaIva", tasaDecimal.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
-                    
-                    SqlParameter pDecimal = cmd.Parameters.Add("@TasaDecimal", SqlDbType.Decimal);
-                    pDecimal.Precision = 18;
-                    pDecimal.Scale = 4;
-                    pDecimal.Value = tasaDecimal;
-
-                    cmd.Parameters.AddWithValue("@JefeCompras", jefeCompras);
-                    cmd.Parameters.AddWithValue("@JefeVentas", string.IsNullOrEmpty(jefeVentas) ? "Camilo Rodríguez Saldaña" : jefeVentas);
-                    cmd.Parameters.AddWithValue("@JefeInventario", string.IsNullOrEmpty(jefeInventario) ? "Katherine Sanhueza Hernández" : jefeInventario);
-                    cmd.ExecuteNonQuery();
-                }
-            }
-
-            ActualizarTextosIvaDinamicos();
-            CargarOrdenes();
-            CalcularKPIs();
-            RecalcularTotalesFinancieros();
-
-            string pctStr = (tasaDecimal * 100m).ToString("0.#");
-            lblConfigMensaje.Text = "¡Parámetros actualizados! La nueva tasa (" + pctStr + "%) se aplicó exitosamente a la grilla y los cálculos.";
-            lblConfigMensaje.ForeColor = System.Drawing.Color.Green;
-            lblIvaActualDb.Text = pctStr + "% (" + tasaDecimal.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + " en BD)";
-        }
+        #region Configuración Global - Tasa de IVA (Admin / Contador)
+        protected void btnAbrirConfig_Click(object sender, EventArgs e)
+        {
+            string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
+            if (!rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase) && !rolUsuario.Equals("Contador", StringComparison.OrdinalIgnoreCase))
+            {
+                MostrarMensaje("Acceso restringido: Solo el Administrador y el Contador pueden configurar la tasa de IVA.", false);
+                return;
+            }
+
+            decimal iva = ConfiguracionGlobal.TasaIva;
+            txtConfigIva.Text = (iva * 100m).ToString("0.0");
+            lblIvaActualDb.Text = (iva * 100m).ToString("0.0") + "% (" + iva.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + " en BD)";
+
+            lblConfigMensaje.Text = "";
+            pnlModalConfig.Visible = true;
+        }
+
+        protected void btnCerrarConfig_Click(object sender, EventArgs e)
+        {
+            pnlModalConfig.Visible = false;
+        }
+
+        protected void btnGuardarConfig_Click(object sender, EventArgs e)
+        {
+            string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
+            if (!rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase) && !rolUsuario.Equals("Contador", StringComparison.OrdinalIgnoreCase))
+            {
+                lblConfigMensaje.Text = "No tiene permisos para modificar la tasa de IVA.";
+                lblConfigMensaje.ForeColor = System.Drawing.Color.Red;
+                return;
+            }
+
+            string ivaIngresado = txtConfigIva.Text.Trim().Replace("%", "").Replace(",", ".");
+            if (!decimal.TryParse(ivaIngresado, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal tasaDecimal) || tasaDecimal <= 0)
+            {
+                lblConfigMensaje.Text = "Ingrese una tasa de IVA válida (ej: 19 o 20).";
+                lblConfigMensaje.ForeColor = System.Drawing.Color.Red;
+                return;
+            }
+
+            if (tasaDecimal > 1.0m)
+            {
+                tasaDecimal = tasaDecimal / 100m;
+            }
+
+            using (MySqlConnection con = new MySqlConnection(connectionString))
+            {
+                con.Open();
+                string sql = @"
+                    UPDATE ConfiguracionGlobal SET Valor = @TasaIva WHERE Clave = 'TasaIva';
+                    
+                    UPDATE OrdenCompra 
+                    SET Iva = ROUND(Neto * @TasaDecimal, 0),
+                        Total = Neto + ROUND(Neto * @TasaDecimal, 0)
+                    WHERE Estado <> 'Anulada';";
+
+                using (MySqlCommand cmd = new MySqlCommand(sql, con))
+                {
+                    cmd.Parameters.AddWithValue("@TasaIva", tasaDecimal.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));
+                    
+                    MySqlParameter pDecimal = cmd.Parameters.Add("@TasaDecimal", MySqlDbType.Decimal);
+                    pDecimal.Precision = 18;
+                    pDecimal.Scale = 4;
+                    pDecimal.Value = tasaDecimal;
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+
+            ActualizarTextosIvaDinamicos();
+            CargarOrdenes();
+            CalcularKPIs();
+            RecalcularTotalesFinancieros();
+
+            string pctStr = (tasaDecimal * 100m).ToString("0.#");
+            lblConfigMensaje.Text = "¡Tasa de IVA actualizada! La nueva tasa (" + pctStr + "%) se aplicó exitosamente a todas las órdenes y cálculos.";
+            lblConfigMensaje.ForeColor = System.Drawing.Color.Green;
+            lblIvaActualDb.Text = pctStr + "% (" + tasaDecimal.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) + " en BD)";
+        }
         #endregion
 
         protected void btnLogout_Click(object sender, EventArgs e)

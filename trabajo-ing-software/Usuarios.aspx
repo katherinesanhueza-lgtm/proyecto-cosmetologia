@@ -87,6 +87,32 @@
                 grid-template-columns: 1fr;
             }
         }
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(46, 46, 46, 0.45);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-content-card {
+            background: var(--color-blanco);
+            border-radius: 22px;
+            width: 90%;
+            max-width: 560px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            border: 1px solid var(--color-borde-suave);
+            padding: 30px;
+        }
     </style>
 </head>
 <body>
@@ -127,19 +153,10 @@
                     <% if (puedeVerCompras) { %>
                     <li><a href="OrdenesCompra.aspx" class="nav-item-link">&Oacute;rdenes de Compra</a></li>
                     <% } %>
-                    <% if (esAdmin || esComprador) { %>
-                    <li><a href="ReporteProveedores.aspx" class="nav-item-link">Reporte Evaluaci&oacute;n</a></li>
-                    <% } %>
-                    <% if (puedeVerCompras) { %>
-                    <li><a href="ReporteOrdenesCompra.aspx" class="nav-item-link">Reporte &Oacute;rdenes</a></li>
-                    <% } %>
 
                     <%-- INVENTARIO (Bodeguero Escritura; Admin Total; Comprador y Contador Consulta) --%>
                     <% if (esAdmin || esBodeguero || esComprador) { %>
                     <li><a href="Recepciones.aspx" class="nav-item-link">Recepci&oacute;n y Lotes</a></li>
-                    <% } %>
-                    <% if (puedeVerInventario) { %>
-                    <li><a href="ReporteIngresos.aspx" class="nav-item-link">Reporte Ingresos</a></li>
                     <% } %>
 
                     <%-- ACCESOS (Solo Administrador General) --%>
@@ -213,7 +230,11 @@
                         <h1 style="font-size: 28px; margin-bottom: 6px;">Gesti&oacute;n de Usuarios</h1>
                         <p class="text-muted" style="margin: 0;">Administraci&oacute;n de cuentas comerciales, permisos y roles de la distribuidora.</p>
                     </div>
-                    <div>
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                        <asp:LinkButton ID="btnAbrirJefaturas" runat="server" CssClass="btn-dermo-secondary" OnClick="btnAbrirJefaturas_Click" style="border-radius: 25px; padding: 9px 18px; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004 11m0 0a8 8 0 0014.288 5.67"></path></svg>
+                            Firmas y Jefaturas
+                        </asp:LinkButton>
                         <button type="button" class="btn-dermo-primary" onclick="toggleFormulario();" style="border-radius: 25px; padding: 10px 22px; font-size: 13px;">
                             + Crear Nuevo Usuario
                         </button>
@@ -363,6 +384,45 @@
                 }
             }
         </script>
+
+        <!-- MODAL DE CONFIGURACIÓN DE FIRMAS Y JEFATURAS INSTITUCIONALES -->
+        <asp:Panel ID="pnlModalJefaturas" runat="server" Visible="false" CssClass="modal-overlay">
+            <div class="modal-content-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-borde-suave); padding-bottom: 14px; margin-bottom: 20px;">
+                    <div>
+                        <span class="pill-badge" style="font-size: 10px; padding: 3px 10px;">RESPONSABLES INSTITUCIONALES</span>
+                        <h2 style="font-size: 20px; margin-top: 4px; color: var(--color-texto);">Firmas Oficiales de Jefatura</h2>
+                    </div>
+                    <asp:Button ID="btnCerrarJefaturas" runat="server" Text="Cerrar" CssClass="btn-dermo-secondary" style="padding: 6px 14px; font-size: 12px;" OnClick="btnCerrarJefaturas_Click" />
+                </div>
+
+                <p class="text-muted" style="font-size: 13px; line-height: 1.5; margin-bottom: 20px;">
+                    Administraci&oacute;n de los nombres institucionales registrados en <code>ConfiguracionGlobal</code>. Estos nombres figuran oficialmente al pie de las firmas en las &Oacute;rdenes de Compra, Gu&iacute;as de Recepci&oacute;n y Reportes.
+                </p>
+
+                <div class="form-group-dermo" style="margin-bottom: 16px;">
+                    <label class="form-label-dermo" style="font-weight: 700;">Jefatura M&oacute;dulo de Compras y Abastecimiento</label>
+                    <asp:TextBox ID="txtJefeCompras" runat="server" CssClass="input-pill-dermo" placeholder="Nombre completo para firmas de OC"></asp:TextBox>
+                </div>
+
+                <div class="form-group-dermo" style="margin-bottom: 16px;">
+                    <label class="form-label-dermo" style="font-weight: 700;">Jefatura M&oacute;dulo de Ventas y Facturaci&oacute;n</label>
+                    <asp:TextBox ID="txtJefeVentas" runat="server" CssClass="input-pill-dermo" placeholder="Nombre completo para firmas de reportes"></asp:TextBox>
+                </div>
+
+                <div class="form-group-dermo" style="margin-bottom: 16px;">
+                    <label class="form-label-dermo" style="font-weight: 700;">Jefatura M&oacute;dulo de Inventario y Kardex</label>
+                    <asp:TextBox ID="txtJefeInventario" runat="server" CssClass="input-pill-dermo" placeholder="Nombre completo para firmas de reportes"></asp:TextBox>
+                </div>
+
+                <asp:Label ID="lblMensajeJefaturas" runat="server" Font-Size="12.5px" style="display: block; margin-top: 14px;"></asp:Label>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; border-top: 1px solid var(--color-borde-suave); padding-top: 15px;">
+                    <asp:Button ID="btnCancelarJefaturas" runat="server" Text="Cancelar" CssClass="btn-dermo-secondary" OnClick="btnCerrarJefaturas_Click" />
+                    <asp:Button ID="btnGuardarJefaturas" runat="server" Text="Guardar Firmas" CssClass="btn-dermo-primary" OnClick="btnGuardarJefaturas_Click" />
+                </div>
+            </div>
+        </asp:Panel>
     </form>
 </body>
 </html>

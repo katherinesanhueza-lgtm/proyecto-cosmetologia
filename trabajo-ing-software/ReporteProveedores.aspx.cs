@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Data;
-using System.Data.SqlClient;
+using System.Configuration;
+using MySql.Data.MySqlClient;
 
 namespace trabajo_ing_software
 {
     public partial class ReporteProveedores : System.Web.UI.Page
     {
-        string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ingsofDB;Integrated Security=True;TrustServerCertificate=True;";
+        string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=;";
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -36,7 +37,7 @@ namespace trabajo_ing_software
         // 1. Cargar las tarjetas superiores (KPIs y Ajustes de BI)
         private void CargarMetricasGenerales()
         {
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
                 con.Open();
 
@@ -45,11 +46,11 @@ namespace trabajo_ing_software
                     SELECT 
                         (SELECT COUNT(*) FROM Laboratorio WHERE Activo = 1) AS TotalLabs,
                         (SELECT COUNT(*) FROM OrdenCompra) AS TotalOC,
-                        (SELECT ISNULL(AVG(DiasPago), 0) FROM Laboratorio WHERE Activo = 1) AS PromedioDias";
+                        (SELECT IFNULL(AVG(DiasPago), 0) FROM Laboratorio WHERE Activo = 1) AS PromedioDias";
 
-                using (SqlCommand cmd = new SqlCommand(queryConteo, con))
+                using (MySqlCommand cmd = new MySqlCommand(queryConteo, con))
                 {
-                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
                     {
                         if (reader.Read())
                         {
@@ -65,11 +66,11 @@ namespace trabajo_ing_software
 
                 // 2. Ajuste BI: Lead Time Global (Días promedio entre OC y Recepción)
                 string queryLeadTime = @"
-                    SELECT ISNULL(AVG(CAST(DATEDIFF(day, oc.Fecha, rc.FechaRecepcion) AS FLOAT)), 0)
+                    SELECT IFNULL(AVG(DATEDIFF(rc.FechaRecepcion, oc.Fecha)), 0)
                     FROM RecepcionCompra rc
                     INNER JOIN OrdenCompra oc ON rc.IdOC = oc.IdOC";
 
-                using (SqlCommand cmd = new SqlCommand(queryLeadTime, con))
+                using (MySqlCommand cmd = new MySqlCommand(queryLeadTime, con))
                 {
                     object res = cmd.ExecuteScalar();
                     double leadTimePromedio = (res != null && res != DBNull.Value) ? Convert.ToDouble(res) : 0.0;
@@ -86,7 +87,7 @@ namespace trabajo_ing_software
                     FROM RecepcionCompra rc
                     LEFT JOIN DevolucionProveedor dp ON rc.IdRecepcion = dp.IdRecepcion";
 
-                using (SqlCommand cmd = new SqlCommand(queryDefectos, con))
+                using (MySqlCommand cmd = new MySqlCommand(queryDefectos, con))
                 {
                     object res = cmd.ExecuteScalar();
                     double tasa = (res != null && res != DBNull.Value) ? Convert.ToDouble(res) : 0.0;
@@ -98,12 +99,12 @@ namespace trabajo_ing_software
                     SELECT 
                         CASE 
                             WHEN COUNT(DISTINCT oc.IdOC) = 0 THEN 100
-                            ELSE CAST((COUNT(DISTINCT rc.IdRecepcion) * 100.0 / COUNT(DISTINCT oc.IdOC)) AS INT)
+                            ELSE ROUND(COUNT(DISTINCT rc.IdRecepcion) * 100.0 / COUNT(DISTINCT oc.IdOC))
                         END
                     FROM OrdenCompra oc
                     LEFT JOIN RecepcionCompra rc ON oc.IdOC = rc.IdOC";
 
-                using (SqlCommand cmd = new SqlCommand(queryCumplimiento, con))
+                using (MySqlCommand cmd = new MySqlCommand(queryCumplimiento, con))
                 {
                     object res = cmd.ExecuteScalar();
                     int cumplimiento = (res != null && res != DBNull.Value) ? Convert.ToInt32(res) : 100;
@@ -115,7 +116,7 @@ namespace trabajo_ing_software
         // 2. Cargar la tabla analítica con métricas de BI por proveedor
         private void CargarTablaReporte()
         {
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
                 // Consulta analítica completa con BI
                 string queryReporte = @"
@@ -123,19 +124,19 @@ namespace trabajo_ing_software
                         l.IdLaboratorio,
                         l.RazonSocial,
                         l.Marca,
-                        ISNULL(l.Pais, 'N/A') AS Pais,
+                        IFNULL(l.Pais, 'N/A') AS Pais,
                         l.DiasPago,
                         COUNT(DISTINCT oc.IdOC) AS TotalOC,
                         COUNT(DISTINCT rc.IdRecepcion) AS TotalRecepciones,
                         COUNT(DISTINCT dp.IdDevolucion) AS TotalDevoluciones,
-                        ISNULL(AVG(CAST(DATEDIFF(day, oc.Fecha, rc.FechaRecepcion) AS FLOAT)), 0) AS LeadTimePromedioDias,
+                        IFNULL(AVG(DATEDIFF(rc.FechaRecepcion, oc.Fecha)), 0) AS LeadTimePromedioDias,
                         CASE 
                             WHEN COUNT(DISTINCT rc.IdRecepcion) = 0 THEN 0.0
                             ELSE ROUND((COUNT(DISTINCT dp.IdDevolucion) * 100.0 / COUNT(DISTINCT rc.IdRecepcion)), 1)
                         END AS TasaDefectosPorcentaje,
                         CASE 
                             WHEN COUNT(DISTINCT oc.IdOC) = 0 THEN 100
-                            ELSE CAST((COUNT(DISTINCT rc.IdRecepcion) * 100.0 / COUNT(DISTINCT oc.IdOC)) AS INT)
+                            ELSE ROUND(COUNT(DISTINCT rc.IdRecepcion) * 100.0 / COUNT(DISTINCT oc.IdOC))
                         END AS PorcentajeCumplimiento,
                         CASE 
                             WHEN COUNT(DISTINCT oc.IdOC) = 0 THEN 'Excelente'
@@ -152,9 +153,9 @@ namespace trabajo_ing_software
                     GROUP BY l.IdLaboratorio, l.RazonSocial, l.Marca, l.Pais, l.DiasPago
                     ORDER BY TotalOC DESC, l.RazonSocial ASC";
 
-                using (SqlCommand cmd = new SqlCommand(queryReporte, con))
+                using (MySqlCommand cmd = new MySqlCommand(queryReporte, con))
                 {
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    using (MySqlDataAdapter da = new MySqlDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
                         da.Fill(dt);

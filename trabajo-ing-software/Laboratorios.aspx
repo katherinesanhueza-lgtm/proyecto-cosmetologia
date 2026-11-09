@@ -1,17 +1,6 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Laboratorios.aspx.cs" Inherits="trabajo_ing_software.Laboratorios" ResponseEncoding="utf-8" ContentType="text/html; charset=utf-8" %>
-
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="es">
-<head runat="server">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Proveedores y Laboratorios - Cosmetolog&iacute;a Profesional</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,500;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    <link href="Content/Estilos.css" rel="stylesheet" type="text/css" />
-    <style>
+﻿<%@ Page Title="Laboratorios y proveedores" MasterPageFile="~/Contabilidad.Master" Language="C#" AutoEventWireup="true" CodeBehind="Laboratorios.aspx.cs" Inherits="trabajo_ing_software.Laboratorios" ResponseEncoding="utf-8" ContentType="text/html; charset=utf-8" %>
+<asp:Content ID="Recursos" ContentPlaceHolderID="EstilosPagina" runat="server">
+<style>
         .labs-container-2col {
             max-width: 1420px;
             margin: 25px auto 40px auto;
@@ -178,75 +167,13 @@
             }
         }
     </style>
-</head>
-<body>
-    <form id="form1" runat="server">
-        <asp:HiddenField ID="hfIdLaboratorio" runat="server" Value="" />
-
-        <!-- HEADER GLOBAL -->
-        <header class="top-header">
-            <div class="brand-block">
-                <span class="brand-logo">NOMBRE</span>
-                <span class="brand-sub">COSMETOLOG&Iacute;A PROFESIONAL</span>
-            </div>
-            <nav>
-                <ul class="nav-links-menu">
-                    <% 
-                        string rolNav = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
-                        bool esAdmin = rolNav.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
-                        bool esComprador = rolNav.Equals("Comprador", StringComparison.OrdinalIgnoreCase);
-                        bool esBodeguero = rolNav.Equals("Bodeguero", StringComparison.OrdinalIgnoreCase);
-                        bool esContador = rolNav.Equals("Contador", StringComparison.OrdinalIgnoreCase);
-                        bool esVendedor = rolNav.Equals("Vendedor", StringComparison.OrdinalIgnoreCase);
-
-                        // Matriz Oficial RBAC 6.1.2
-                        bool puedeVerCompras = esAdmin || esComprador || esContador;
-                        bool puedeVerInventario = esAdmin || esBodeguero || esComprador || esContador || esVendedor;
-                    %>
-                    <li><a href="Default.aspx" class="nav-item-link">Inicio</a></li>
-
-                    <%-- ADMINISTRACIÃ“N (Solo Administrador General) --%>
-                    <% if (esAdmin) { %>
-                    <li><a href="Usuarios.aspx" class="nav-item-link">Usuarios</a></li>
-                    <% } %>
-
-                    <%-- COMPRAS (Admin y Comprador Escritura; Contador Solo Consulta) --%>
-                    <% if (esAdmin || esComprador || esContador) { %>
-                    <li><a href="Laboratorios.aspx" class="nav-item-link">Laboratorios</a></li>
-                    <% } %>
-                    <% if (puedeVerCompras) { %>
-                    <li><a href="OrdenesCompra.aspx" class="nav-item-link">&Oacute;rdenes de Compra</a></li>
-                    <% } %>
-                    <% if (esAdmin || esComprador) { %>
-                    <li><a href="ReporteProveedores.aspx" class="nav-item-link">Reporte Evaluaci&oacute;n</a></li>
-                    <% } %>
-                    <% if (puedeVerCompras) { %>
-                    <li><a href="ReporteOrdenesCompra.aspx" class="nav-item-link">Reporte &Oacute;rdenes</a></li>
-                    <% } %>
-
-                    <%-- INVENTARIO (Bodeguero Escritura; Admin Total; Comprador y Contador Consulta) --%>
-                    <% if (esAdmin || esBodeguero || esComprador) { %>
-                    <li><a href="Recepciones.aspx" class="nav-item-link">Recepci&oacute;n y Lotes</a></li>
-                    <% } %>
-                    <% if (puedeVerInventario) { %>
-                    <li><a href="ReporteIngresos.aspx" class="nav-item-link">Reporte Ingresos</a></li>
-                    <% } %>
-
-                    <%-- ACCESOS (Solo Administrador General) --%>
-                    <% if (esAdmin) { %>
-                    <li><a href="Accesos.aspx" class="nav-item-link">Accesos</a></li>
-                    <% } %>
-                </ul>
-            </nav>
-            <div class="header-actions">
-                <asp:Label ID="lblBienvenida" runat="server" Font-Bold="true" Font-Size="13px"></asp:Label>
-                <asp:Button ID="btnLogout" runat="server" Text="Cerrar Sesi&oacute;n" CssClass="btn-dermo-secondary" style="padding: 7px 16px; font-size: 12px;" OnClick="btnLogout_Click" />
-                <div class="user-avatar-btn" title="Usuario">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                </div>
-            </div>
-        </header>
-
+</asp:Content>
+<asp:Content ID="Acciones" ContentPlaceHolderID="AccionesUsuario" runat="server">
+    <asp:Label ID="lblBienvenida" Visible="false" runat="server" Font-Bold="true" Font-Size="13px"></asp:Label>
+                <asp:Button ID="btnLogout" runat="server" Text="Cerrar Sesi&oacute;n" CssClass="btn btn-outline-secondary btn-sm cierre-compras" OnClick="btnLogout_Click" />
+</asp:Content>
+<asp:Content ID="Contenido" ContentPlaceHolderID="MainContent" runat="server">
+    <div class="dashboard compras-contenido">
         <!-- CUERPO PRINCIPAL DEL MODULO -->
         <div class="labs-container-2col">
 
@@ -257,15 +184,15 @@
                 </span>
                 <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 15px;">
                     <div>
-                        <h1 style="font-size: 32px; margin: 4px 0 6px 0;">Proveedores y Laboratorios</h1>
+                        <h1>Proveedores y Laboratorios</h1>
                         <p class="text-muted" style="margin: 0; max-width: 750px; line-height: 1.5;">
                             Directorio comercial, condiciones de cr&eacute;dito y cat&aacute;logo de marcas cosmec&eacute;uticas aliadas bajo est&aacute;ndares GMP e ISO 22716.
                         </p>
                     </div>
                     <div style="display: flex; gap: 12px;">
-                        <a href="ReporteProveedores.aspx" class="btn-dermo-secondary" style="text-decoration: none; display: inline-flex; align-items: center;">Exportar Cat&aacute;logo (Reporte)</a>
+                        <a href="ReporteProveedores.aspx" class="btn btn-outline-secondary"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>Reporte de Evaluaci&oacute;n</a>
                         <asp:Button ID="btnIrReporte" runat="server" Visible="false" OnClick="btnIrReporte_Click" />
-                        <button type="button" class="btn-dermo-primary" onclick="nuevoLaboratorioFocus();">
+                        <button type="button" class="btn btn-primary" onclick="nuevoLaboratorioFocus();">
                             + Agregar Nuevo Laboratorio
                         </button>
                     </div>
@@ -273,13 +200,13 @@
             </div>
 
             <!-- BARRA DE FILTROS Y BUSQUEDA -->
-            <div class="filter-toolbar-row">
+            <div class="filter-toolbar-row card-dermocosmetica">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-texto-suave); flex-shrink: 0;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <asp:TextBox ID="txtBuscar" runat="server" CssClass="input-pill-dermo" style="border: none; background: transparent; padding: 6px 0;" placeholder="Buscar por laboratorio, marca o representante comercial..." AutoPostBack="true" OnTextChanged="txtBuscar_TextChanged"></asp:TextBox>
+                    <asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control" placeholder="Buscar por laboratorio, marca o representante comercial..." AutoPostBack="true" OnTextChanged="txtBuscar_TextChanged"></asp:TextBox>
                 </div>
                 <div>
-                    <asp:DropDownList ID="ddlFiltroPais" runat="server" CssClass="input-pill-dermo" style="padding: 6px 14px; font-size: 12px;" AutoPostBack="true" OnSelectedIndexChanged="ddlFiltroPais_SelectedIndexChanged">
+                    <asp:DropDownList ID="ddlFiltroPais" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlFiltroPais_SelectedIndexChanged">
                         <asp:ListItem Text="Pa&iacute;s: Todos" Value="" />
                         <asp:ListItem Text="Francia" Value="Francia" />
                         <asp:ListItem Text="Alemania" Value="Alemania" />
@@ -292,7 +219,7 @@
                     </asp:DropDownList>
                 </div>
                 <div>
-                    <asp:DropDownList ID="ddlFiltroEstado" runat="server" CssClass="input-pill-dermo" style="padding: 6px 14px; font-size: 12px;" AutoPostBack="true" OnSelectedIndexChanged="ddlFiltroEstado_SelectedIndexChanged">
+                    <asp:DropDownList ID="ddlFiltroEstado" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlFiltroEstado_SelectedIndexChanged">
                         <asp:ListItem Text="Estado: Todos" Value="" />
                         <asp:ListItem Text="Activo" Value="1" Selected="True" />
                         <asp:ListItem Text="Inactivo" Value="0" />
@@ -317,7 +244,7 @@
                         </div>
 
                         <asp:GridView ID="gvLaboratorios" runat="server" AutoGenerateColumns="False" 
-                            CssClass="table-dermo-modern" GridLines="None" EmptyDataText="No hay laboratorios registrados a&uacute;n."
+                            CssClass="table table-hover align-middle" GridLines="None" EmptyDataText="No hay laboratorios registrados a&uacute;n."
                             OnRowCommand="gvLaboratorios_RowCommand" DataKeyNames="IdLaboratorio">
                             <Columns>
                                 <asp:TemplateField HeaderText="LABORATORIO" HeaderStyle-CssClass="col-left" ItemStyle-CssClass="col-left">
@@ -369,13 +296,13 @@
                                         <div style="display: inline-flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center;">
                                             <asp:Button ID="btnEditar" runat="server" Text="Editar" 
                                                 CommandName="Editar" CommandArgument='<%# Eval("IdLaboratorio") %>'
-                                                CssClass="btn-tabla-editar" ToolTip="Editar laboratorio" />
+                                                CssClass="btn btn-outline-secondary btn-sm" ToolTip="Editar laboratorio" />
 
                                             <asp:Button ID="btnCambiarEstado" runat="server" 
                                                 Text='<%# Convert.ToBoolean(Eval("Activo")) ? "Desactivar" : "Activar" %>' 
                                                 CommandName="CambiarEstado" 
                                                 CommandArgument='<%# Eval("IdLaboratorio") + ";" + Eval("Activo") %>'
-                                                CssClass='<%# Convert.ToBoolean(Eval("Activo")) ? "btn-tabla-desactivar" : "btn-tabla-activar" %>' />
+                                                CssClass='<%# Convert.ToBoolean(Eval("Activo")) ? "btn btn-outline-danger btn-sm" : "btn btn-outline-secondary btn-sm" %>' />
                                         </div>
                                     </ItemTemplate>
                                 </asp:TemplateField>
@@ -419,50 +346,50 @@
                         </p>
 
                         <div class="form-group-dermo">
-                            <label class="form-label-dermo">Raz&oacute;n Social / Nombre Laboratorio *</label>
-                            <asp:TextBox ID="txtRazonSocial" runat="server" CssClass="input-pill-dermo" placeholder="Ej: Laboratoires DermAlliance S.A.S."></asp:TextBox>
+                            <asp:Label runat="server" CssClass="form-label" AssociatedControlID="txtRazonSocial">Raz&oacute;n Social / Nombre Laboratorio *</asp:Label>
+                            <asp:TextBox ID="txtRazonSocial" runat="server" CssClass="form-control" placeholder="Ej: Laboratoires DermAlliance S.A.S."></asp:TextBox>
                         </div>
 
                         <div class="form-row-2col">
                             <div class="form-group-dermo">
-                                <label class="form-label-dermo">Pa&iacute;s de Origen</label>
-                                <asp:TextBox ID="txtPais" runat="server" CssClass="input-pill-dermo" placeholder="Ej: Francia (UE)"></asp:TextBox>
+                                <asp:Label runat="server" CssClass="form-label" AssociatedControlID="txtPais">Pa&iacute;s de Origen</asp:Label>
+                                <asp:TextBox ID="txtPais" runat="server" CssClass="form-control" placeholder="Ej: Francia (UE)"></asp:TextBox>
                             </div>
                             <div class="form-group-dermo">
-                                <label class="form-label-dermo">Plazo de Pago (D&iacute;as)</label>
-                                <asp:TextBox ID="txtDiasPago" runat="server" CssClass="input-pill-dermo" TextMode="Number" Text="30"></asp:TextBox>
+                                <asp:Label runat="server" CssClass="form-label" AssociatedControlID="txtDiasPago">Plazo de Pago (D&iacute;as)</asp:Label>
+                                <asp:TextBox ID="txtDiasPago" runat="server" CssClass="form-control" TextMode="Number" Text="30"></asp:TextBox>
                             </div>
                         </div>
 
                         <div class="form-group-dermo">
-                            <label class="form-label-dermo">Representante Comercial Autorizado</label>
-                            <asp:TextBox ID="txtContacto" runat="server" CssClass="input-pill-dermo" placeholder="Ej: Dr. Antoine Laurent"></asp:TextBox>
+                            <asp:Label runat="server" CssClass="form-label" AssociatedControlID="txtContacto">Representante Comercial Autorizado</asp:Label>
+                            <asp:TextBox ID="txtContacto" runat="server" CssClass="form-control" placeholder="Ej: Dr. Antoine Laurent"></asp:TextBox>
                         </div>
 
                         <div class="form-group-dermo">
-                            <label class="form-label-dermo">Correo Electr&oacute;nico de Compras / Facturaci&oacute;n *</label>
-                            <asp:TextBox ID="txtEmail" runat="server" CssClass="input-pill-dermo" placeholder="compras.latam@laboratorio.com"></asp:TextBox>
+                            <asp:Label runat="server" CssClass="form-label" AssociatedControlID="txtEmail">Correo Electr&oacute;nico de Compras / Facturaci&oacute;n *</asp:Label>
+                            <asp:TextBox ID="txtEmail" runat="server" CssClass="form-control" placeholder="compras.latam@laboratorio.com"></asp:TextBox>
                         </div>
 
                         <div class="form-row-2col">
                             <div class="form-group-dermo">
-                                <label class="form-label-dermo">RUT Proveedor *</label>
-                                <asp:TextBox ID="txtRut" runat="server" CssClass="input-pill-dermo" placeholder="76.111.222-8"></asp:TextBox>
+                                <asp:Label runat="server" CssClass="form-label" AssociatedControlID="txtRut">RUT Proveedor *</asp:Label>
+                                <asp:TextBox ID="txtRut" runat="server" CssClass="form-control" placeholder="76.111.222-8"></asp:TextBox>
                             </div>
                             <div class="form-group-dermo">
-                                <label class="form-label-dermo">Tel&eacute;fono de Contacto</label>
-                                <asp:TextBox ID="txtTelefono" runat="server" CssClass="input-pill-dermo" placeholder="+33 1 42 68 55 00"></asp:TextBox>
+                                <asp:Label runat="server" CssClass="form-label" AssociatedControlID="txtTelefono">Tel&eacute;fono de Contacto</asp:Label>
+                                <asp:TextBox ID="txtTelefono" runat="server" CssClass="form-control" placeholder="+33 1 42 68 55 00"></asp:TextBox>
                             </div>
                         </div>
 
                         <div class="form-group-dermo">
-                            <label class="form-label-dermo">Marcas Cosmec&eacute;uticas Distribuidas *</label>
-                            <asp:TextBox ID="txtMarca" runat="server" CssClass="input-pill-dermo" placeholder="Ej: Aura Lumi&egrave;re Pro, BioRetinol FX Clinical"></asp:TextBox>
+                            <asp:Label runat="server" CssClass="form-label" AssociatedControlID="txtMarca">Marcas Cosmec&eacute;uticas Distribuidas *</asp:Label>
+                            <asp:TextBox ID="txtMarca" runat="server" CssClass="form-control" placeholder="Ej: Aura Lumi&egrave;re Pro, BioRetinol FX Clinical"></asp:TextBox>
                         </div>
 
                         <div style="display: flex; gap: 12px; margin-top: 20px;">
-                            <asp:Button ID="btnGuardar" runat="server" Text="Guardar Cambios" CssClass="btn-dermo-primary" OnClick="btnGuardar_Click" style="flex: 1;" />
-                            <asp:Button ID="btnCancelar" runat="server" Text="Cancelar" CssClass="btn-dermo-secondary" Visible="false" OnClick="btnCancelar_Click" />
+                            <asp:Button ID="btnGuardar" runat="server" Text="Guardar Cambios" CssClass="btn btn-primary" OnClick="btnGuardar_Click" />
+                            <asp:Button ID="btnCancelar" runat="server" Text="Cancelar" CssClass="btn btn-outline-secondary" Visible="false" OnClick="btnCancelar_Click" />
                         </div>
 
                         <asp:Label ID="lblMensaje" runat="server" Font-Size="13px" style="display: block; margin-top: 14px; font-weight: 500;"></asp:Label>
@@ -482,6 +409,6 @@
                 document.getElementById('<%= txtRazonSocial.ClientID %>').scrollIntoView({ behavior: 'smooth' });
             }
         </script>
-    </form>
-</body>
-</html>
+        
+    </div>
+</asp:Content>
