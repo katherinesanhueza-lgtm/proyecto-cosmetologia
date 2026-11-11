@@ -1,4 +1,4 @@
-using System;
+Ôªøusing System;
 using System.Data;
 using System.Configuration;
 using MySql.Data.MySqlClient;
@@ -37,7 +37,7 @@ namespace trabajo_ing_software
                 lblBienvenida.Text = Session["NombreUsuario"] != null ? Session["NombreUsuario"].ToString() : "Usuario";
                 lblAuditor.Text = lblBienvenida.Text;
 
-                // InyecciÛn din·mica de jefaturas de mÛdulos para firmas formales desde ConfiguracionGlobal
+                // Inyecci√≥n din√°mica de jefaturas de m√≥dulos para firmas formales desde ConfiguracionGlobal
                 lblFirmaCompras.Text = ConfiguracionGlobal.NombreJefeCompras;
                 lblFirmaVentas.Text = ConfiguracionGlobal.NombreJefeVentas;
                 lblFirmaInventario.Text = ConfiguracionGlobal.NombreJefeInventario;
@@ -235,7 +235,7 @@ namespace trabajo_ing_software
                         string pctStr = (tasa * 100m).ToString("0.#");
 
                         StringBuilder sb = new StringBuilder();
-                        sb.AppendLine(string.Format("N∞ Orden;Proveedor;RUT;Fecha EmisiÛn;Fecha Entrega;Estado;Õtems;Neto ($);IVA {0}% ($);Total ($)", pctStr));
+                        sb.AppendLine(string.Format("N¬∞ Orden;Proveedor;RUT;Fecha Emisi√≥n;Fecha Entrega;Estado;√çtems;Neto ($);IVA {0}% ($);Total ($)", pctStr));
 
                         foreach (DataRow dr in dt.Rows)
                         {

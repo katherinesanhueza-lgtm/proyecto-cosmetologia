@@ -179,6 +179,7 @@
 </asp:Content>
 <asp:Content ID="Contenido" ContentPlaceHolderID="MainContent" runat="server">
     <div class="dashboard compras-contenido">
+        <asp:HiddenField ID="hfIdLaboratorio" runat="server" Value="" />
         <!-- CUERPO PRINCIPAL DEL MODULO -->
         <div class="labs-container-2col">
 

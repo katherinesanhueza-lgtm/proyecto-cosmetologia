@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Data;
 using System.Configuration;
 using MySql.Data.MySqlClient;
@@ -218,7 +218,7 @@ namespace trabajo_ing_software
                         da.Fill(dt);
 
                         StringBuilder sb = new StringBuilder();
-                        sb.AppendLine("N° Recepción;N° OC;Guía Despacho;Proveedor;RUT;Fecha Recepción;SKU;Producto;Variante;Lote;Vencimiento;Cantidad;Costo Unitario ($);Total Línea ($)");
+                        sb.AppendLine("NÂ° RecepciÃ³n;NÂ° OC;GuÃ­a Despacho;Proveedor;RUT;Fecha RecepciÃ³n;SKU;Producto;Variante;Lote;Vencimiento;Cantidad;Costo Unitario ($);Total LÃ­nea ($)");
 
                         foreach (DataRow dr in dt.Rows)
                         {

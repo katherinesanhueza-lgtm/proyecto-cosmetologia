@@ -13,7 +13,7 @@ namespace trabajo_ing_software
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            // Verificaci�n de seguridad de sesi�n
+            // Verificación de seguridad de sesión
             if (Session["IdUsuario"] == null)
             {
                 Response.Redirect("Login.aspx");
@@ -22,7 +22,7 @@ namespace trabajo_ing_software
 
             ActualizarTextosIvaDinamicos();
 
-            // Control de acceso por perfil (RBAC): S�lo Administrador y Contador pueden gestionar par�metros legales
+            // Control de acceso por perfil (RBAC): Sólo Administrador y Contador pueden gestionar parámetros legales
             string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
             btnAbrirConfig.Visible = rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase) || 
                                      rolUsuario.Equals("Contador", StringComparison.OrdinalIgnoreCase);
@@ -46,7 +46,7 @@ namespace trabajo_ing_software
             }
         }
 
-        #region Inicializaci�n y Estructura Temporal de �tems
+        #region Inicialización y Estructura Temporal de ítems
         public string GetIniciales(string nombre)
         {
             if (string.IsNullOrWhiteSpace(nombre)) return "OC";
@@ -80,7 +80,7 @@ namespace trabajo_ing_software
         }
         #endregion
 
-        #region Carga de Datos y Cat�logos
+        #region Carga de Datos y Catálogos
         private void CargarLaboratoriosFiltro()
         {
             ddlFiltroLaboratorio.Items.Clear();
@@ -189,7 +189,7 @@ namespace trabajo_ing_software
                             {
                                 lblInfoRut.Text = dr["Rut"].ToString();
                                 int dias = dr["DiasPago"] != DBNull.Value ? Convert.ToInt32(dr["DiasPago"]) : 30;
-                                lblInfoDiasPago.Text = dias + " d�as de cr�dito";
+                                lblInfoDiasPago.Text = dias + " días de crédito";
                                 lblInfoContacto.Text = dr["Contacto"].ToString();
                                 lblInfoPais.Text = dr["Pais"].ToString();
 
@@ -244,21 +244,21 @@ namespace trabajo_ing_software
         {
             if (string.IsNullOrEmpty(ddlProductoVariante.SelectedValue))
             {
-                MostrarMensaje("Debe seleccionar un producto del cat�logo para agregarlo a la orden.", false);
+                MostrarMensaje("Debe seleccionar un producto del catálogo para agregarlo a la orden.", false);
                 return;
             }
 
             int cantidad;
             if (!int.TryParse(txtCantidad.Text, out cantidad) || cantidad <= 0)
             {
-                MostrarMensaje("Ingrese una cantidad v�lida mayor a 0.", false);
+                MostrarMensaje("Ingrese una cantidad válida mayor a 0.", false);
                 return;
             }
 
             decimal costo;
             if (!decimal.TryParse(txtCostoUnitario.Text, out costo) || costo < 0)
             {
-                MostrarMensaje("Ingrese un costo unitario v�lido.", false);
+                MostrarMensaje("Ingrese un costo unitario válido.", false);
                 return;
             }
 
@@ -319,7 +319,7 @@ namespace trabajo_ing_software
 
             RecalcularTotalesFinancieros();
 
-            // Restablecer inputs de �tem
+            // Restablecer inputs de ítem
             ddlProductoVariante.SelectedIndex = 0;
             txtCantidad.Text = "1";
             txtCostoUnitario.Text = "";
@@ -353,7 +353,7 @@ namespace trabajo_ing_software
                 neto += Convert.ToDecimal(row["Subtotal"]);
             }
 
-            // C�lculo din�mico seg�n tasa de IVA consultada desde ConfiguracionGlobal (Ajuste L�gico RF-COM-04)
+            // Cálculo dinámico según tasa de IVA consultada desde ConfiguracionGlobal (Ajuste Lógico RF-COM-04)
             decimal iva = neto * ConfiguracionGlobal.TasaIva;
             decimal total = neto + iva;
 
@@ -382,7 +382,7 @@ namespace trabajo_ing_software
             DateTime fechaEmision;
             if (!DateTime.TryParse(txtFechaEmision.Text, out fechaEmision))
             {
-                MostrarMensaje("Seleccione una fecha de emisi�n v�lida.", false);
+                MostrarMensaje("Seleccione una fecha de emisión válida.", false);
                 return;
             }
 
@@ -397,7 +397,7 @@ namespace trabajo_ing_software
             {
                 neto += Convert.ToDecimal(row["Subtotal"]);
             }
-            // C�lculo din�mico seg�n tasa de IVA consultada desde ConfiguracionGlobal (Ajuste L�gico RF-COM-04)
+            // Cálculo dinámico según tasa de IVA consultada desde ConfiguracionGlobal (Ajuste Lógico RF-COM-04)
             decimal iva = neto * ConfiguracionGlobal.TasaIva;
             decimal total = neto + iva;
 
@@ -497,7 +497,7 @@ namespace trabajo_ing_software
         }
         #endregion
 
-        #region Visualizaci�n y Listado de �rdenes (GridView Principal)
+        #region Visualización y Listado de Órdenes (GridView Principal)
         private void ActualizarTextosIvaDinamicos()
         {
             decimal tasa = ConfiguracionGlobal.TasaIva;
@@ -685,7 +685,7 @@ namespace trabajo_ing_software
                             {
                                 lblModalIvaPct.Text = (ConfiguracionGlobal.TasaIva * 100m).ToString("0.#");
                             }
-                            // Inyecci�n din�mica de Jefatura de Compras bajo la firma (Ajuste L�gico)
+                            // Inyección dinámica de Jefatura de Compras bajo la firma (Ajuste Lógico)
                             lblModalFirmaJefe.Text = ConfiguracionGlobal.NombreJefeCompras;
                         }
                     }

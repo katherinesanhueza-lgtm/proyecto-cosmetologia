@@ -126,7 +126,7 @@ namespace trabajo_ing_software
                 return;
             }
 
-            // Validar formato de correo electr�nico
+            // Validar formato de correo electrónico
             if (!ValidarEmail(correo))
             {
                 lblMensaje.Text = "El formato del correo electrónico no es válido (Ej: usuario@dermo.cl).";
@@ -134,7 +134,7 @@ namespace trabajo_ing_software
                 return;
             }
 
-            // �Estamos creando o editando?
+            // ¿Estamos creando o editando?
             bool esEdicion = !string.IsNullOrEmpty(hfIdUsuario.Value);
 
             using (MySqlConnection con = new MySqlConnection(connectionString))

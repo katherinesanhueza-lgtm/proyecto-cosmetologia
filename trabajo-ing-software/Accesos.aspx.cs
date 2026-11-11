@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Data;
 using System.Configuration;
 using MySql.Data.MySqlClient;
@@ -141,7 +141,7 @@ namespace trabajo_ing_software
                 }
             }
 
-            lblMensaje.Text = "Acceso actualizado con �xito.";
+            lblMensaje.Text = "Acceso actualizado con éxito.";
             lblMensaje.ForeColor = System.Drawing.Color.Green;
             CargarTablaAccesos();
         }
