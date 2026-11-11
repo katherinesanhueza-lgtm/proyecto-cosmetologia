@@ -1,17 +1,6 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="OrdenesCompra.aspx.cs" Inherits="trabajo_ing_software.OrdenesCompra" ResponseEncoding="utf-8" ContentType="text/html; charset=utf-8" %>
-
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="es">
-<head runat="server">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>&Oacute;rdenes de Compra - Cosmetolog&iacute;a Profesional</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,500;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    <link href="Content/Estilos.css" rel="stylesheet" type="text/css" />
-    <style>
+﻿<%@ Page Title="Órdenes de compra" MasterPageFile="~/Contabilidad.Master" Language="C#" AutoEventWireup="true" CodeBehind="OrdenesCompra.aspx.cs" Inherits="trabajo_ing_software.OrdenesCompra" ResponseEncoding="utf-8" ContentType="text/html; charset=utf-8" %>
+<asp:Content ID="Recursos" ContentPlaceHolderID="EstilosPagina" runat="server">
+<style>
         .oc-container {
             max-width: 1440px;
             margin: 25px auto 50px auto;
@@ -365,66 +354,13 @@
             }
         }
     </style>
-</head>
-<body>
-    <form id="form1" runat="server">
-        <asp:HiddenField ID="hfIdOC" runat="server" Value="" />
-
-        <!-- HEADER GLOBAL DE MARCA -->
-        <header class="top-header">
-            <div class="brand-block">
-                <span class="brand-logo">NOMBRE</span>
-                <span class="brand-sub">COSMETOLOG&Iacute;A PROFESIONAL</span>
-            </div>
-            <nav>
-                <ul class="nav-links-menu">
-                    <% 
-                        string rolNav = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
-                        bool esAdmin = rolNav.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
-                        bool esComprador = rolNav.Equals("Comprador", StringComparison.OrdinalIgnoreCase);
-                        bool esBodeguero = rolNav.Equals("Bodeguero", StringComparison.OrdinalIgnoreCase);
-                        bool esContador = rolNav.Equals("Contador", StringComparison.OrdinalIgnoreCase);
-                        bool esVendedor = rolNav.Equals("Vendedor", StringComparison.OrdinalIgnoreCase);
-
-                        // Matriz Oficial RBAC 6.1.2
-                        bool puedeVerCompras = esAdmin || esComprador || esContador;
-                        bool puedeVerInventario = esAdmin || esBodeguero || esComprador || esContador || esVendedor;
-                    %>
-                    <li><a href="Default.aspx" class="nav-item-link">Inicio</a></li>
-
-                    <%-- ADMINISTRACIÃ“N (Solo Administrador General) --%>
-                    <% if (esAdmin) { %>
-                    <li><a href="Usuarios.aspx" class="nav-item-link">Usuarios</a></li>
-                    <% } %>
-
-                    <%-- COMPRAS (Admin y Comprador Escritura; Contador Solo Consulta) --%>
-                    <% if (esAdmin || esComprador || esContador) { %>
-                    <li><a href="Laboratorios.aspx" class="nav-item-link">Laboratorios</a></li>
-                    <% } %>
-                    <% if (puedeVerCompras) { %>
-                    <li><a href="OrdenesCompra.aspx" class="nav-item-link">&Oacute;rdenes de Compra</a></li>
-                    <% } %>
-
-                    <%-- INVENTARIO (Bodeguero Escritura; Admin Total; Comprador y Contador Consulta) --%>
-                    <% if (esAdmin || esBodeguero || esComprador) { %>
-                    <li><a href="Recepciones.aspx" class="nav-item-link">Recepci&oacute;n y Lotes</a></li>
-                    <% } %>
-
-                    <%-- ACCESOS (Solo Administrador General) --%>
-                    <% if (esAdmin) { %>
-                    <li><a href="Accesos.aspx" class="nav-item-link">Accesos</a></li>
-                    <% } %>
-                </ul>
-            </nav>
-            <div class="header-actions">
-                <asp:Label ID="lblBienvenida" runat="server" Font-Bold="true" Font-Size="13px"></asp:Label>
-                <asp:Button ID="btnLogout" runat="server" Text="Cerrar Sesi&oacute;n" CssClass="btn-dermo-secondary" style="padding: 7px 16px; font-size: 12px;" OnClick="btnLogout_Click" />
-                <div class="user-avatar-btn" title="Usuario">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                </div>
-            </div>
-        </header>
-
+</asp:Content>
+<asp:Content ID="Acciones" ContentPlaceHolderID="AccionesUsuario" runat="server">
+    <asp:Label ID="lblBienvenida" Visible="false" runat="server" Font-Bold="true" Font-Size="13px"></asp:Label>
+                <asp:Button ID="btnLogout" runat="server" Text="Cerrar Sesi&oacute;n" CssClass="btn btn-outline-secondary btn-sm cierre-compras" OnClick="btnLogout_Click" />
+</asp:Content>
+<asp:Content ID="Contenido" ContentPlaceHolderID="MainContent" runat="server">
+    <div class="dashboard compras-contenido">
         <!-- CONTENEDOR PRINCIPAL -->
         <div class="oc-container">
 
@@ -432,19 +368,19 @@
             <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
                 <div>
                     <span class="pill-badge" style="font-size: 10px; padding: 4px 12px; margin-bottom: 8px;">M&Oacute;DULO DE COMPRAS - ABASTECIMIENTO</span>
-                    <h1 style="font-size: 26px; margin-top: 4px;">Gesti&oacute;n de &Oacute;rdenes de Compra (OC)</h1>
+                    <h1>Gesti&oacute;n de &Oacute;rdenes de Compra (OC)</h1>
                     <p class="text-muted" style="margin-top: 4px;">Generaci&oacute;n de pedidos arancelarios a laboratorios, detalle de insumos, c&aacute;lculo autom&aacute;tico de IVA (<asp:Label ID="lblIvaSubtitulo" runat="server"></asp:Label>%) y administraci&oacute;n de estados.</p>
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <a href="ReporteOrdenesCompra.aspx" class="btn-dermo-secondary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                    <a href="ReporteOrdenesCompra.aspx" class="btn btn-outline-secondary">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                         Reporte Anal&iacute;tico
                     </a>
-                    <asp:LinkButton ID="btnAbrirConfig" runat="server" CssClass="btn-dermo-secondary" OnClick="btnAbrirConfig_Click" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                    <asp:LinkButton ID="btnAbrirConfig" runat="server" CssClass="btn btn-outline-secondary" OnClick="btnAbrirConfig_Click">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                         Tasa de IVA Legal (%)
                     </asp:LinkButton>
-                    <asp:Button ID="btnToggleForm" runat="server" Text="Nueva &Oacute;rden de Compra" CssClass="btn-dermo-primary" OnClick="btnToggleForm_Click" />
+                    <asp:Button ID="btnToggleForm" runat="server" Text="Nueva &Oacute;rden de Compra" CssClass="btn btn-primary" OnClick="btnToggleForm_Click" />
                 </div>
             </div>
 
@@ -517,7 +453,7 @@
                             <asp:Label ID="lblTituloFormulario" runat="server" Text="Nueva &Oacute;rden de Compra"></asp:Label>
                         </h2>
                     </div>
-                    <asp:Button ID="btnCerrarForm" runat="server" Text="Cerrar Formulario" CssClass="btn-dermo-secondary" style="font-size: 12px; padding: 6px 14px;" OnClick="btnCerrarForm_Click" />
+                    <asp:Button ID="btnCerrarForm" runat="server" Text="Cerrar Formulario" CssClass="btn btn-outline-secondary" OnClick="btnCerrarForm_Click" />
                 </div>
 
                 <!-- 1. CABECERA MAESTRA DE LA ORDEN -->
@@ -528,18 +464,18 @@
 
                 <div class="form-grid-3col">
                     <div class="form-group-dermo">
-                        <label class="label-dermo">N&uacute;mero de &Oacute;rden de Compra</label>
-                        <asp:TextBox ID="txtNumeroOC" runat="server" CssClass="input-dermo" placeholder="Ej: OC-2026-0001" ReadOnly="true" style="background-color: #FAF8F5; font-weight: 600;"></asp:TextBox>
+                        <asp:Label runat="server" CssClass="form-label" AssociatedControlID="txtNumeroOC">N&uacute;mero de &Oacute;rden de Compra</asp:Label>
+                        <asp:TextBox ID="txtNumeroOC" runat="server" CssClass="form-control" placeholder="Ej: OC-2026-0001" ReadOnly="true"></asp:TextBox>
                     </div>
 
                     <div class="form-group-dermo">
-                        <label class="label-dermo">Laboratorio / Proveedor (*)</label>
-                        <asp:DropDownList ID="ddlLaboratorio" runat="server" CssClass="select-dermo" AutoPostBack="true" OnSelectedIndexChanged="ddlLaboratorio_SelectedIndexChanged"></asp:DropDownList>
+                        <asp:Label runat="server" CssClass="form-label" AssociatedControlID="ddlLaboratorio">Laboratorio / Proveedor (*)</asp:Label>
+                        <asp:DropDownList ID="ddlLaboratorio" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlLaboratorio_SelectedIndexChanged"></asp:DropDownList>
                     </div>
 
                     <div class="form-group-dermo">
-                        <label class="label-dermo">Estado Inicial (*)</label>
-                        <asp:DropDownList ID="ddlEstado" runat="server" CssClass="select-dermo">
+                        <asp:Label runat="server" CssClass="form-label" AssociatedControlID="ddlEstado">Estado Inicial (*)</asp:Label>
+                        <asp:DropDownList ID="ddlEstado" runat="server" CssClass="form-select">
                             <asp:ListItem Value="Borrador" Text="Borrador (Cotizaci&oacute;n previa)"></asp:ListItem>
                             <asp:ListItem Value="Emitida" Text="Emitida (Confirmada a Laboratorio)" Selected="True"></asp:ListItem>
                             <asp:ListItem Value="Parcial" Text="Parcial (Entrega fraccionada)"></asp:ListItem>
@@ -559,18 +495,18 @@
 
                 <div class="form-grid-3col">
                     <div class="form-group-dermo">
-                        <label class="label-dermo">Fecha de Emisi&oacute;n (*)</label>
-                        <asp:TextBox ID="txtFechaEmision" runat="server" TextMode="Date" CssClass="input-dermo"></asp:TextBox>
+                        <asp:Label runat="server" CssClass="form-label" AssociatedControlID="txtFechaEmision">Fecha de Emisi&oacute;n (*)</asp:Label>
+                        <asp:TextBox ID="txtFechaEmision" runat="server" TextMode="Date" CssClass="form-control"></asp:TextBox>
                     </div>
 
                     <div class="form-group-dermo">
-                        <label class="label-dermo">Fecha Esperada de Entrega (*)</label>
-                        <asp:TextBox ID="txtFechaEsperada" runat="server" TextMode="Date" CssClass="input-dermo"></asp:TextBox>
+                        <asp:Label runat="server" CssClass="form-label" AssociatedControlID="txtFechaEsperada">Fecha Esperada de Entrega (*)</asp:Label>
+                        <asp:TextBox ID="txtFechaEsperada" runat="server" TextMode="Date" CssClass="form-control"></asp:TextBox>
                     </div>
 
                     <div class="form-group-dermo">
-                        <label class="label-dermo">Usuario Emisor</label>
-                        <asp:TextBox ID="txtUsuarioEmisor" runat="server" CssClass="input-dermo" ReadOnly="true" style="background-color: #FAF8F5;"></asp:TextBox>
+                        <asp:Label runat="server" CssClass="form-label" AssociatedControlID="txtUsuarioEmisor">Usuario Emisor</asp:Label>
+                        <asp:TextBox ID="txtUsuarioEmisor" runat="server" CssClass="form-control" ReadOnly="true"></asp:TextBox>
                     </div>
                 </div>
 
@@ -582,28 +518,28 @@
 
                 <div class="form-grid-4col">
                     <div class="form-group-dermo" style="margin-bottom: 0;">
-                        <label class="label-dermo">Seleccionar Producto / Variante de Cat&aacute;logo</label>
-                        <asp:DropDownList ID="ddlProductoVariante" runat="server" CssClass="select-dermo" AutoPostBack="true" OnSelectedIndexChanged="ddlProductoVariante_SelectedIndexChanged"></asp:DropDownList>
+                        <asp:Label runat="server" CssClass="form-label" AssociatedControlID="ddlProductoVariante">Seleccionar Producto / Variante de Cat&aacute;logo</asp:Label>
+                        <asp:DropDownList ID="ddlProductoVariante" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlProductoVariante_SelectedIndexChanged"></asp:DropDownList>
                     </div>
 
                     <div class="form-group-dermo" style="margin-bottom: 0;">
-                        <label class="label-dermo">Cantidad</label>
-                        <asp:TextBox ID="txtCantidad" runat="server" TextMode="Number" CssClass="input-dermo" Text="1" min="1"></asp:TextBox>
+                        <asp:Label runat="server" CssClass="form-label" AssociatedControlID="txtCantidad">Cantidad</asp:Label>
+                        <asp:TextBox ID="txtCantidad" runat="server" TextMode="Number" CssClass="form-control" Text="1" min="1"></asp:TextBox>
                     </div>
 
                     <div class="form-group-dermo" style="margin-bottom: 0;">
-                        <label class="label-dermo">Costo Unit. ($)</label>
-                        <asp:TextBox ID="txtCostoUnitario" runat="server" TextMode="Number" CssClass="input-dermo" placeholder="Costo"></asp:TextBox>
+                        <asp:Label runat="server" CssClass="form-label" AssociatedControlID="txtCostoUnitario">Costo Unit. ($)</asp:Label>
+                        <asp:TextBox ID="txtCostoUnitario" runat="server" TextMode="Number" CssClass="form-control" placeholder="Costo"></asp:TextBox>
                     </div>
 
                     <div>
-                        <asp:Button ID="btnAgregarItem" runat="server" Text="Agregar &Iacute;tem" CssClass="btn-dermo-primary" style="padding: 11px 18px;" OnClick="btnAgregarItem_Click" />
+                        <asp:Button ID="btnAgregarItem" runat="server" Text="Agregar &Iacute;tem" CssClass="btn btn-primary" OnClick="btnAgregarItem_Click" />
                     </div>
                 </div>
 
                 <!-- GRILLA TEMPORAL DEL DETALLE DE LA ORDEN -->
                 <div class="table-dermo-container" style="margin-bottom: 15px;">
-                    <asp:GridView ID="gvDetalleOC" runat="server" AutoGenerateColumns="False" CssClass="table-dermo-modern" EmptyDataText="No se han agregado productos a la &oacute;rden de compra." OnRowCommand="gvDetalleOC_RowCommand">
+                    <asp:GridView ID="gvDetalleOC" runat="server" AutoGenerateColumns="False" CssClass="table table-hover align-middle" GridLines="None" EmptyDataText="No se han agregado productos a la &oacute;rden de compra." OnRowCommand="gvDetalleOC_RowCommand">
                         <Columns>
                             <asp:BoundField DataField="Sku" HeaderText="SKU" />
                             <asp:BoundField DataField="Producto" HeaderText="Producto e Insumo" />
@@ -648,20 +584,20 @@
 
                 <!-- BOTONES DE ACCION DEL FORMULARIO -->
                 <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; border-top: 1px solid var(--color-borde-suave); padding-top: 18px;">
-                    <asp:Button ID="btnCancelarForm" runat="server" Text="Cancelar" CssClass="btn-dermo-secondary" OnClick="btnCerrarForm_Click" />
-                    <asp:Button ID="btnGuardarOC" runat="server" Text="Guardar &Oacute;rden de Compra" CssClass="btn-dermo-primary" style="padding: 12px 28px;" OnClick="btnGuardarOC_Click" />
+                    <asp:Button ID="btnCancelarForm" runat="server" Text="Cancelar" CssClass="btn btn-outline-secondary" OnClick="btnCerrarForm_Click" />
+                    <asp:Button ID="btnGuardarOC" runat="server" Text="Guardar &Oacute;rden de Compra" CssClass="btn btn-primary" OnClick="btnGuardarOC_Click" />
                 </div>
             </asp:Panel>
 
             <!-- BARRA DE BUSQUEDA Y FILTROS -->
-            <div class="filter-toolbar-row">
+            <div class="filter-toolbar-row card-dermocosmetica">
                 <div style="position: relative; display: flex; align-items: center; flex: 1; min-width: 280px;">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 14px; color: var(--color-texto-suave); pointer-events: none;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <asp:TextBox ID="txtBuscar" runat="server" CssClass="input-dermo" placeholder="Buscar por N&deg; OC, laboratorio, RUT..." style="padding-left: 38px; border-radius: 20px; width: 100%; box-sizing: border-box;" AutoPostBack="true" OnTextChanged="txtBuscar_TextChanged"></asp:TextBox>
+                    <asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control" style="padding-left: 38px;" placeholder="Buscar por N&deg; OC, laboratorio, RUT..." AutoPostBack="true" OnTextChanged="txtBuscar_TextChanged"></asp:TextBox>
                 </div>
 
                 <div>
-                    <asp:DropDownList ID="ddlFiltroEstado" runat="server" CssClass="select-dermo" style="border-radius: 20px; min-width: 170px;" AutoPostBack="true" OnSelectedIndexChanged="ddlFiltroEstado_SelectedIndexChanged">
+                    <asp:DropDownList ID="ddlFiltroEstado" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlFiltroEstado_SelectedIndexChanged">
                         <asp:ListItem Value="" Text="Todos los Estados"></asp:ListItem>
                         <asp:ListItem Value="Borrador" Text="Borrador"></asp:ListItem>
                         <asp:ListItem Value="Emitida" Text="Emitida"></asp:ListItem>
@@ -672,11 +608,11 @@
                 </div>
 
                 <div>
-                    <asp:DropDownList ID="ddlFiltroLaboratorio" runat="server" CssClass="select-dermo" style="border-radius: 20px; min-width: 200px;" AutoPostBack="true" OnSelectedIndexChanged="ddlFiltroLaboratorio_SelectedIndexChanged"></asp:DropDownList>
+                    <asp:DropDownList ID="ddlFiltroLaboratorio" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlFiltroLaboratorio_SelectedIndexChanged"></asp:DropDownList>
                 </div>
 
                 <div>
-                    <asp:Button ID="btnLimpiarFiltros" runat="server" Text="Limpiar" CssClass="btn-dermo-secondary" style="border-radius: 20px; padding: 10px 18px; font-size: 12px; font-weight: 600;" OnClick="btnLimpiarFiltros_Click" />
+                    <asp:Button ID="btnLimpiarFiltros" runat="server" Text="Limpiar filtros" CssClass="btn btn-outline-secondary" OnClick="btnLimpiarFiltros_Click" />
                 </div>
             </div>
 
@@ -690,7 +626,7 @@
                     <span class="badge-status-activo" style="font-size: 11px; padding: 4px 12px; border-radius: 12px;">Gesti&oacute;n Arancelaria</span>
                 </div>
 
-                <asp:GridView ID="gvOrdenes" runat="server" AutoGenerateColumns="False" CssClass="table-dermo-modern" GridLines="None" EmptyDataText="No se encontraron &oacute;rdenes de compra con los filtros seleccionados." OnRowCommand="gvOrdenes_RowCommand">
+                <asp:GridView ID="gvOrdenes" runat="server" AutoGenerateColumns="False" CssClass="table table-hover align-middle" GridLines="None" EmptyDataText="No se encontraron &oacute;rdenes de compra con los filtros seleccionados." OnRowCommand="gvOrdenes_RowCommand">
                     <Columns>
                         <asp:TemplateField HeaderText="N&deg; &Oacute;RDEN" HeaderStyle-CssClass="col-center" ItemStyle-CssClass="col-center">
                             <ItemTemplate>
@@ -737,19 +673,19 @@
                         <asp:TemplateField HeaderText="ACCIONES" HeaderStyle-CssClass="col-center" ItemStyle-CssClass="col-center">
                             <ItemTemplate>
                                 <div style="display: flex; gap: 6px; align-items: center; justify-content: center;">
-                                    <asp:LinkButton ID="btnVer" runat="server" CommandName="VerDetalle" CommandArgument='<%# Eval("IdOC") %>' CssClass="btn-tabla-ver" ToolTip="Ver Comprobante">
+                                    <asp:LinkButton ID="btnVer" runat="server" CommandName="VerDetalle" CommandArgument='<%# Eval("IdOC") %>' CssClass="btn btn-outline-secondary btn-sm" ToolTip="Ver Comprobante">
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                                         Ver Detalle
                                     </asp:LinkButton>
-                                    <asp:LinkButton ID="btnAprobar" runat="server" CommandName="AprobarOC" CommandArgument='<%# Eval("IdOC") %>' Visible='<%# Eval("Estado").ToString() == "Borrador" %>' CssClass="btn-tabla-emitir" ToolTip="Emitir a Laboratorio">
+                                    <asp:LinkButton ID="btnAprobar" runat="server" CommandName="AprobarOC" CommandArgument='<%# Eval("IdOC") %>' Visible='<%# Eval("Estado").ToString() == "Borrador" %>' CssClass="btn btn-primary btn-sm" ToolTip="Emitir a Laboratorio">
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                                         Emitir
                                     </asp:LinkButton>
-                                    <asp:LinkButton ID="btnRecibir" runat="server" CommandName="RecibirOC" CommandArgument='<%# Eval("IdOC") %>' Visible='<%# Eval("Estado").ToString() == "Emitida" || Eval("Estado").ToString() == "Parcial" %>' CssClass="btn-tabla-recibir" ToolTip="Registrar Recepci&oacute;n">
+                                    <asp:LinkButton ID="btnRecibir" runat="server" CommandName="RecibirOC" CommandArgument='<%# Eval("IdOC") %>' Visible='<%# Eval("Estado").ToString() == "Emitida" || Eval("Estado").ToString() == "Parcial" %>' CssClass="btn btn-primary btn-sm" ToolTip="Registrar Recepci&oacute;n">
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                         Recibir
                                     </asp:LinkButton>
-                                    <asp:LinkButton ID="btnAnular" runat="server" CommandName="AnularOC" CommandArgument='<%# Eval("IdOC") %>' Visible='<%# Eval("Estado").ToString() != "Anulada" && Eval("Estado").ToString() != "Recibida" %>' OnClientClick="return confirm('¿Seguro que deseas anular esta orden de compra?');" CssClass="btn-tabla-anular" ToolTip="Anular Orden">
+                                    <asp:LinkButton ID="btnAnular" runat="server" CommandName="AnularOC" CommandArgument='<%# Eval("IdOC") %>' Visible='<%# Eval("Estado").ToString() != "Anulada" && Eval("Estado").ToString() != "Recibida" %>' OnClientClick="return confirm('¿Seguro que deseas anular esta orden de compra?');" CssClass="btn btn-outline-danger btn-sm" ToolTip="Anular Orden">
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                                         Anular
                                     </asp:LinkButton>
@@ -771,7 +707,7 @@
                             Detalle de &Oacute;rden <asp:Label ID="lblModalNumeroOC" runat="server" ForeColor="#7A5E47"></asp:Label>
                         </h2>
                     </div>
-                    <asp:Button ID="btnCerrarModal" runat="server" Text="Cerrar" CssClass="btn-dermo-secondary" style="padding: 6px 16px; font-size: 12px;" OnClick="btnCerrarModal_Click" />
+                    <asp:Button ID="btnCerrarModal" runat="server" Text="Cerrar" CssClass="btn btn-outline-secondary" OnClick="btnCerrarModal_Click" />
                 </div>
 
                 <div class="supplier-info-badge" style="margin-bottom: 20px;">
@@ -783,7 +719,7 @@
                 </div>
 
                 <div class="table-dermo-container" style="margin-bottom: 20px;">
-                    <asp:GridView ID="gvModalItems" runat="server" AutoGenerateColumns="False" CssClass="table-dermo-modern" EmptyDataText="No hay productos en esta &oacute;rden.">
+                    <asp:GridView ID="gvModalItems" runat="server" AutoGenerateColumns="False" CssClass="table table-hover align-middle" GridLines="None" EmptyDataText="No hay productos en esta &oacute;rden.">
                         <Columns>
                             <asp:BoundField DataField="Sku" HeaderText="SKU" />
                             <asp:BoundField DataField="Producto" HeaderText="Producto" />
@@ -825,10 +761,10 @@
                 </div>
 
                 <div style="text-align: right; margin-top: 25px; border-top: 1px solid var(--color-borde-suave); padding-top: 15px;">
-                    <button type="button" onclick="window.print();" class="btn-dermo-secondary" style="cursor: pointer; padding: 10px 20px;">
+                    <button type="button" onclick="window.print();" class="btn btn-outline-secondary">
                         Imprimir / Guardar Comprobante
                     </button>
-                    <asp:Button ID="btnCerrarModal2" runat="server" Text="Aceptar y Salir" CssClass="btn-dermo-primary" style="margin-left: 10px; padding: 10px 22px;" OnClick="btnCerrarModal_Click" />
+                    <asp:Button ID="btnCerrarModal2" runat="server" Text="Aceptar y Salir" CssClass="btn btn-primary" OnClick="btnCerrarModal_Click" />
                 </div>
             </div>
         </asp:Panel>
@@ -841,7 +777,7 @@
                         <span class="pill-badge" style="font-size: 10px; padding: 3px 10px;">AJUSTE TRIBUTARIO</span>
                         <h2 style="font-size: 20px; margin-top: 4px; color: var(--color-texto);">Tasa de IVA Legal (%)</h2>
                     </div>
-                    <asp:Button ID="btnCerrarConfig" runat="server" Text="Cerrar" CssClass="btn-dermo-secondary" style="padding: 6px 14px; font-size: 12px;" OnClick="btnCerrarConfig_Click" />
+                    <asp:Button ID="btnCerrarConfig" runat="server" Text="Cerrar" CssClass="btn btn-outline-secondary" OnClick="btnCerrarConfig_Click" />
                 </div>
 
                 <p class="text-muted" style="font-size: 13px; line-height: 1.5; margin-bottom: 20px;">
@@ -849,9 +785,9 @@
                 </p>
 
                 <div class="form-group-dermo">
-                    <label class="label-dermo" style="font-weight: 700;">Tasa de IVA Legal Vigente (%)</label>
+                    <label class="form-label" style="font-weight: 700;">Tasa de IVA Legal Vigente (%)</label>
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <asp:TextBox ID="txtConfigIva" runat="server" CssClass="input-pill-dermo" style="max-width: 140px; font-weight: 700; text-align: center;" placeholder="19.0"></asp:TextBox>
+                        <asp:TextBox ID="txtConfigIva" runat="server" CssClass="form-control" placeholder="19.0"></asp:TextBox>
                         <span style="font-size: 13px; color: var(--color-texto-suave); font-weight: 600;">% (Ejemplo: 19 para 19%, 20 para 20%)</span>
                     </div>
                     <small style="font-size: 11px; color: #736E67; display: block; margin-top: 6px;">
@@ -862,12 +798,11 @@
                 <asp:Label ID="lblConfigMensaje" runat="server" Font-Size="12.5px" style="display: block; margin-top: 14px;"></asp:Label>
 
                 <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; border-top: 1px solid var(--color-borde-suave); padding-top: 15px;">
-                    <asp:Button ID="btnCancelarConfig" runat="server" Text="Cancelar" CssClass="btn-dermo-secondary" OnClick="btnCerrarConfig_Click" />
-                    <asp:Button ID="btnGuardarConfig" runat="server" Text="Guardar Tasa IVA" CssClass="btn-dermo-primary" OnClick="btnGuardarConfig_Click" />
+                    <asp:Button ID="btnCancelarConfig" runat="server" Text="Cancelar" CssClass="btn btn-outline-secondary" OnClick="btnCerrarConfig_Click" />
+                    <asp:Button ID="btnGuardarConfig" runat="server" Text="Guardar Tasa IVA" CssClass="btn btn-primary" OnClick="btnGuardarConfig_Click" />
                 </div>
             </div>
         </asp:Panel>
-
-    </form>
-</body>
-</html>
+        
+    </div>
+</asp:Content>

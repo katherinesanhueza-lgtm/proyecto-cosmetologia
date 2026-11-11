@@ -411,4 +411,87 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
   </Target>
+  <ItemGroup>
+    <Content Include="Contabilidad.aspx" />
+    <Content Include="Compras.aspx" />
+    <Compile Include="Compras.aspx.cs"><DependentUpon>Compras.aspx</DependentUpon></Compile>
+    <Compile Include="Compras.aspx.designer.cs"><DependentUpon>Compras.aspx</DependentUpon></Compile>
+    <Content Include="Content\ComprasResumen.css" />
+    <Compile Include="RecepcionInventario.cs" />
+    <Content Include="Contabilidad.Master" />
+    <Content Include="Content\Contabilidad.css" />
+    <Content Include="Content\Inicio.css" />
+    <Content Include="App_Data\000_esquema_mysql.sql" />
+    <Content Include="App_Data\001_inventario.sql" />
+    <Compile Include="ContabilidadDatos.cs" />
+    <Compile Include="ContabilidadExportacion.cs" />
+    <Compile Include="Contabilidad.aspx.cs">
+      <DependentUpon>Contabilidad.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Contabilidad.aspx.designer.cs">
+      <DependentUpon>Contabilidad.aspx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Clientes.aspx" />
+    <Compile Include="Clientes.aspx.cs">
+      <DependentUpon>Clientes.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Clientes.aspx.designer.cs">
+      <DependentUpon>Clientes.aspx</DependentUpon>
+    </Compile>
+    <Content Include="Cotizaciones.aspx" />
+    <Compile Include="Cotizaciones.aspx.cs">
+      <DependentUpon>Cotizaciones.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Cotizaciones.aspx.designer.cs">
+      <DependentUpon>Cotizaciones.aspx</DependentUpon>
+    </Compile>
+    <Content Include="Despachos.aspx" />
+    <Compile Include="Despachos.aspx.cs">
+      <DependentUpon>Despachos.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Despachos.aspx.designer.cs">
+      <DependentUpon>Despachos.aspx</DependentUpon>
+    </Compile>
+    <Content Include="Devoluciones.aspx" />
+    <Compile Include="Devoluciones.aspx.cs">
+      <DependentUpon>Devoluciones.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Devoluciones.aspx.designer.cs">
+      <DependentUpon>Devoluciones.aspx</DependentUpon>
+    </Compile>
+    <Content Include="ReporteVentas.aspx" />
+    <Compile Include="ReporteVentas.aspx.cs">
+      <DependentUpon>ReporteVentas.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ReporteVentas.aspx.designer.cs">
+      <DependentUpon>ReporteVentas.aspx</DependentUpon>
+    </Compile>
+    <Content Include="Ventas.aspx" />
+    <Compile Include="Ventas.aspx.cs">
+      <DependentUpon>Ventas.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Ventas.aspx.designer.cs">
+      <DependentUpon>Ventas.aspx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="VentaInventario.cs" />
+    <Compile Include="PaginaVentas.cs" />
+    <Content Include="App_Data\003_ventas.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Inventario.aspx" />
+    <Compile Include="Inventario.aspx.cs" />
+    <Compile Include="Inventario.aspx.designer.cs" />
+    <Content Include="Gestion.aspx" />
+    <Compile Include="Gestion.aspx.cs" />
+    <Content Include="ReporteInventario.aspx" />
+    <Compile Include="ReporteInventario.aspx.cs" />
+    <Compile Include="ReporteInventario.aspx.designer.cs" />
+    <Compile Include="InventarioDatos.cs" />
+    <Compile Include="PaginaInventario.cs" />
+    <Content Include="App_Data\004_contabilidad_mysql.sql" />
+  </ItemGroup>
 </Project>

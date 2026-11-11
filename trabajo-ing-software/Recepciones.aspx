@@ -1,17 +1,6 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Recepciones.aspx.cs" Inherits="trabajo_ing_software.Recepciones" ResponseEncoding="utf-8" ContentType="text/html; charset=utf-8" %>
-
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="es">
-<head runat="server">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Recepci&oacute;n y Asignaci&oacute;n de Lotes - Cosmetolog&iacute;a Profesional</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,500;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    <link href="Content/Estilos.css" rel="stylesheet" type="text/css" />
-    <style>
+﻿<%@ Page Title="Recepciones y lotes" MasterPageFile="~/Contabilidad.Master" Language="C#" AutoEventWireup="true" CodeBehind="Recepciones.aspx.cs" Inherits="trabajo_ing_software.Recepciones" ResponseEncoding="utf-8" ContentType="text/html; charset=utf-8" %>
+<asp:Content ID="Recursos" ContentPlaceHolderID="EstilosPagina" runat="server">
+<style>
         .rec-container {
             max-width: 1440px;
             margin: 25px auto 50px auto;
@@ -137,65 +126,13 @@
             }
         }
     </style>
-</head>
-<body>
-    <form id="form1" runat="server">
-
-        <!-- HEADER GLOBAL DE MARCA -->
-        <header class="top-header">
-            <div class="brand-block">
-                <span class="brand-logo">NOMBRE</span>
-                <span class="brand-sub">COSMETOLOG&Iacute;A PROFESIONAL</span>
-            </div>
-            <nav>
-                <ul class="nav-links-menu">
-                    <% 
-                        string rolNav = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
-                        bool esAdmin = rolNav.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
-                        bool esComprador = rolNav.Equals("Comprador", StringComparison.OrdinalIgnoreCase);
-                        bool esBodeguero = rolNav.Equals("Bodeguero", StringComparison.OrdinalIgnoreCase);
-                        bool esContador = rolNav.Equals("Contador", StringComparison.OrdinalIgnoreCase);
-                        bool esVendedor = rolNav.Equals("Vendedor", StringComparison.OrdinalIgnoreCase);
-
-                        // Matriz Oficial RBAC 6.1.2
-                        bool puedeVerCompras = esAdmin || esComprador || esContador;
-                        bool puedeVerInventario = esAdmin || esBodeguero || esComprador || esContador || esVendedor;
-                    %>
-                    <li><a href="Default.aspx" class="nav-item-link">Inicio</a></li>
-
-                    <%-- ADMINISTRACIÃ“N (Solo Administrador General) --%>
-                    <% if (esAdmin) { %>
-                    <li><a href="Usuarios.aspx" class="nav-item-link">Usuarios</a></li>
-                    <% } %>
-
-                    <%-- COMPRAS (Admin y Comprador Escritura; Contador Solo Consulta) --%>
-                    <% if (esAdmin || esComprador || esContador) { %>
-                    <li><a href="Laboratorios.aspx" class="nav-item-link">Laboratorios</a></li>
-                    <% } %>
-                    <% if (puedeVerCompras) { %>
-                    <li><a href="OrdenesCompra.aspx" class="nav-item-link">&Oacute;rdenes de Compra</a></li>
-                    <% } %>
-
-                    <%-- INVENTARIO (Bodeguero Escritura; Admin Total; Comprador y Contador Consulta) --%>
-                    <% if (esAdmin || esBodeguero || esComprador) { %>
-                    <li><a href="Recepciones.aspx" class="nav-item-link">Recepci&oacute;n y Lotes</a></li>
-                    <% } %>
-
-                    <%-- ACCESOS (Solo Administrador General) --%>
-                    <% if (esAdmin) { %>
-                    <li><a href="Accesos.aspx" class="nav-item-link">Accesos</a></li>
-                    <% } %>
-                </ul>
-            </nav>
-            <div class="header-actions">
-                <asp:Label ID="lblBienvenida" runat="server" Font-Bold="true" Font-Size="13px"></asp:Label>
-                <asp:Button ID="btnLogout" runat="server" Text="Cerrar Sesi&oacute;n" CssClass="btn-dermo-secondary" style="padding: 7px 16px; font-size: 12px;" OnClick="btnLogout_Click" />
-                <div class="user-avatar-btn" title="Usuario">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                </div>
-            </div>
-        </header>
-
+</asp:Content>
+<asp:Content ID="Acciones" ContentPlaceHolderID="AccionesUsuario" runat="server">
+    <asp:Label ID="lblBienvenida" Visible="false" runat="server" Font-Bold="true" Font-Size="13px"></asp:Label>
+                <asp:Button ID="btnLogout" runat="server" Text="Cerrar Sesi&oacute;n" CssClass="btn btn-outline-secondary btn-sm cierre-compras" OnClick="btnLogout_Click" />
+</asp:Content>
+<asp:Content ID="Contenido" ContentPlaceHolderID="MainContent" runat="server">
+    <div class="dashboard compras-contenido">
         <!-- CONTENEDOR PRINCIPAL -->
         <div class="rec-container">
 
@@ -203,15 +140,15 @@
             <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
                 <div>
                     <span class="pill-badge" style="font-size: 10px; padding: 4px 12px; margin-bottom: 8px;">M&Oacute;DULO DE COMPRAS - RECEPCI&Oacute;N Y BODEGA</span>
-                    <h1 style="font-size: 26px; margin-top: 4px;">Recepci&oacute;n de Mercader&iacute;a y Asignaci&oacute;n de Lotes</h1>
+                    <h1>Recepci&oacute;n de Mercader&iacute;a y Asignaci&oacute;n de Lotes</h1>
                     <p class="text-muted" style="margin-top: 4px;">Registro de gu&iacute;a de despacho, control f&iacute;sico de insumos contra &Oacute;rdenes de Compra, y asignaci&oacute;n de lotes y fechas de vencimiento bajo criterio FEFO (RF-COM-05 / RF-COM-06 / RF-COM-07).</p>
                 </div>
-                <div style="display: flex; gap: 10px;">
-                    <a href="ReporteIngresos.aspx" class="btn-dermo-secondary" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                <div class="compras-acciones">
+                    <a href="ReporteIngresos.aspx" class="btn btn-outline-secondary">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                         Reporte Consolidado
                     </a>
-                    <asp:Button ID="btnToggleForm" runat="server" Text="Nueva Recepci&oacute;n de Mercader&iacute;a" CssClass="btn-dermo-primary" OnClick="btnToggleForm_Click" />
+                    <asp:Button ID="btnToggleForm" runat="server" Text="Nueva Recepci&oacute;n de Mercader&iacute;a" CssClass="btn btn-primary" OnClick="btnToggleForm_Click" />
                 </div>
             </div>
 
@@ -262,7 +199,7 @@
                         <span class="pill-badge" style="font-size: 10px; padding: 3px 10px;">RECEPCI&Oacute;N F&Iacute;SICA</span>
                         <h2 style="font-size: 20px; margin-top: 4px;">Ingreso de Mercader&iacute;a contra &Oacute;rden de Compra</h2>
                     </div>
-                    <asp:Button ID="btnCerrarForm" runat="server" Text="Cerrar Formulario" CssClass="btn-dermo-secondary" style="font-size: 12px; padding: 6px 14px;" OnClick="btnCerrarForm_Click" />
+                    <asp:Button ID="btnCerrarForm" runat="server" Text="Cerrar Formulario" CssClass="btn btn-outline-secondary" OnClick="btnCerrarForm_Click" />
                 </div>
 
                 <!-- 1. CABECERA DE LA RECEPCION -->
@@ -273,18 +210,22 @@
 
                 <div class="form-grid-3col">
                     <div class="form-group-dermo">
-                        <label class="label-dermo">Seleccionar &Oacute;rden de Compra (*)</label>
-                        <asp:DropDownList ID="ddlOrdenCompra" runat="server" CssClass="select-dermo" AutoPostBack="true" OnSelectedIndexChanged="ddlOrdenCompra_SelectedIndexChanged"></asp:DropDownList>
+                        <asp:Label runat="server" CssClass="form-label" AssociatedControlID="ddlOrdenCompra">Seleccionar &Oacute;rden de Compra (*)</asp:Label>
+                        <asp:DropDownList ID="ddlOrdenCompra" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlOrdenCompra_SelectedIndexChanged"></asp:DropDownList>
                     </div>
 
                     <div class="form-group-dermo">
-                        <label class="label-dermo">N&deg; Gu&iacute;a de Despacho / Factura Proveedor (*)</label>
-                        <asp:TextBox ID="txtGuiaDespacho" runat="server" CssClass="input-dermo" placeholder="Ej: GD-884920"></asp:TextBox>
+                        <asp:Label runat="server" CssClass="form-label" AssociatedControlID="txtGuiaDespacho">N&deg; Gu&iacute;a de Despacho / Factura Proveedor (*)</asp:Label>
+                        <asp:TextBox ID="txtGuiaDespacho" runat="server" CssClass="form-control" placeholder="Ej: GD-884920"></asp:TextBox>
                     </div>
 
                     <div class="form-group-dermo">
-                        <label class="label-dermo">Fecha de Recepci&oacute;n (*)</label>
-                        <asp:TextBox ID="txtFechaRecepcion" runat="server" TextMode="Date" CssClass="input-dermo"></asp:TextBox>
+                        <asp:Label runat="server" CssClass="form-label" AssociatedControlID="txtFechaRecepcion">Fecha de Recepci&oacute;n (*)</asp:Label>
+                        <asp:TextBox ID="txtFechaRecepcion" runat="server" TextMode="Date" CssClass="form-control"></asp:TextBox>
+                    </div>
+                    <div class="form-group-dermo">
+                        <asp:Label runat="server" AssociatedControlID="ddlBodega" CssClass="label-dermo">Bodega de destino (*)</asp:Label>
+                        <asp:DropDownList ID="ddlBodega" runat="server" CssClass="form-select" />
                     </div>
                 </div>
 
@@ -308,7 +249,7 @@
                 </p>
 
                 <div class="table-dermo-container" style="margin-bottom: 20px;">
-                    <asp:GridView ID="gvItemsRecepcion" runat="server" AutoGenerateColumns="False" CssClass="table-dermo-modern" EmptyDataText="Seleccione una orden de compra para cargar sus l&iacute;neas de productos.">
+                    <asp:GridView ID="gvItemsRecepcion" runat="server" AutoGenerateColumns="False" CssClass="table table-hover align-middle" GridLines="None" EmptyDataText="Seleccione una orden de compra para cargar sus l&iacute;neas de productos.">
                         <Columns>
                             <asp:BoundField DataField="Sku" HeaderText="SKU" />
                             <asp:BoundField DataField="Producto" HeaderText="Producto e Insumo" />
@@ -323,19 +264,19 @@
                                     <asp:HiddenField ID="hfIdVariante" runat="server" Value='<%# Eval("IdVariante") %>' />
                                     <asp:HiddenField ID="hfCostoUnitario" runat="server" Value='<%# Eval("CostoUnitario") %>' />
                                     <asp:HiddenField ID="hfCantidadPendiente" runat="server" Value='<%# Eval("CantidadPendiente") %>' />
-                                    <asp:TextBox ID="txtCantRecibir" runat="server" Text='<%# Eval("CantidadPendiente") %>' TextMode="Number" min="0" max='<%# Eval("CantidadPendiente") %>' CssClass="input-dermo" style="width: 80px; padding: 6px;"></asp:TextBox>
+                                    <asp:TextBox ID="txtCantRecibir" runat="server" Text='<%# Eval("CantidadPendiente") %>' TextMode="Number" min="0" max='<%# Eval("CantidadPendiente") %>' CssClass="form-control form-control-sm" style="width: 80px;"></asp:TextBox>
                                 </ItemTemplate>
                             </asp:TemplateField>
 
                             <asp:TemplateField HeaderText="N&deg; Lote (*)">
                                 <ItemTemplate>
-                                    <asp:TextBox ID="txtNumeroLote" runat="server" Text='<%# Eval("SugerenciaLote") %>' CssClass="input-dermo" placeholder="Ej: LOT-2026-A" style="width: 140px; padding: 6px; font-weight: 600;"></asp:TextBox>
+                                    <asp:TextBox ID="txtNumeroLote" runat="server" Text='<%# Eval("SugerenciaLote") %>' CssClass="form-control form-control-sm" placeholder="Ej: LOT-2026-A" style="width: 140px;"></asp:TextBox>
                                 </ItemTemplate>
                             </asp:TemplateField>
 
                             <asp:TemplateField HeaderText="Fecha Vencimiento (*)">
                                 <ItemTemplate>
-                                    <asp:TextBox ID="txtFechaVencimiento" runat="server" Text='<%# Eval("SugerenciaVencimiento") %>' TextMode="Date" CssClass="input-dermo" style="width: 135px; padding: 6px;"></asp:TextBox>
+                                    <asp:TextBox ID="txtFechaVencimiento" runat="server" Text='<%# Eval("SugerenciaVencimiento") %>' TextMode="Date" CssClass="form-control form-control-sm" style="width: 135px;"></asp:TextBox>
                                 </ItemTemplate>
                             </asp:TemplateField>
 
@@ -353,30 +294,30 @@
 
                 <!-- BOTONES DE ACCION -->
                 <div style="display: flex; justify-content: flex-end; gap: 12px;">
-                    <asp:Button ID="btnCancelarForm" runat="server" Text="Cancelar" CssClass="btn-dermo-secondary" OnClick="btnCerrarForm_Click" />
-                    <asp:Button ID="btnAprobarRecepcion" runat="server" Text="Aprobar e Ingresar a Bodega" CssClass="btn-dermo-primary" style="padding: 12px 28px; background: #27AE60;" OnClick="btnAprobarRecepcion_Click" />
+                    <asp:Button ID="btnCancelarForm" runat="server" Text="Cancelar" CssClass="btn btn-outline-secondary" OnClick="btnCerrarForm_Click" />
+                    <asp:Button ID="btnAprobarRecepcion" runat="server" Text="Aprobar e Ingresar a Bodega" CssClass="btn btn-primary" OnClick="btnAprobarRecepcion_Click" />
                 </div>
             </asp:Panel>
 
             <!-- BARRA DE BUSQUEDA Y FILTROS -->
-            <div class="filter-toolbar-row">
+            <div class="filter-toolbar-row card-dermocosmetica">
                 <div style="position: relative; display: flex; align-items: center;">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 14px; color: var(--color-texto-suave);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <asp:TextBox ID="txtBuscar" runat="server" CssClass="input-dermo" placeholder="Buscar por N&deg; recepci&oacute;n, gu&iacute;a, OC o proveedor..." style="padding-left: 38px; border-radius: 20px;" AutoPostBack="true" OnTextChanged="txtBuscar_TextChanged"></asp:TextBox>
+                    <asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control" style="padding-left: 38px;" placeholder="Buscar por N&deg; recepci&oacute;n, gu&iacute;a, OC o proveedor..." AutoPostBack="true" OnTextChanged="txtBuscar_TextChanged"></asp:TextBox>
                 </div>
 
                 <div>
-                    <asp:DropDownList ID="ddlFiltroLaboratorio" runat="server" CssClass="select-dermo" style="border-radius: 20px;" AutoPostBack="true" OnSelectedIndexChanged="ddlFiltroLaboratorio_SelectedIndexChanged"></asp:DropDownList>
+                    <asp:DropDownList ID="ddlFiltroLaboratorio" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlFiltroLaboratorio_SelectedIndexChanged"></asp:DropDownList>
                 </div>
 
                 <div>
-                    <asp:Button ID="btnLimpiarFiltros" runat="server" Text="Limpiar" CssClass="btn-dermo-secondary" style="border-radius: 20px; padding: 10px 16px; font-size: 12px;" OnClick="btnLimpiarFiltros_Click" />
+                    <asp:Button ID="btnLimpiarFiltros" runat="server" Text="Limpiar filtros" CssClass="btn btn-outline-secondary" OnClick="btnLimpiarFiltros_Click" />
                 </div>
             </div>
 
             <!-- TABLA PRINCIPAL DE RECEPCIONES HISTORICAS -->
             <div class="table-dermo-container">
-                <asp:GridView ID="gvRecepciones" runat="server" AutoGenerateColumns="False" CssClass="table-dermo-modern" EmptyDataText="No se registran recepciones de mercader&iacute;a para los criterios seleccionados." OnRowCommand="gvRecepciones_RowCommand">
+                <asp:GridView ID="gvRecepciones" runat="server" AutoGenerateColumns="False" CssClass="table table-hover align-middle" GridLines="None" EmptyDataText="No se registran recepciones de mercader&iacute;a para los criterios seleccionados." OnRowCommand="gvRecepciones_RowCommand">
                     <Columns>
                         <asp:TemplateField HeaderText="N&deg; Recepci&oacute;n">
                             <ItemTemplate>
@@ -417,7 +358,7 @@
 
                         <asp:TemplateField HeaderText="Acciones">
                             <ItemTemplate>
-                                <asp:LinkButton ID="btnVer" runat="server" CommandName="VerDetalle" CommandArgument='<%# Eval("IdRecepcion") %>' CssClass="btn-dermo-secondary" style="padding: 4px 10px; font-size: 11px; text-decoration: none;">
+                                <asp:LinkButton ID="btnVer" runat="server" CommandName="VerDetalle" CommandArgument='<%# Eval("IdRecepcion") %>' CssClass="btn btn-outline-secondary" style="padding: 4px 10px; font-size: 11px; text-decoration: none;">
                                     Ver Lotes y Detalle
                                 </asp:LinkButton>
                             </ItemTemplate>
@@ -438,7 +379,7 @@
                             Recepci&oacute;n <asp:Label ID="lblModalIdRec" runat="server" ForeColor="#7A5E47"></asp:Label>
                         </h2>
                     </div>
-                    <asp:Button ID="btnCerrarModal" runat="server" Text="Cerrar" CssClass="btn-dermo-secondary" style="padding: 6px 16px; font-size: 12px;" OnClick="btnCerrarModal_Click" />
+                    <asp:Button ID="btnCerrarModal" runat="server" Text="Cerrar" CssClass="btn btn-outline-secondary" OnClick="btnCerrarModal_Click" />
                 </div>
 
                 <div class="info-oc-banner" style="margin-bottom: 20px;">
@@ -450,7 +391,7 @@
                 </div>
 
                 <div class="table-dermo-container" style="margin-bottom: 20px;">
-                    <asp:GridView ID="gvModalLotes" runat="server" AutoGenerateColumns="False" CssClass="table-dermo-modern" EmptyDataText="No hay productos registrados en esta recepci&oacute;n.">
+                    <asp:GridView ID="gvModalLotes" runat="server" AutoGenerateColumns="False" CssClass="table table-hover align-middle" GridLines="None" EmptyDataText="No hay productos registrados en esta recepci&oacute;n.">
                         <Columns>
                             <asp:BoundField DataField="Sku" HeaderText="SKU" />
                             <asp:BoundField DataField="Producto" HeaderText="Producto" />
@@ -465,14 +406,13 @@
                 </div>
 
                 <div style="text-align: right; margin-top: 25px; border-top: 1px solid var(--color-borde-suave); padding-top: 15px;">
-                    <button type="button" onclick="window.print();" class="btn-dermo-secondary" style="cursor: pointer; padding: 10px 20px;">
+                    <button type="button" onclick="window.print();" class="btn btn-outline-secondary">
                         Imprimir Comprobante de Entrada
                     </button>
-                    <asp:Button ID="btnCerrarModal2" runat="server" Text="Aceptar y Salir" CssClass="btn-dermo-primary" style="margin-left: 10px; padding: 10px 22px;" OnClick="btnCerrarModal_Click" />
+                    <asp:Button ID="btnCerrarModal2" runat="server" Text="Aceptar y Salir" CssClass="btn btn-primary" OnClick="btnCerrarModal_Click" />
                 </div>
             </div>
         </asp:Panel>
-
-    </form>
-</body>
-</html>
+        
+    </div>
+</asp:Content>

@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 // <generado automáticamente>
 //     Este código fue generado por una herramienta.
 //
@@ -30,6 +30,7 @@ namespace trabajo_ing_software
         protected global::System.Web.UI.WebControls.DropDownList ddlOrdenCompra;
         protected global::System.Web.UI.WebControls.TextBox txtGuiaDespacho;
         protected global::System.Web.UI.WebControls.TextBox txtFechaRecepcion;
+        protected global::System.Web.UI.WebControls.DropDownList ddlBodega;
 
         protected global::System.Web.UI.WebControls.Panel pnlInfoOC;
         protected global::System.Web.UI.WebControls.Label lblInfoLaboratorio;

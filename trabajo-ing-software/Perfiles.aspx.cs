@@ -1,4 +1,4 @@
-using System;
+Ôªøusing System;
 using System.Data;
 using System.Configuration;
 using MySql.Data.MySqlClient;
@@ -13,6 +13,19 @@ namespace trabajo_ing_software
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (Session["IdUsuario"] == null)
+            {
+                Response.Redirect("Login.aspx");
+                return;
+            }
+
+            string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
+            if (!rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
+            {
+                ConfiguracionGlobal.RedirigirSegunRol(Response, rolUsuario);
+                return;
+            }
+
             if (!IsPostBack)
             {
                 CargarPerfiles();
@@ -58,7 +71,7 @@ namespace trabajo_ing_software
                 }
             }
 
-            lblMensaje.Text = "Perfil guardado con Èxito.";
+            lblMensaje.Text = "Perfil guardado con √©xito.";
             lblMensaje.ForeColor = System.Drawing.Color.Green;
 
             txtNombrePerfil.Text = "";
@@ -84,7 +97,7 @@ namespace trabajo_ing_software
                     }
                     catch (MySqlException)
                     {
-                        lblMensaje.Text = "No se puede eliminar este perfil porque est· asignado a uno o m·s usuarios.";
+                        lblMensaje.Text = "No se puede eliminar este perfil porque est√° asignado a uno o m√°s usuarios.";
                         lblMensaje.ForeColor = System.Drawing.Color.Red;
                     }
                 }

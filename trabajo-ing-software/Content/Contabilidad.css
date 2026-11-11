@@ -1,0 +1,487 @@
+/* Importar fuentes oficiales de tu diseño */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap');
+
+:root {
+    --color-primario: #D7C9B8;
+    --color-secundario: #A89B8A;
+    --color-acento: #8B6F56;
+    --color-fondo: #F7F4EE;
+    --color-texto: #2E2E2E;
+    --color-blanco: #FFFFFF;
+}
+
+body {
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Títulos con Playfair Display */
+h1, h2, h3, .titulo-elegante {
+    font-family: 'Playfair Display', serif;
+    color: var(--color-acento);
+    font-weight: 700;
+}
+
+/* Tarjeta / Contenedor blanco minimalista */
+.card-dermocosmetica {
+    background-color: var(--color-blanco);
+    border-radius: 20px;
+    padding: 35px;
+    box-shadow: 0 10px 30px rgba(139, 111, 86, 0.08);
+    border: 1px solid var(--color-primario);
+}
+
+.erp-header {
+    height: 78px;
+    background-color: var(--color-blanco);
+    border-bottom: 1px solid var(--color-primario);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 35px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+
+/* LOGO */
+
+.erp-logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.logo-simbolo {
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-acento);
+    color: var(--color-blanco);
+    border-radius: 14px;
+    font-family: 'Playfair Display', serif;
+    font-size: 25px;
+    font-weight: 700;
+}
+
+.logo-titulo {
+    display: block;
+    font-family: 'Playfair Display', serif;
+    color: var(--color-acento);
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.logo-subtitulo {
+    display: block;
+    color: var(--color-secundario);
+    font-size: 11px;
+    margin-top: 1px;
+}
+
+
+/* USUARIO */
+
+.erp-usuario {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.usuario-info {
+    text-align: right;
+}
+
+.usuario-nombre {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.usuario-rol {
+    display: block;
+    color: var(--color-secundario);
+    font-size: 11px;
+}
+
+.usuario-avatar {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-primario);
+    color: var(--color-acento);
+    border-radius: 50%;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   LAYOUT
+   ========================================================= */
+
+.erp-layout {
+    display: flex;
+    min-height: 100vh;
+    padding-top: 78px;
+}
+
+
+/* =========================================================
+   MENÚ LATERAL
+   ========================================================= */
+
+.erp-sidebar {
+    width: 245px;
+    background-color: var(--color-blanco);
+    border-right: 1px solid var(--color-primario);
+    position: fixed;
+    top: 78px;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 28px 18px;
+}
+
+.erp-menu {
+    display: flex;
+    flex-direction: column;
+}
+
+.menu-titulo {
+    color: var(--color-secundario);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.3px;
+    margin: 0 12px 12px;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 12px 14px;
+    margin-bottom: 5px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--color-texto);
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.25s ease;
+}
+
+    .menu-item:hover {
+        background-color: var(--color-fondo);
+        color: var(--color-acento);
+    }
+
+.menu-icono {
+    width: 25px;
+    text-align: center;
+    color: var(--color-acento);
+    font-size: 17px;
+}
+
+.menu-inactivo {
+    opacity: 0.45;
+    cursor: default;
+}
+
+    .menu-inactivo:hover {
+        background-color: transparent;
+        color: var(--color-texto);
+    }
+
+.menu-separador {
+    height: 1px;
+    background-color: var(--color-fondo);
+    margin: 18px 10px;
+}
+
+
+/* PIE DEL SIDEBAR */
+
+.sidebar-footer {
+    border-top: 1px solid var(--color-fondo);
+    padding: 18px 12px 0;
+}
+
+    .sidebar-footer span {
+        display: block;
+        color: var(--color-acento);
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+    }
+
+    .sidebar-footer small {
+        color: var(--color-secundario);
+        font-size: 10px;
+    }
+
+
+/* =========================================================
+   CONTENIDO
+   ========================================================= */
+
+.erp-contenido {
+    flex: 1;
+    margin-left: 245px;
+    padding: 35px;
+    background-color: var(--color-fondo);
+    min-height: calc(100vh - 78px);
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+.dashboard {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+
+/* ENCABEZADO */
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.dashboard-etiqueta {
+    margin: 0 0 5px;
+    color: var(--color-secundario);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+}
+
+.dashboard-header h1 {
+    margin: 0 0 7px;
+    font-size: 32px;
+}
+
+.dashboard-descripcion {
+    margin: 0;
+    color: #777;
+    font-size: 13px;
+}
+
+
+.erp-sidebar { overflow-y: auto; }
+.erp-contenido { min-width: 0; }
+.menu-item[aria-current="page"] {
+    background-color: var(--color-fondo);
+    color: var(--color-acento);
+    font-weight: 700;
+}
+.contabilidad-formulario {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 16px;
+}
+.contabilidad-campo { flex: 1 1 190px; min-width: 0; }
+.contabilidad-campo-ancho, .contabilidad-formulario > .form-text { flex-basis: 100%; }
+.contabilidad-accion { max-width: 100%; white-space: normal; }
+.card-dermocosmetica .table { --bs-table-hover-bg: var(--color-fondo); }
+.card-dermocosmetica .table thead th {
+    background-color: var(--color-fondo);
+    color: var(--color-acento);
+}
+@media (max-width: 800px) {
+    .erp-header { padding-inline: 18px; }
+    .erp-layout { display: block; }
+    .erp-sidebar { position: static; width: auto; padding: 14px; }
+    .erp-menu { flex-direction: row; flex-wrap: wrap; gap: 4px; }
+    .menu-titulo { flex-basis: 100%; margin-bottom: 4px; }
+    .menu-item { margin-bottom: 0; padding: 8px; gap: 4px; }
+    .sidebar-footer { display: none; }
+    .erp-contenido { margin-left: 0; padding: 20px 14px; }
+    .card-dermocosmetica { padding: 20px; }
+    .dashboard-header h1 { font-size: clamp(1.7rem, 7vw, 2.4rem); }
+}
+
+/* Ajustes de las pantallas de Compras dentro del tema ERP. */
+.compras-contenido :is(.oc-container, .rec-container, .report-container, #reporte-proveedores) {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}
+
+.compras-contenido :is(.kpi-card, .kpi-card-luxury, .card-dermo-luxury, .form-oc-card, .form-rec-card, .table-dermo-container) {
+    border-color: var(--color-primario);
+    border-radius: 20px;
+    background-color: var(--color-blanco);
+    box-shadow: 0 10px 30px rgba(139, 111, 86, 0.08);
+}
+
+.compras-contenido .table-dermo-container { overflow-x: auto; }
+
+
+
+
+@media (max-width: 800px) {
+    .compras-contenido :is(.form-grid-3col, .form-grid-4col, .form-row-2col, .kpi-grid-4col, .kpi-row-4col, .kpi-row-3col) {
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+    }
+    .cierre-compras { font-size: 0.75rem; }
+}
+
+@media print {
+    .erp-header, .erp-sidebar { display: none !important; }
+    .erp-layout, .erp-contenido { display: block; margin: 0; padding: 0; }
+}
+
+/* Botones, controles y tablas de Inventario aplicados a Compras. */
+.compras-contenido h1 {
+    color: var(--color-acento);
+    font-size: 32px;
+    margin-bottom: 7px;
+}
+
+.compras-contenido :is(.filter-card, .filter-toolbar-row) {
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.compras-contenido .filter-grid-5col {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(135px, 1fr)) repeat(2, minmax(170px, 1.25fr));
+    align-items: end;
+    gap: 16px;
+}
+
+.compras-contenido .filter-grid-5col > .compras-acciones {
+    grid-column: 1 / -1;
+}
+
+.compras-contenido .compras-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.compras-contenido .form-label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--color-texto);
+    font-weight: 500;
+}
+
+.compras-contenido :is(.form-control, .form-select) {
+    min-width: 0;
+    font-family: inherit;
+}
+
+.compras-contenido .table-dermo-container .table {
+    margin-bottom: 0;
+    --bs-table-hover-bg: var(--color-fondo);
+}
+
+.compras-contenido .table th {
+    background-color: var(--color-blanco);
+    color: var(--color-texto);
+    font-weight: 600;
+}
+
+.compras-contenido .table .btn {
+    margin: 2px 0;
+    white-space: nowrap;
+}
+
+@media (max-width: 1050px) {
+    .compras-contenido .filter-grid-5col {
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+    }
+}
+
+@media (max-width: 800px) {
+    .compras-contenido h1 { font-size: clamp(1.7rem, 7vw, 2.4rem); }
+    .compras-contenido :is(.filter-card, .filter-toolbar-row) { padding: 16px; }
+}
+
+/* Tema visual compartido por los módulos del ERP. */
+:root {
+    --color-fondo: #f8f7f5;
+    --color-blanco: #fff;
+    --color-texto: #24211e;
+    --color-secundario: #786e65;
+    --color-acento: #796047;
+    --color-primario: #e9e2da;
+}
+
+.erp-header { height: 62px; padding-inline: 22px; }
+.erp-layout { padding-top: 62px; }
+.erp-sidebar { width: 216px; top: 62px; padding: 20px 12px; }
+.erp-contenido { margin-left: 216px; padding: 26px clamp(20px, 3vw, 44px); }
+.logo-simbolo { width: 34px; height: 34px; border-radius: 9px; font-size: 20px; }
+.logo-titulo { font-size: 19px; color: #29231e; }
+.logo-subtitulo { letter-spacing: .1em; text-transform: uppercase; font-size: 9px; }
+.erp-contexto { color: var(--color-secundario); font-size: 12px; }
+.usuario-avatar { width: 34px; height: 34px; color: white; background: var(--color-acento); }
+.erp-menu .menu-item { gap: 10px; padding: 9px 12px; border-radius: 24px; margin-bottom: 4px; }
+.erp-menu .menu-item.principal-activo { background: var(--color-acento); color: white; font-weight: 700; }
+.erp-menu .principal-activo .menu-icono { color: inherit; }
+.menu-icono { display: inline-flex; justify-content: center; align-items: center; width: 18px; flex: 0 0 18px; }
+.menu-icono svg { width: 16px; height: 16px; }
+.menu-separador { background: var(--color-primario); margin-block: 12px; }
+.erp-menu .menu-item[aria-current="page"]:not(.principal-activo) { background: #eee7df; }
+.sidebar-footer { padding: 12px; background: #f2efeb; border: 1px solid var(--color-primario); border-radius: 8px; margin-top: 16px; }
+
+.erp-contenido :is(h1,h2,h3) { color: #29231e; }
+.erp-contenido .dashboard-header { margin-bottom: 22px; }
+.erp-contenido .dashboard-header h1 { font-size: clamp(1.65rem, 3vw, 2.15rem); }
+.erp-contenido .dashboard-etiqueta { color: var(--color-secundario); text-transform: uppercase; }
+.erp-contenido :is(.card-dermocosmetica,.inicio-modulo,.kpi-card,.kpi-card-luxury,.card-dermo-luxury,.form-oc-card,.form-rec-card,.printable-sheet,.filter-card) {
+    border: 1px solid var(--color-primario);
+    border-radius: 11px;
+    background-color: var(--color-blanco);
+    box-shadow: 0 2px 4px rgba(50,38,27,.04);
+}
+.erp-contenido .card-dermocosmetica { padding: clamp(14px, 2vw, 24px); }
+.erp-contenido .inicio-indicador { padding: 14px 16px; }
+.erp-contenido :is(.inicio-indicador,.kpi-card,.kpi-card-luxury) :is(.inicio-valor,.kpi-valor) { color: #29231e; }
+.erp-contenido .btn-primary {
+    --bs-btn-bg: #796047; --bs-btn-border-color: #796047;
+    --bs-btn-hover-bg: #654e38; --bs-btn-hover-border-color: #654e38;
+    --bs-btn-active-bg: #594532; --bs-btn-active-border-color: #594532;
+    --bs-btn-focus-shadow-rgb: 121,96,71;
+}
+.erp-contenido .btn-outline-secondary {
+    --bs-btn-color: #69523e; --bs-btn-border-color: #cdbfb1;
+    --bs-btn-hover-color: #493827; --bs-btn-hover-bg: #f1ebe5; --bs-btn-hover-border-color: #ad9884;
+    --bs-btn-active-color: #493827; --bs-btn-active-bg: #e9dfd5;
+}
+.erp-contenido :is(.form-control,.form-select) { border-color: #dcd3ca; border-radius: 7px; }
+.erp-contenido :is(.form-control,.form-select):focus { border-color: #a88b70; box-shadow: 0 0 0 .2rem rgba(121,96,71,.15); }
+.erp-contenido .table { --bs-table-hover-bg: #f4f0eb; --bs-table-border-color: #ece7e1; }
+.erp-contenido .table th { background-color: #f8f6f3; color: #514435; font-size: .85rem; }
+.erp-contenido .table td { vertical-align: middle; }
+
+@media (max-width: 800px) {
+    .erp-header { padding-inline: 14px; }
+    .erp-contexto { display: none; }
+    .erp-sidebar { width: auto; padding: 12px; }
+    .erp-menu .menu-item { padding: 6px 9px; }
+    .erp-contenido { margin-left: 0; padding: 18px 14px; }
+}
+@media print {
+    .erp-layout,.erp-contenido { padding: 0; margin: 0; }
+}

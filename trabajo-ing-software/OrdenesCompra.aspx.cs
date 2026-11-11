@@ -610,7 +610,11 @@ namespace trabajo_ing_software
             else if (e.CommandName == "RecibirOC")
             {
                 int idOC = Convert.ToInt32(e.CommandArgument);
-                ActualizarEstadoOrden(idOC, "Recibida");
+                string rol = Convert.ToString(Session["RolUsuario"]);
+                if (string.Equals(rol, "Administrador", StringComparison.OrdinalIgnoreCase))
+                    Response.Redirect("Recepciones.aspx?orden=" + idOC);
+                else
+                    MostrarMensaje("El encargado de bodega debe registrar la recepción para actualizar el inventario.", false);
             }
             else if (e.CommandName == "AnularOC")
             {
@@ -634,17 +638,8 @@ namespace trabajo_ing_software
                             cmd.Parameters.AddWithValue("@Estado", nuevoEstado);
                             cmd.Parameters.AddWithValue("@IdOC", idOC);
                             cmd.ExecuteNonQuery();
-                        }
+                        }
 
-                        if (nuevoEstado == "Recibida")
-                        {
-                            string queryDet = "UPDATE DetalleOrdenCompra SET CantidadRecibida = CantidadPedida WHERE IdOC = @IdOC";
-                            using (MySqlCommand cmdDet = new MySqlCommand(queryDet, con, trans))
-                            {
-                                cmdDet.Parameters.AddWithValue("@IdOC", idOC);
-                                cmdDet.ExecuteNonQuery();
-                            }
-                        }
 
                         trans.Commit();
                         MostrarMensaje("Orden de compra actualizada al estado: " + nuevoEstado + ".", true);

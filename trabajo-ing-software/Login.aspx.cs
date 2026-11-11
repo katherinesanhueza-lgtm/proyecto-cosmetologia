@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Configuration;
 using MySql.Data.MySqlClient;
 
@@ -17,7 +17,7 @@ namespace trabajo_ing_software
             string correo = txtCorreo.Text.Trim();
             string clave = txtPassword.Text.Trim();
 
-            // 1. Validaciones b�sicas de entrada
+            // 1. Validaciones básicas de entrada
             if (string.IsNullOrEmpty(correo) || string.IsNullOrEmpty(clave))
             {
                 lblMensaje.Text = "Por favor, completa todos los campos.";
@@ -26,7 +26,7 @@ namespace trabajo_ing_software
 
             if (!ValidarEmail(correo))
             {
-                lblMensaje.Text = "El formato del correo electr�nico no es v�lido.";
+                lblMensaje.Text = "El formato del correo electrónico no es válido.";
                 return;
             }
 
@@ -47,43 +47,24 @@ namespace trabajo_ing_software
                         {
                             if (reader.Read())
                             {
-                                // Usuario encontrado: Guardamos los datos en la Sesi�n
+                                // Usuario encontrado: Guardamos los datos en la Sesión
                                 string rol = reader["Rol"] != null ? reader["Rol"].ToString() : "";
                                 Session["IdUsuario"] = reader["IdUsuario"].ToString();
                                 Session["NombreUsuario"] = reader["Nombre"].ToString();
                                 Session["RolUsuario"] = rol;
 
                                 // Redireccionamiento segun perfil (RBAC)
-                                if (rol.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    Response.Redirect("Usuarios.aspx");
-                                }
-                                else if (rol.Equals("Bodeguero", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    Response.Redirect("Recepciones.aspx");
-                                }
-                                else if (rol.Equals("Comprador", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    Response.Redirect("OrdenesCompra.aspx");
-                                }
-                                else if (rol.Equals("Contador", StringComparison.OrdinalIgnoreCase))
-                                {
-                                    Response.Redirect("ReporteOrdenesCompra.aspx");
-                                }
-                                else
-                                {
-                                    Response.Redirect("Default.aspx");
-                                }
+                                Response.Redirect("Default.aspx");
                             }
                             else
                             {
-                                lblMensaje.Text = "Correo o contrase�a incorrectos, o usuario inactivo.";
+                                lblMensaje.Text = "Correo o contraseña incorrectos, o usuario inactivo.";
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        lblMensaje.Text = "Error de conexi�n: " + ex.Message;
+                        lblMensaje.Text = "Error de conexión: " + ex.Message;
                     }
                 }
             }

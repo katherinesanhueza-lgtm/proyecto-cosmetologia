@@ -1,4 +1,4 @@
-using System;
+锘縰sing System;
 using System.Data;
 using System.Configuration;
 using MySql.Data.MySqlClient;
@@ -34,13 +34,36 @@ namespace trabajo_ing_software
                 txtFechaRecepcion.Text = DateTime.Today.ToString("yyyy-MM-dd");
 
                 CargarOrdenesCompraPendientes();
+                CargarBodegas();
                 CargarLaboratoriosFiltro();
                 CargarRecepciones();
-                CalcularKPIs();
+                CalcularKPIs();
+                if (int.TryParse(Request.QueryString["orden"], out int orden)
+                    && ddlOrdenCompra.Items.FindByValue(orden.ToString()) != null)
+                {
+                    ddlOrdenCompra.SelectedValue = orden.ToString();
+                    pnlFormularioRec.Visible = true;
+                    CargarDetalleOrdenParaRecepcion(orden);
+                }
             }
         }
 
         #region Carga de Datos y Selectores
+        private void CargarBodegas()
+        {
+            using (var conexion = new MySqlConnection(connectionString))
+            using (var adaptador = new MySqlDataAdapter("SELECT IdBodega, Nombre FROM bodega WHERE Activo=1 ORDER BY Nombre", conexion))
+            {
+                var bodegas = new DataTable();
+                adaptador.Fill(bodegas);
+                ddlBodega.DataSource = bodegas;
+                ddlBodega.DataTextField = "Nombre";
+                ddlBodega.DataValueField = "IdBodega";
+                ddlBodega.DataBind();
+                ddlBodega.Items.Insert(0, new ListItem("Selecciona una bodega", ""));
+            }
+        }
+
         private void CargarLaboratoriosFiltro()
         {
             ddlFiltroLaboratorio.Items.Clear();
@@ -135,7 +158,7 @@ namespace trabajo_ing_software
                 }
             }
 
-            // 2. Cargar L韓eas de Productos Pendientes
+            // 2. Cargar L铆neas de Productos Pendientes
             string queryItems = @"SELECT doc.IdDetalleOC, doc.IdVariante, v.Sku, p.Nombre AS Producto, v.NombreVariante,
                                          doc.CantidadPedida,
                                          IFNULL(doc.CantidadRecibida, 0) AS CantidadRecibida,
@@ -165,9 +188,14 @@ namespace trabajo_ing_software
         }
         #endregion
 
-        #region Registro de Recepci髇 y Asignaci髇 de Lotes (Transaccional)
-        protected void btnAprobarRecepcion_Click(object sender, EventArgs e)
-        {
+        #region Registro de Recepci贸n y Asignaci贸n de Lotes (Transaccional)
+        protected void btnAprobarRecepcion_Click(object sender, EventArgs e)
+        {
+            if (!int.TryParse(ddlBodega.SelectedValue, out int idBodega) || idBodega <= 0)
+            {
+                MostrarMensaje("Selecciona la bodega que recibir谩 los productos.", false);
+                return;
+            }
             if (string.IsNullOrEmpty(ddlOrdenCompra.SelectedValue))
             {
                 MostrarMensaje("Debe seleccionar una orden de compra para recepcionar.", false);
@@ -177,14 +205,14 @@ namespace trabajo_ing_software
             string guia = txtGuiaDespacho.Text.Trim();
             if (string.IsNullOrEmpty(guia))
             {
-                MostrarMensaje("Debe ingresar el n鷐ero de Gu韆 de Despacho o Factura del proveedor (RF-COM-05).", false);
+                MostrarMensaje("Debe ingresar el n煤mero de Gu铆a de Despacho o Factura del proveedor (RF-COM-05).", false);
                 return;
             }
 
             DateTime fechaRec;
             if (!DateTime.TryParse(txtFechaRecepcion.Text, out fechaRec))
             {
-                MostrarMensaje("Ingrese una fecha de recepci髇 v醠ida.", false);
+                MostrarMensaje("Ingrese una fecha de recepci贸n v谩lida.", false);
                 return;
             }
 
@@ -211,20 +239,20 @@ namespace trabajo_ing_software
 
                     if (string.IsNullOrWhiteSpace(txtLote.Text))
                     {
-                        MostrarMensaje("Debe asignar un n鷐ero de lote para cada producto que ingrese (RF-COM-06).", false);
+                        MostrarMensaje("Debe asignar un n煤mero de lote para cada producto que ingrese (RF-COM-06).", false);
                         return;
                     }
 
                     DateTime fechaVenc;
                     if (!DateTime.TryParse(txtVenc.Text, out fechaVenc))
                     {
-                        MostrarMensaje("Debe indicar una fecha de vencimiento v醠ida para los lotes ingresados.", false);
+                        MostrarMensaje("Debe indicar una fecha de vencimiento v谩lida para los lotes ingresados.", false);
                         return;
                     }
 
                     if (fechaVenc <= DateTime.Today)
                     {
-                        MostrarMensaje("Pol韙ica FEFO: La fecha de vencimiento del lote debe ser posterior al d韆 de hoy.", false);
+                        MostrarMensaje("Pol铆tica FEFO: La fecha de vencimiento del lote debe ser posterior al d铆a de hoy.", false);
                         return;
                     }
 
@@ -249,6 +277,14 @@ namespace trabajo_ing_software
                 {
                     try
                     {
+                        using (var orden = new MySqlCommand(
+                            "SELECT IdOC FROM ordencompra WHERE IdOC=@id AND Estado IN ('Emitida','Parcial') FOR UPDATE", con, trans))
+                        {
+                            orden.Parameters.AddWithValue("@id", idOC);
+                            if (orden.ExecuteScalar() == null)
+                                throw new InvalidOperationException("La orden ya no admite recepciones.");
+                        }
+
                         // 1. Insertar Cabecera en RecepcionCompra
                         string queryRec = @"INSERT INTO RecepcionCompra (IdOC, GuiaDespacho, FechaRecepcion, Estado, IdUsuario)
                                             VALUES (@IdOC, @Guia, @Fecha, 'Completa', @IdUsuario);
@@ -286,6 +322,7 @@ namespace trabajo_ing_software
                                 // A. DetalleRecepcion
                                 string queryDetRec = @"INSERT INTO DetalleRecepcion (IdRecepcion, IdDetalleOC, IdVariante, NumeroLote, FechaVencimiento, Cantidad, CostoUnitario)
                                                        VALUES (@IdRec, @IdDetOC, @IdVar, @NumLote, @Venc, @Cant, @Costo)";
+                                int detalleRecepcion;
                                 using (MySqlCommand cmdDet = new MySqlCommand(queryDetRec, con, trans))
                                 {
                                     cmdDet.Parameters.AddWithValue("@IdRec", idRecepcion);
@@ -295,44 +332,26 @@ namespace trabajo_ing_software
                                     cmdDet.Parameters.AddWithValue("@Venc", fechaVenc);
                                     cmdDet.Parameters.AddWithValue("@Cant", cant);
                                     cmdDet.Parameters.AddWithValue("@Costo", costo);
-                                    cmdDet.ExecuteNonQuery();
-                                }
-
-                                // B. Alta de Lote en Inventario (RF-COM-06 / FEFO)
-                                string queryLote = @"INSERT INTO Lote (IdVariante, NumeroLote, FechaIngreso, FechaVencimiento, CostoUnitario, CantidadInicial, CantidadDisponible, Estado)
-                                                     VALUES (@IdVar, @NumLote, @FechaIng, @Venc, @Costo, @Cant, @Cant, 'Disponible')";
-                                using (MySqlCommand cmdLote = new MySqlCommand(queryLote, con, trans))
-                                {
-                                    cmdLote.Parameters.AddWithValue("@IdVar", idVar);
-                                    cmdLote.Parameters.AddWithValue("@NumLote", numLote);
-                                    cmdLote.Parameters.AddWithValue("@FechaIng", fechaRec);
-                                    cmdLote.Parameters.AddWithValue("@Venc", fechaVenc);
-                                    cmdLote.Parameters.AddWithValue("@Costo", costo);
-                                    cmdLote.Parameters.AddWithValue("@Cant", cant);
-                                    cmdLote.ExecuteNonQuery();
+                                    cmdDet.ExecuteNonQuery();
+                                    detalleRecepcion = checked((int)cmdDet.LastInsertedId);
                                 }
 
                                 // C. Actualizar CantidadRecibida en DetalleOrdenCompra
                                 string queryUpdDetOC = @"UPDATE DetalleOrdenCompra 
                                                          SET CantidadRecibida = IFNULL(CantidadRecibida, 0) + @Cant 
-                                                         WHERE IdDetalleOC = @IdDetOC";
+                                                         WHERE IdDetalleOC = @IdDetOC AND IdOC=@IdOC AND IdVariante=@IdVar AND CantidadPedida-IFNULL(CantidadRecibida,0)>=@Cant";
                                 using (MySqlCommand cmdUpdDet = new MySqlCommand(queryUpdDetOC, con, trans))
                                 {
                                     cmdUpdDet.Parameters.AddWithValue("@Cant", cant);
                                     cmdUpdDet.Parameters.AddWithValue("@IdDetOC", idDetalleOC);
-                                    cmdUpdDet.ExecuteNonQuery();
+                                    cmdUpdDet.Parameters.AddWithValue("@IdOC", idOC);
+                                    cmdUpdDet.Parameters.AddWithValue("@IdVar", idVar);
+                                    if (cmdUpdDet.ExecuteNonQuery() != 1)
+                                        throw new InvalidOperationException("La cantidad pendiente cambi贸. Vuelve a seleccionar la orden.");
                                 }
 
-                                // D. Actualizar Stock F韘ico en VarianteProducto
-                                string queryUpdStock = @"UPDATE VarianteProducto 
-                                                         SET StockTotal = IFNULL(StockTotal, 0) + @Cant 
-                                                         WHERE IdVariante = @IdVar";
-                                using (MySqlCommand cmdUpdStock = new MySqlCommand(queryUpdStock, con, trans))
-                                {
-                                    cmdUpdStock.Parameters.AddWithValue("@Cant", cant);
-                                    cmdUpdStock.Parameters.AddWithValue("@IdVar", idVar);
-                                    cmdUpdStock.ExecuteNonQuery();
-                                }
+                                RecepcionInventario.Ingresar(con, trans, idVar, idBodega, detalleRecepcion,
+                                    idUsuario, numLote, fechaRec, fechaVenc, cant, costo);
                             }
                         }
 
@@ -366,7 +385,7 @@ namespace trabajo_ing_software
                             cmdUpdOC.ExecuteNonQuery();
                         }
 
-                        // Actualizar estado de la recepci髇 si fue parcial
+                        // Actualizar estado de la recepci贸n si fue parcial
                         if (!ordenCompleta)
                         {
                             string queryUpdRec = "UPDATE RecepcionCompra SET Estado = 'Parcial' WHERE IdRecepcion = @IdRec";
@@ -377,9 +396,9 @@ namespace trabajo_ing_software
                             }
                         }
 
-                        trans.Commit();
+                        using (var cuenta = VentaInventario.Comando(con, trans, @"INSERT INTO cuentaporpagar                            (IdRecepcion,IdLaboratorio,Monto,Estado,IdUsuario)                            SELECT r.IdRecepcion,oc.IdLaboratorio,                                ROUND(SUM(d.Cantidad*d.CostoUnitario)*(1+COALESCE(oc.Iva/NULLIF(oc.Neto,0),0)),2),                                'Pendiente',@p1                            FROM recepcioncompra r JOIN ordencompra oc ON oc.IdOC=r.IdOC                            JOIN detallerecepcion d ON d.IdRecepcion=r.IdRecepcion                            WHERE r.IdRecepcion=@p0                            GROUP BY r.IdRecepcion,oc.IdLaboratorio,oc.Iva,oc.Neto", idRecepcion,idUsuario))                        {                            if (cuenta.ExecuteNonQuery() != 1)                                throw new InvalidOperationException("No se pudo crear la cuenta por pagar de la recepci贸n.");                        }                        trans.Commit();
 
-                        MostrarMensaje("Recepci髇 REC-" + idRecepcion.ToString("D4") + " aprobada exitosamente. Se ingresaron " + totalItemsRecibiendo + " unidades a bodega con sus respectivos lotes (RF-COM-05 / RF-COM-06).", true);
+                        MostrarMensaje("Recepci贸n REC-" + idRecepcion.ToString("D4") + " aprobada exitosamente. Se ingresaron " + totalItemsRecibiendo + " unidades a bodega con sus respectivos lotes (RF-COM-05 / RF-COM-06).", true);
                         pnlFormularioRec.Visible = false;
 
                         LimpiarFormulario();
@@ -390,7 +409,7 @@ namespace trabajo_ing_software
                     catch (Exception ex)
                     {
                         trans.Rollback();
-                        MostrarMensaje("Error al procesar el ingreso de mercader韆: " + ex.Message, false);
+                        MostrarMensaje("Error al procesar el ingreso de mercader铆a: " + ex.Message, false);
                     }
                 }
             }
@@ -406,7 +425,7 @@ namespace trabajo_ing_software
         }
         #endregion
 
-        #region Visualizaci髇 y Listado de Recepciones Hist髍icas
+        #region Visualizaci贸n y Listado de Recepciones Hist贸ricas
         private void CargarRecepciones()
         {
             string filtro = txtBuscar.Text.Trim();
