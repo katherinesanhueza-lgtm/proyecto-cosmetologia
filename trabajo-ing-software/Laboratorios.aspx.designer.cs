@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 // <generado automáticamente>
 //     Este código fue generado por una herramienta.
 //
@@ -229,5 +229,14 @@ namespace trabajo_ing_software
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnIrUsuarios;
+
+        protected global::System.Web.UI.WebControls.Button btnNuevoLaboratorio;
+        protected global::System.Web.UI.WebControls.Panel pnlAlerta;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl alertaTitulo;
+        protected global::System.Web.UI.WebControls.Label lblAlerta;
+        protected global::System.Web.UI.WebControls.LinkButton btnCerrarAlerta;
+        protected global::System.Web.UI.WebControls.Panel pnlModalForm;
+        protected global::System.Web.UI.WebControls.LinkButton btnCerrarModalX;
+        protected global::System.Web.UI.WebControls.Panel pnlMensajeModal;
     }
 }

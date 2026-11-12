@@ -630,10 +630,17 @@
                     <Columns>
                         <asp:TemplateField HeaderText="N&deg; &Oacute;RDEN" HeaderStyle-CssClass="col-center" ItemStyle-CssClass="col-center">
                             <ItemTemplate>
-                                <span class="oc-folio-pill">
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-                                    <%# Eval("NumeroOC") %>
-                                </span>
+                                <div>
+                                    <span class="oc-folio-pill">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                                        <%# Eval("NumeroOC") %>
+                                    </span>
+                                </div>
+                                <div style="margin-top: 4px;">
+                                    <%# Eval("IdCotizacion") != DBNull.Value && Eval("IdCotizacion") != null ? 
+                                        "<span style='font-size: 10px; font-weight: 600; color: #7A5E47; background-color: #F5EFEB; border: 1px solid #D8C7B5; border-radius: 10px; padding: 1px 7px; display: inline-flex; align-items: center; gap: 3px;' title='Generada desde Cotización de Importación'><svg width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'></path><polyline points='14 2 14 8 20 8'></polyline></svg> COT-" + string.Format("{0:D4}", Eval("IdCotizacion")) + "</span>" : 
+                                        "<span style='font-size: 10px; color: #A09990;'>Compra directa</span>" %>
+                                </div>
                             </ItemTemplate>
                         </asp:TemplateField>
 
@@ -715,6 +722,7 @@
                     <div><strong>RUT:</strong> <asp:Label ID="lblModalRut" runat="server"></asp:Label></div>
                     <div><strong>Fecha Emisi&oacute;n:</strong> <asp:Label ID="lblModalFecha" runat="server"></asp:Label></div>
                     <div><strong>Fecha Entrega:</strong> <asp:Label ID="lblModalFechaEsperada" runat="server"></asp:Label></div>
+                    <div><strong>Origen:</strong> <asp:Label ID="lblModalOrigen" runat="server"></asp:Label></div>
                     <div><strong>Estado:</strong> <asp:Label ID="lblModalEstado" runat="server" Font-Bold="true"></asp:Label></div>
                 </div>
 

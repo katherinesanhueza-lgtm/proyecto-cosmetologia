@@ -52,6 +52,7 @@ namespace trabajo_ing_software
                 CargarProductos();
                 CargarCotizaciones();
                 CalcularKPIs();
+                ActualizarTipoCambioSegunMoneda(ddlMoneda.SelectedValue, false);
             }
         }
 
@@ -143,13 +144,42 @@ namespace trabajo_ing_software
 
         protected void ddlMoneda_SelectedIndexChanged(object sender, EventArgs e)
         {
-            switch (ddlMoneda.SelectedValue)
-            {
-                case "USD": txtTipoCambio.Text = "950"; break;
-                case "EUR": txtTipoCambio.Text = "1020"; break;
-                default: txtTipoCambio.Text = "1"; break;
-            }
+            ActualizarTipoCambioSegunMoneda(ddlMoneda.SelectedValue, false);
             RecalcularTotales();
+        }
+
+        protected void btnActualizarTC_Click(object sender, EventArgs e)
+        {
+            ActualizarTipoCambioSegunMoneda(ddlMoneda.SelectedValue, true);
+            RecalcularTotales();
+            MostrarMensaje($"Tipo de cambio de {ddlMoneda.SelectedValue} actualizado en vivo exitosamente.", true);
+        }
+
+        private void ActualizarTipoCambioSegunMoneda(string moneda, bool forzar = false)
+        {
+            if (string.Equals(moneda, "CLP", StringComparison.OrdinalIgnoreCase))
+            {
+                txtTipoCambio.Text = "1";
+                lblInfoTipoCambio.Text = "Moneda local (1 CLP)";
+                lblInfoTipoCambio.ForeColor = System.Drawing.ColorTranslator.FromHtml("#6c757d");
+                btnActualizarTC.Visible = false;
+                return;
+            }
+
+            btnActualizarTC.Visible = true;
+            var info = ConfiguracionGlobal.ObtenerTipoCambio(moneda, forzar);
+            txtTipoCambio.Text = info.Tasa.ToString("0.##", CultureInfo.InvariantCulture);
+
+            if (info.FueEnVivo)
+            {
+                lblInfoTipoCambio.Text = $"🟢 Sincronizado hoy ({info.FechaDesc}) · Editable";
+                lblInfoTipoCambio.ForeColor = System.Drawing.ColorTranslator.FromHtml("#1E8449");
+            }
+            else
+            {
+                lblInfoTipoCambio.Text = $"🟢 Al día ({info.FechaDesc}) · Editable";
+                lblInfoTipoCambio.ForeColor = System.Drawing.ColorTranslator.FromHtml("#27AE60");
+            }
         }
 
         protected void ddlProducto_SelectedIndexChanged(object sender, EventArgs e)
@@ -631,7 +661,7 @@ namespace trabajo_ing_software
             lblInfoLab.Text = "Seleccione un proveedor";
             txtFecha.Text = DateTime.Today.ToString("yyyy-MM-dd");
             ddlMoneda.SelectedValue = "USD";
-            txtTipoCambio.Text = "950";
+            ActualizarTipoCambioSegunMoneda("USD", false);
             ddlProducto.SelectedIndex = 0;
             txtCantidad.Text = "10";
             txtCostoMoneda.Text = "";
@@ -643,6 +673,10 @@ namespace trabajo_ing_software
         {
             pnlFormulario.Visible = !pnlFormulario.Visible;
             lblMensaje.Visible = false;
+            if (pnlFormulario.Visible)
+            {
+                ActualizarTipoCambioSegunMoneda(ddlMoneda.SelectedValue, false);
+            }
         }
 
         protected void btnCerrarForm_Click(object sender, EventArgs e) => pnlFormulario.Visible = false;

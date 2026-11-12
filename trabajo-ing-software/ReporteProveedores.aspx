@@ -99,7 +99,7 @@
 </asp:Content>
 <asp:Content ID="Contenido" ContentPlaceHolderID="MainContent" runat="server">
     <div class="dashboard compras-contenido">
-        <div class="container" id="reporte-proveedores">
+        <div class="container">
             <div class="header-top no-print">
                 <div>
                     <h1>Reporte: Evaluaci&oacute;n de Proveedores</h1>
@@ -139,12 +139,28 @@
                 </div>
             </div>
 
-            <!-- Titulo del informe -->
-            <div style="margin-bottom: 20px;">
-                <h2 style="margin-bottom: 5px;">Distribuidora de Dermocosm&eacute;tica Profesional</h2>
-                <p style="margin: 0; font-size: 14px; color: var(--color-texto-suave);">Informe Anal&iacute;tico de Rendimiento, Lead Time y Control de Calidad</p>
-                <small style="color: gray;">Fecha de emisi&oacute;n: <%= DateTime.Now.ToString("dd/MM/yyyy HH:mm") %></small>
-            </div>
+            <!-- HOJA FORMAL DEL REPORTE (EXPORTABLE A PDF) -->
+            <div id="reporte-imprimible" class="printable-sheet" style="background-color: var(--color-blanco); border: 1px solid var(--color-borde-suave); border-radius: 18px; padding: 24px; box-shadow: 0 4px 15px rgba(122, 94, 71, 0.05);">
+
+                <!-- Titulo del informe -->
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid var(--color-borde-suave); padding-bottom: 15px;">
+                    <div>
+                        <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 700; color: var(--color-texto);">
+                            DERMO ERP - COSMETOLOG&Iacute;A PROFESIONAL
+                        </div>
+                        <div style="font-size: 11px; color: var(--color-texto-suave); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px;">
+                            Distribuidora de Dermocosm&eacute;tica y Cosmec&eacute;utica Profesional
+                        </div>
+                        <div style="font-size: 12px; margin-top: 8px; color: var(--color-acento); font-weight: 600;">
+                            INFORME ANAL&Iacute;TICO: EVALUACI&Oacute;N DE PROVEEDORES Y LEAD TIME (RF-COM-11)
+                        </div>
+                    </div>
+                    <div style="text-align: right; font-size: 11px; color: var(--color-texto-suave); line-height: 1.6;">
+                        <div><strong>Fecha Reporte:</strong> <%= DateTime.Now.ToString("dd/MM/yyyy HH:mm") %></div>
+                        <div><strong>M&oacute;dulo:</strong> Compras y Abastecimiento</div>
+                        <div><strong>Sistema:</strong> ERP Dermo-Cosm&eacute;tica .NET</div>
+                    </div>
+                </div>
 
             <!-- Fila de Tarjetas KPI con Ajustes de BI -->
             <div class="kpi-grid">
@@ -236,19 +252,40 @@
                     </div>
                 </div>
             </div>
-        </div>
+
+            <!-- FIRMAS DE RESPONSABILIDAD DEL EQUIPO (DINÁMICAS DESDE CONFIGURACIONGLOBAL) -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 40px; text-align: center; font-size: 11px;">
+                <div>
+                    <div style="border-top: 1px solid #736E67; width: 80%; margin: 0 auto 6px auto;"></div>
+                    <strong><asp:Label ID="lblFirmaCompras" runat="server"></asp:Label></strong><br />
+                    M&oacute;dulo de Compras y Abastecimiento
+                </div>
+                <div>
+                    <div style="border-top: 1px solid #736E67; width: 80%; margin: 0 auto 6px auto;"></div>
+                    <strong><asp:Label ID="lblFirmaVentas" runat="server"></asp:Label></strong><br />
+                    M&oacute;dulo de Ventas y Facturaci&oacute;n
+                </div>
+                <div>
+                    <div style="border-top: 1px solid #736E67; width: 80%; margin: 0 auto 6px auto;"></div>
+                    <strong><asp:Label ID="lblFirmaInventario" runat="server"></asp:Label></strong><br />
+                    M&oacute;dulo de Inventario y Kardex
+                </div>
+            </div>
+
+            </div> <!-- Fin #reporte-imprimible -->
+        </div> <!-- Fin .container -->
 
         <!-- Boton de respaldo para el diseñador -->
         <asp:Button ID="btnVolver" runat="server" Visible="false" OnClick="btnVolver_Click" />
 
         <script>
             function descargarPDF() {
-                var elemento = document.getElementById('reporte-proveedores');
+                var elemento = document.getElementById('reporte-imprimible');
                 var opt = {
                     margin:       [10, 10, 10, 10],
                     filename:     'Reporte_Evaluacion_Proveedores_BI.pdf',
                     image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2 },
+                    html2canvas:  { scale: 2, useCORS: true },
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
                 };
                 html2pdf().set(opt).from(elemento).save();

@@ -141,6 +141,15 @@ namespace trabajo_ing_software
         protected global::System.Web.UI.WebControls.DropDownList ddlMoneda;
 
         /// <summary>
+        /// Control btnActualizarTC.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton btnActualizarTC;
+
+        /// <summary>
         /// Control txtTipoCambio.
         /// </summary>
         /// <remarks>
@@ -148,6 +157,15 @@ namespace trabajo_ing_software
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtTipoCambio;
+
+        /// <summary>
+        /// Control lblInfoTipoCambio.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblInfoTipoCambio;
 
         /// <summary>
         /// Control ddlProducto.

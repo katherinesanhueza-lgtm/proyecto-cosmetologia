@@ -55,6 +55,10 @@ namespace trabajo_ing_software
 
                 lblBienvenida.Text = Session["NombreUsuario"] != null ? Session["NombreUsuario"].ToString() : "Usuario";
 
+                lblFirmaCompras.Text = ConfiguracionGlobal.NombreJefeCompras;
+                lblFirmaVentas.Text = ConfiguracionGlobal.NombreJefeVentas;
+                lblFirmaInventario.Text = ConfiguracionGlobal.NombreJefeInventario;
+
                 CargarPaises();
                 CargarMetricasGenerales();
 

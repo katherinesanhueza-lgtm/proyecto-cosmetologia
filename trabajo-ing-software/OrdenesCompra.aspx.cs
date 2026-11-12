@@ -525,7 +525,7 @@ namespace trabajo_ing_software
             string estado = ddlFiltroEstado.SelectedValue;
             string idLab = ddlFiltroLaboratorio.SelectedValue;
 
-            string query = @"SELECT oc.IdOC, oc.NumeroOC, l.RazonSocial, l.Rut, oc.Fecha, oc.FechaEsperada, oc.Estado, oc.Neto, oc.Iva, oc.Total
+            string query = @"SELECT oc.IdOC, oc.NumeroOC, oc.IdCotizacion, l.RazonSocial, l.Rut, oc.Fecha, oc.FechaEsperada, oc.Estado, oc.Neto, oc.Iva, oc.Total
                              FROM OrdenCompra oc
                              INNER JOIN Laboratorio l ON oc.IdLaboratorio = l.IdLaboratorio
                              WHERE 1=1";
@@ -657,7 +657,7 @@ namespace trabajo_ing_software
 
         private void CargarModalDetalle(int idOC)
         {
-            string queryCab = @"SELECT oc.NumeroOC, l.RazonSocial, l.Rut, oc.Fecha, oc.FechaEsperada, oc.Estado, oc.Neto, oc.Iva, oc.Total
+            string queryCab = @"SELECT oc.NumeroOC, oc.IdCotizacion, l.RazonSocial, l.Rut, oc.Fecha, oc.FechaEsperada, oc.Estado, oc.Neto, oc.Iva, oc.Total
                                 FROM OrdenCompra oc
                                 INNER JOIN Laboratorio l ON oc.IdLaboratorio = l.IdLaboratorio
                                 WHERE oc.IdOC = @IdOC";
@@ -676,7 +676,19 @@ namespace trabajo_ing_software
                             lblModalLaboratorio.Text = dr["RazonSocial"].ToString();
                             lblModalRut.Text = dr["Rut"].ToString();
                             lblModalFecha.Text = Convert.ToDateTime(dr["Fecha"]).ToString("dd/MM/yyyy");
-                            lblModalFechaEsperada.Text = Convert.ToDateTime(dr["FechaEsperada"]).ToString("dd/MM/yyyy");
+                            lblModalFechaEsperada.Text = Convert.ToDateTime(dr["FechaEsperada"]).ToString("dd/MM/yyyy");
+
+                            if (lblModalOrigen != null)
+                            {
+                                if (dr["IdCotizacion"] != DBNull.Value && dr["IdCotizacion"] != null)
+                                {
+                                    lblModalOrigen.Text = "Cotizaci&oacute;n COT-" + string.Format("{0:D4}", dr["IdCotizacion"]);
+                                }
+                                else
+                                {
+                                    lblModalOrigen.Text = "Compra directa (Sin cotizaci&oacute;n)";
+                                }
+                            }
                             lblModalEstado.Text = dr["Estado"].ToString();
                             lblModalNeto.Text = string.Format("{0:C0}", dr["Neto"]);
                             lblModalIva.Text = string.Format("{0:C0}", dr["Iva"]);
