@@ -1,0 +1,155 @@
+﻿<%@ Master Language="C#" %>
+<script runat="server">
+    private static readonly string[][] VistasCompras = {
+        new[] { "Compras", "Resumen de Compras" },
+        new[] { "Laboratorios", "Laboratorios y proveedores" },
+        new[] { "OrdenesCompra", "Órdenes de compra" },
+        new[] { "Recepciones", "Recepciones y lotes" },
+        new[] { "ReporteProveedores", "Evaluación de proveedores" },
+        new[] { "ReporteOrdenesCompra", "Reporte de órdenes" },
+        new[] { "ReporteIngresos", "Reporte de ingresos" }
+    };
+
+    private static readonly string[][] VistasVentas = {
+        new[] { "Ventas", "Punto de venta" },
+        new[] { "Clientes", "Clientes" },
+        new[] { "Cotizaciones", "Cotizaciones" },
+        new[] { "Despachos", "Despachos" },
+        new[] { "Devoluciones", "Devoluciones" },
+        new[] { "ReporteVentas", "Reporte de ventas" }
+    };
+
+    protected bool EsInventario => PaginaActual == "Inventario" || PaginaActual == "Gestion" || PaginaActual == "ReporteInventario";
+    protected bool EsInicio => PaginaActual == "Default";
+    protected bool EsVentas => Array.Exists(VistasVentas, vista => vista[0] == PaginaActual);
+    protected string NombreModulo => EsCompras ? "Compras" : EsVentas ? "Ventas" : EsInventario ? "Inventario" : EsInicio ? "Inicio" : "Contabilidad";
+
+    protected string PaginaActual
+    {
+        get { return System.IO.Path.GetFileNameWithoutExtension(Page.AppRelativeVirtualPath); }
+    }
+
+    protected bool EsCompras
+    {
+        get { return Array.Exists(VistasCompras, vista => vista[0] == PaginaActual); }
+    }
+</script>
+<!DOCTYPE html>
+<html lang="es">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%: Page.Title %> - Dermo ERP</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" runat="server" />
+    <% if (EsCompras) { %>
+    <link href="<%: ResolveUrl("~/Content/Estilos.css") %>" rel="stylesheet" />
+    <% } %>
+    <link href="<%: ResolveUrl("~/Content/Contabilidad.css?v=4") %>" rel="stylesheet" />
+    <asp:ContentPlaceHolder ID="EstilosPagina" runat="server" />
+</head>
+<body>
+    <form runat="server">
+        <asp:ScriptManager runat="server" EnablePartialRendering="false" />
+        <header class="erp-header">
+            <div class="erp-logo">
+                <span class="logo-simbolo" aria-hidden="true">D</span>
+                <div>
+                    <span class="logo-titulo">Dermo ERP</span>
+                    <span class="logo-subtitulo">Sistema ERP</span>
+                </div>
+            </div>
+            <span class="erp-contexto"><%: NombreModulo %> / <%: Page.Title %></span>
+            <div class="erp-usuario">
+                <div class="usuario-info">
+                    <span class="usuario-nombre"><%: Convert.ToString(Session["NombreUsuario"]) %></span>
+                    <span class="usuario-rol"><%: Convert.ToString(Session["RolUsuario"]) %></span>
+                </div>
+                <span class="usuario-avatar" aria-hidden="true">C</span>
+                <asp:ContentPlaceHolder ID="AccionesUsuario" runat="server" />
+            </div>
+        </header>
+        <div class="erp-layout">
+            <aside class="erp-sidebar">
+                <nav class="erp-menu" aria-label="Secciones de <%: NombreModulo %>">
+                    <span class="menu-titulo">Módulos principales</span>
+                    <%
+                        var modulos = new[] {
+                            new[] { "Inicio", "", "M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z" },
+                            new[] { "Compras", "Compras.aspx", "M5 7h14v14H5z M9 8V6a3 3 0 0 1 6 0v2" },
+                            new[] { "Ventas", "Ventas.aspx", "M5 9h14l2 4v7H3v-7z M7 9V4h10v5 M7 15h3 M15 15h2" },
+                            new[] { "Inventario", "Inventario.aspx", "M3 4h18v5H3z M5 9v11h14V9 M10 13h4" },
+                            new[] { "Contabilidad", "Contabilidad.aspx", "M3 9l9-6 9 6H3z M5 20h14 M7 10v7 M12 10v7 M17 10v7" }
+                        };
+                        foreach (var modulo in modulos)
+                        {
+                            bool activo = NombreModulo == modulo[0];
+                    %>
+                    <a class="menu-item<%: activo ? " principal-activo" : "" %>"
+                       aria-current="<%: activo ? "location" : "false" %>"
+                       href="<%: ResolveUrl("~/" + modulo[1]) %>">
+                        <span class="menu-icono" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="<%: modulo[2] %>" /></svg></span>
+                        <%: modulo[0] %>
+                    </a>
+                    <% } %>
+                    <% if (Session["IdUsuario"] == null) { %>
+                    <a class="menu-item" href="<%: ResolveUrl("~/Login.aspx") %>">Iniciar sesión</a>
+                    <% } %>
+                    <% if (!EsInicio) { %>
+                    <div class="menu-separador"></div>
+                    <span class="menu-titulo"><%: NombreModulo %></span>
+                    <% } %>
+                    <% if (EsInventario) {
+                        foreach (var entrada in new[] {
+                            new[] { "Inventario.aspx", "Existencias" },
+                            new[] { "Gestion.aspx?m=productos", "Productos" },
+                            new[] { "Gestion.aspx?m=variantes", "Variantes" },
+                            new[] { "Gestion.aspx?m=lotes", "Lotes" },
+                            new[] { "Gestion.aspx?m=movimientos", "Movimientos" },
+                            new[] { "Gestion.aspx?m=historial", "Historial" },
+                            new[] { "Gestion.aspx?m=alertas", "Alertas" },
+                            new[] { "ReporteInventario.aspx", "Reporte de inventario" }
+                        }) { %>
+                    <a class="menu-item" href="<%: ResolveUrl("~/" + entrada[0]) %>"><%: entrada[1] %></a>
+                    <% } } else if (EsCompras || EsVentas) {
+                        foreach (var seccion in (EsCompras ? VistasCompras : VistasVentas))
+                        {
+                    %>
+                    <a class="menu-item" aria-current="<%: PaginaActual == seccion[0] ? "page" : "false" %>"
+                        href="<%: ResolveUrl("~/" + seccion[0] + ".aspx") %>">
+                        <span class="menu-icono" aria-hidden="true">▦</span> <%: seccion[1] %>
+                    </a>
+                    <% } } else if (!EsInicio) {
+                        var secciones = new[] {
+                            new[] { "cuentas", "Plan de cuentas" },
+                            new[] { "periodos", "Períodos contables" },
+                            new[] { "diario", "Libro diario" },
+                            new[] { "operaciones", "Operaciones del ERP" },
+                            new[] { "balance", "Balance de comprobación" },
+                            new[] { "resultados", "Estado de resultados" },
+                            new[] { "pagos", "Proyección de pagos" },
+                            new[] { "cobros", "Antigüedad de saldos" },
+                            new[] { "perdidas", "Pérdidas por mermas" },
+                            new[] { "inventario", "Inventario valorizado" }
+                        };
+                        string actual = Request.QueryString["vista"] ?? "cuentas";
+                        foreach (var seccion in secciones)
+                        {
+                    %>
+                    <a class="menu-item" aria-current="<%: actual == seccion[0] ? "page" : "false" %>"
+                        href="<%: ResolveUrl("~/Contabilidad.aspx?vista=" + seccion[0]) %>">
+                        <span class="menu-icono" aria-hidden="true">▦</span> <%: seccion[1] %>
+                    </a>
+                    <% } } %>
+                </nav>
+                <div class="sidebar-footer">
+                    <span>Dermo ERP</span>
+                    <small>Sistema de Gestión</small>
+                </div>
+            </aside>
+            <main class="erp-contenido">
+                <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+            </main>
+        </div>
+    </form>
+</body>
+</html>

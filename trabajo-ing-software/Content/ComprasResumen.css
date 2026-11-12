@@ -1,0 +1,23 @@
+.compras-indicadores, .compras-paneles { display: grid; gap: 16px; }
+.compras-indicadores { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 20px; }
+.compras-paneles { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+.compras-resumen .compras-kpi { padding: 16px; }
+.compras-resumen .compras-kpi h2 { margin: 0; font: inherit; font-weight: 600; font-size: .86rem; }
+.compras-kpi strong { display: block; margin: 6px 0; font-size: clamp(1.35rem, 2vw, 1.8rem); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.compras-kpi span, .compras-nota { color: #71665b; font-size: .83rem; }
+.compras-paneles h2 { margin-bottom: 4px; font-size: 1.25rem; }
+.compras-grafico { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.compras-mes { display: grid; grid-template-rows: auto 110px auto; align-items: end; text-align: center; gap: 6px; min-width: 0; font-size: .75rem; }
+.compras-importe { color: #69523e; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.compras-barra-espacio { height: 110px; display: flex; justify-content: center; align-items: end; border-bottom: 1px solid #dcd3ca; background: repeating-linear-gradient(to top, transparent 0 26px, #f3eee9 26px 27px); }
+.compras-barra-espacio span { width: min(65%, 26px); border-radius: 4px 4px 0 0; background: var(--color-acento); }
+.compras-paneles .table { font-size: .85rem; }
+
+@media (max-width: 1050px) {
+    .compras-paneles { grid-template-columns: minmax(0, 1fr); }
+    .compras-indicadores { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 420px) {
+    .compras-indicadores { gap: 8px; }
+    .compras-resumen .compras-kpi { padding: 10px; }
+}
