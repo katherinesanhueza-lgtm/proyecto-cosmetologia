@@ -593,7 +593,7 @@
             <div class="filter-toolbar-row card-dermocosmetica">
                 <div style="position: relative; display: flex; align-items: center; flex: 1; min-width: 280px;">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 14px; color: var(--color-texto-suave); pointer-events: none;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control" placeholder="Buscar por N&deg; OC, laboratorio, RUT..." AutoPostBack="true" OnTextChanged="txtBuscar_TextChanged"></asp:TextBox>
+                    <asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control" style="padding-left: 38px;" placeholder="Buscar por N&deg; OC, laboratorio, RUT..." AutoPostBack="true" OnTextChanged="txtBuscar_TextChanged"></asp:TextBox>
                 </div>
 
                 <div>

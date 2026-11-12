@@ -3,11 +3,18 @@
     private static readonly string[][] VistasCompras = {
         new[] { "Compras", "Resumen de Compras" },
         new[] { "Laboratorios", "Laboratorios y proveedores" },
+        new[] { "CotizacionesImportacion", "Cotizaciones de importación" },
         new[] { "OrdenesCompra", "Órdenes de compra" },
         new[] { "Recepciones", "Recepciones y lotes" },
-        new[] { "ReporteProveedores", "Evaluación de proveedores" },
-        new[] { "ReporteOrdenesCompra", "Reporte de órdenes" },
-        new[] { "ReporteIngresos", "Reporte de ingresos" }
+        new[] { "DevolucionesProveedor", "Devoluciones y reclamos" }
+    };
+
+    private static readonly string[] ReportesCompras = {
+        "ReporteProveedores",
+        "ReporteOrdenesCompra",
+        "ReporteIngresos",
+        "ReporteCotizaciones",
+        "ReporteComprasLaboratorio"
     };
 
     private static readonly string[][] VistasVentas = {
@@ -19,10 +26,27 @@
         new[] { "ReporteVentas", "Reporte de ventas" }
     };
 
+    private static readonly string[][] VistasAdmin = {
+        new[] { "Usuarios", "Gestión de usuarios" },
+        new[] { "Accesos", "Asignación de accesos" },
+        new[] { "Perfiles", "Perfiles y roles" }
+    };
+
     protected bool EsInventario => PaginaActual == "Inventario" || PaginaActual == "Gestion" || PaginaActual == "ReporteInventario";
     protected bool EsInicio => PaginaActual == "Default";
     protected bool EsVentas => Array.Exists(VistasVentas, vista => vista[0] == PaginaActual);
-    protected string NombreModulo => EsCompras ? "Compras" : EsVentas ? "Ventas" : EsInventario ? "Inventario" : EsInicio ? "Inicio" : "Contabilidad";
+    protected bool EsAdminVista => Array.Exists(VistasAdmin, vista => vista[0] == PaginaActual);
+    protected bool EsRolAdmin => string.Equals(Convert.ToString(Session["RolUsuario"]), "Administrador", StringComparison.OrdinalIgnoreCase);
+    protected string NombreModulo => EsCompras ? "Compras" : EsVentas ? "Ventas" : EsInventario ? "Inventario" : EsAdminVista ? "Usuarios" : EsInicio ? "Inicio" : "Contabilidad";
+
+    protected string InicialUsuario
+    {
+        get
+        {
+            string nombre = Convert.ToString(Session["NombreUsuario"]);
+            return string.IsNullOrWhiteSpace(nombre) ? "D" : nombre.Trim().Substring(0, 1).ToUpperInvariant();
+        }
+    }
 
     protected string PaginaActual
     {
@@ -31,7 +55,11 @@
 
     protected bool EsCompras
     {
-        get { return Array.Exists(VistasCompras, vista => vista[0] == PaginaActual); }
+        get
+        {
+            return Array.Exists(VistasCompras, vista => vista[0] == PaginaActual)
+                || Array.Exists(ReportesCompras, r => r == PaginaActual);
+        }
     }
 </script>
 <!DOCTYPE html>
@@ -41,7 +69,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title><%: Page.Title %> - Dermo ERP</title>
     <link href="~/Content/bootstrap.min.css" rel="stylesheet" runat="server" />
-    <% if (EsCompras) { %>
+    <% if (EsCompras || EsAdminVista) { %>
     <link href="<%: ResolveUrl("~/Content/Estilos.css") %>" rel="stylesheet" />
     <% } %>
     <link href="<%: ResolveUrl("~/Content/Contabilidad.css?v=4") %>" rel="stylesheet" />
@@ -64,7 +92,7 @@
                     <span class="usuario-nombre"><%: Convert.ToString(Session["NombreUsuario"]) %></span>
                     <span class="usuario-rol"><%: Convert.ToString(Session["RolUsuario"]) %></span>
                 </div>
-                <span class="usuario-avatar" aria-hidden="true">C</span>
+                <span class="usuario-avatar" aria-hidden="true"><%: InicialUsuario %></span>
                 <asp:ContentPlaceHolder ID="AccionesUsuario" runat="server" />
             </div>
         </header>
@@ -73,14 +101,18 @@
                 <nav class="erp-menu" aria-label="Secciones de <%: NombreModulo %>">
                     <span class="menu-titulo">Módulos principales</span>
                     <%
-                        var modulos = new[] {
+                        var modulosLista = new System.Collections.Generic.List<string[]> {
                             new[] { "Inicio", "", "M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z" },
                             new[] { "Compras", "Compras.aspx", "M5 7h14v14H5z M9 8V6a3 3 0 0 1 6 0v2" },
                             new[] { "Ventas", "Ventas.aspx", "M5 9h14l2 4v7H3v-7z M7 9V4h10v5 M7 15h3 M15 15h2" },
                             new[] { "Inventario", "Inventario.aspx", "M3 4h18v5H3z M5 9v11h14V9 M10 13h4" },
                             new[] { "Contabilidad", "Contabilidad.aspx", "M3 9l9-6 9 6H3z M5 20h14 M7 10v7 M12 10v7 M17 10v7" }
                         };
-                        foreach (var modulo in modulos)
+                        if (EsRolAdmin)
+                        {
+                            modulosLista.Add(new[] { "Usuarios", "Usuarios.aspx", "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0-8 0" });
+                        }
+                        foreach (var modulo in modulosLista)
                         {
                             bool activo = NombreModulo == modulo[0];
                     %>
@@ -110,8 +142,8 @@
                             new[] { "ReporteInventario.aspx", "Reporte de inventario" }
                         }) { %>
                     <a class="menu-item" href="<%: ResolveUrl("~/" + entrada[0]) %>"><%: entrada[1] %></a>
-                    <% } } else if (EsCompras || EsVentas) {
-                        foreach (var seccion in (EsCompras ? VistasCompras : VistasVentas))
+                    <% } } else if (EsCompras || EsVentas || EsAdminVista) {
+                        foreach (var seccion in (EsCompras ? VistasCompras : EsVentas ? VistasVentas : VistasAdmin))
                         {
                     %>
                     <a class="menu-item" aria-current="<%: PaginaActual == seccion[0] ? "page" : "false" %>"
@@ -120,23 +152,25 @@
                     </a>
                     <% } } else if (!EsInicio) {
                         var secciones = new[] {
-                            new[] { "cuentas", "Plan de cuentas" },
-                            new[] { "periodos", "Períodos contables" },
-                            new[] { "diario", "Libro diario" },
-                            new[] { "operaciones", "Operaciones del ERP" },
-                            new[] { "balance", "Balance de comprobación" },
-                            new[] { "resultados", "Estado de resultados" },
-                            new[] { "pagos", "Proyección de pagos" },
-                            new[] { "cobros", "Antigüedad de saldos" },
-                            new[] { "perdidas", "Pérdidas por mermas" },
-                            new[] { "inventario", "Inventario valorizado" }
+                            new[] { "cuentas", "Plan de cuentas", "Contabilidad.aspx?vista=cuentas" },
+                            new[] { "periodos", "Períodos contables", "Contabilidad.aspx?vista=periodos" },
+                            new[] { "diario", "Libro diario", "Contabilidad.aspx?vista=diario" },
+                            new[] { "operaciones", "Operaciones del ERP", "Contabilidad.aspx?vista=operaciones" },
+                            new[] { "CuentasPagar", "Cuentas por pagar", "CuentasPagar.aspx" },
+                            new[] { "balance", "Balance de comprobación", "Contabilidad.aspx?vista=balance" },
+                            new[] { "resultados", "Estado de resultados", "Contabilidad.aspx?vista=resultados" },
+                            new[] { "ReporteFlujoCaja", "Flujo de caja (BI)", "ReporteFlujoCaja.aspx" },
+                            new[] { "pagos", "Proyección de pagos", "Contabilidad.aspx?vista=pagos" },
+                            new[] { "cobros", "Antigüedad de saldos", "Contabilidad.aspx?vista=cobros" },
+                            new[] { "perdidas", "Pérdidas por mermas", "Contabilidad.aspx?vista=perdidas" },
+                            new[] { "inventario", "Inventario valorizado", "Contabilidad.aspx?vista=inventario" }
                         };
-                        string actual = Request.QueryString["vista"] ?? "cuentas";
+                        string actual = PaginaActual == "Contabilidad" ? (Request.QueryString["vista"] ?? "cuentas") : PaginaActual;
                         foreach (var seccion in secciones)
                         {
                     %>
                     <a class="menu-item" aria-current="<%: actual == seccion[0] ? "page" : "false" %>"
-                        href="<%: ResolveUrl("~/Contabilidad.aspx?vista=" + seccion[0]) %>">
+                        href="<%: ResolveUrl("~/" + seccion[2]) %>">
                         <span class="menu-icono" aria-hidden="true">▦</span> <%: seccion[1] %>
                     </a>
                     <% } } %>

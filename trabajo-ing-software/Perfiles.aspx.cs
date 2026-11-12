@@ -13,6 +13,19 @@ namespace trabajo_ing_software
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (Session["IdUsuario"] == null)
+            {
+                Response.Redirect("Login.aspx");
+                return;
+            }
+
+            string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
+            if (!rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
+            {
+                ConfiguracionGlobal.RedirigirSegunRol(Response, rolUsuario);
+                return;
+            }
+
             if (!IsPostBack)
             {
                 CargarPerfiles();

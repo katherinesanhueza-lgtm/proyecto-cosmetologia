@@ -126,15 +126,15 @@ namespace trabajo_ing_software
                 return;
             }
 
-            // Validar formato de correo electr�nico
+            // Validar formato de correo electrónico
             if (!ValidarEmail(correo))
             {
-                lblMensaje.Text = "El formato del correo electr�nico no es v�lido (Ej: usuario@dermo.cl).";
+                lblMensaje.Text = "El formato del correo electrónico no es válido (Ej: usuario@dermo.cl).";
                 lblMensaje.ForeColor = System.Drawing.Color.Red;
                 return;
             }
 
-            // �Estamos creando o editando?
+            // ¿Estamos creando o editando?
             bool esEdicion = !string.IsNullOrEmpty(hfIdUsuario.Value);
 
             using (MySqlConnection con = new MySqlConnection(connectionString))
@@ -146,30 +146,30 @@ namespace trabajo_ing_software
                     // CREATE: Crear nuevo usuario
                     if (string.IsNullOrEmpty(password))
                     {
-                        lblMensaje.Text = "La contrase�a es obligatoria para nuevos usuarios.";
+                        lblMensaje.Text = "La contraseña es obligatoria para nuevos usuarios.";
                         lblMensaje.ForeColor = System.Drawing.Color.Red;
                         return;
                     }
                     if (password.Length < 4)
                     {
-                        lblMensaje.Text = "La contrase�a debe tener al menos 4 caracteres.";
+                        lblMensaje.Text = "La contraseña debe tener al menos 4 caracteres.";
                         lblMensaje.ForeColor = System.Drawing.Color.Red;
                         return;
                     }
-                    query = "INSERT INTO Usuario (Nombre, Correo, Password, Rol, Activo) VALUES (@Nombre, @Correo, @Password, @Rol, 1)";
+                    query = "INSERT INTO Usuario (IdRol, Nombre, Correo, Password, Rol, Activo) VALUES ((SELECT IdRol FROM Rol WHERE Nombre = @Rol LIMIT 1), @Nombre, @Correo, @Password, @Rol, 1)";
                 }
                 else
                 {
                     // UPDATE: Modificar usuario existente
                     if (string.IsNullOrEmpty(password))
                     {
-                        // Si dej� la clave vac�a, no cambiamos la clave actual
-                        query = "UPDATE Usuario SET Nombre=@Nombre, Correo=@Correo, Rol=@Rol WHERE IdUsuario=@IdUsuario";
+                        // Si dejó la clave vacía, no cambiamos la clave actual
+                        query = "UPDATE Usuario SET IdRol=(SELECT IdRol FROM Rol WHERE Nombre = @Rol LIMIT 1), Nombre=@Nombre, Correo=@Correo, Rol=@Rol WHERE IdUsuario=@IdUsuario";
                     }
                     else
                     {
-                        // Si escribi� clave nueva, la actualizamos
-                        query = "UPDATE Usuario SET Nombre=@Nombre, Correo=@Correo, Password=@Password, Rol=@Rol WHERE IdUsuario=@IdUsuario";
+                        // Si escribió clave nueva, la actualizamos
+                        query = "UPDATE Usuario SET IdRol=(SELECT IdRol FROM Rol WHERE Nombre = @Rol LIMIT 1), Nombre=@Nombre, Correo=@Correo, Password=@Password, Rol=@Rol WHERE IdUsuario=@IdUsuario";
                     }
                 }
 
@@ -194,7 +194,7 @@ namespace trabajo_ing_software
                         con.Open();
                         cmd.ExecuteNonQuery();
 
-                        lblMensaje.Text = esEdicion ? "Usuario modificado con �xito." : "Usuario creado con �xito.";
+                        lblMensaje.Text = esEdicion ? "Usuario modificado con éxito." : "Usuario creado con éxito.";
                         lblMensaje.ForeColor = System.Drawing.Color.Green;
 
                         LimpiarFormulario();
@@ -282,10 +282,10 @@ namespace trabajo_ing_software
 
         private void EliminarUsuario(int idUsuario)
         {
-            // Seguridad: no dejar que el usuario se elimine a s� mismo
+            // Seguridad: no dejar que el usuario se elimine a sí mismo
             if (Session["IdUsuario"].ToString() == idUsuario.ToString())
             {
-                lblMensaje.Text = "No puedes eliminar tu propio usuario mientras tienes la sesi�n activa.";
+                lblMensaje.Text = "No puedes eliminar tu propio usuario mientras tienes la sesión activa.";
                 lblMensaje.ForeColor = System.Drawing.Color.Red;
                 return;
             }
@@ -302,13 +302,13 @@ namespace trabajo_ing_software
                         con.Open();
                         cmd.ExecuteNonQuery();
 
-                        lblMensaje.Text = "Usuario eliminado con �xito.";
+                        lblMensaje.Text = "Usuario eliminado con éxito.";
                         lblMensaje.ForeColor = System.Drawing.Color.Green;
                         CargarUsuarios();
                     }
                     catch (MySqlException)
                     {
-                        lblMensaje.Text = "No se puede eliminar este usuario porque ya tiene registros o compras asociadas. En su lugar, usa el bot�n 'Desactivar'.";
+                        lblMensaje.Text = "No se puede eliminar este usuario porque ya tiene registros o compras asociadas. En su lugar, usa el botón 'Desactivar'.";
                         lblMensaje.ForeColor = System.Drawing.Color.Red;
                     }
                 }
@@ -343,6 +343,7 @@ namespace trabajo_ing_software
             txtJefeCompras.Text = ConfiguracionGlobal.NombreJefeCompras;
             txtJefeVentas.Text = ConfiguracionGlobal.NombreJefeVentas;
             txtJefeInventario.Text = ConfiguracionGlobal.NombreJefeInventario;
+            txtNombreContador.Text = ConfiguracionGlobal.NombreContador;
             lblMensajeJefaturas.Text = "";
             pnlModalJefaturas.Visible = true;
         }
@@ -357,6 +358,7 @@ namespace trabajo_ing_software
             string jefeCompras = txtJefeCompras.Text.Trim();
             string jefeVentas = txtJefeVentas.Text.Trim();
             string jefeInventario = txtJefeInventario.Text.Trim();
+            string nombreContador = txtNombreContador.Text.Trim();
 
             if (string.IsNullOrEmpty(jefeCompras))
             {
@@ -373,13 +375,17 @@ namespace trabajo_ing_software
                     string sql = @"
                         UPDATE ConfiguracionGlobal SET Valor = @JefeCompras WHERE Clave = 'NombreJefeCompras';
                         UPDATE ConfiguracionGlobal SET Valor = @JefeVentas WHERE Clave = 'NombreJefeVentas';
-                        UPDATE ConfiguracionGlobal SET Valor = @JefeInventario WHERE Clave = 'NombreJefeInventario';";
+                        UPDATE ConfiguracionGlobal SET Valor = @JefeInventario WHERE Clave = 'NombreJefeInventario';
+                        INSERT INTO ConfiguracionGlobal (Clave, Valor, Descripcion)
+                        VALUES ('NombreContador', @NombreContador, 'Firma oficial Contabilidad y Comprobantes de Pago')
+                        ON DUPLICATE KEY UPDATE Valor = VALUES(Valor);";
 
                     using (MySqlCommand cmd = new MySqlCommand(sql, con))
                     {
                         cmd.Parameters.AddWithValue("@JefeCompras", jefeCompras);
                         cmd.Parameters.AddWithValue("@JefeVentas", string.IsNullOrEmpty(jefeVentas) ? "Camilo Rodríguez Saldaña" : jefeVentas);
                         cmd.Parameters.AddWithValue("@JefeInventario", string.IsNullOrEmpty(jefeInventario) ? "Katherine Sanhueza Hernández" : jefeInventario);
+                        cmd.Parameters.AddWithValue("@NombreContador", string.IsNullOrEmpty(nombreContador) ? "Contador General" : nombreContador);
                         cmd.ExecuteNonQuery();
                     }
                 }

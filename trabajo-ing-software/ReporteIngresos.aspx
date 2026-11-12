@@ -72,6 +72,11 @@
             margin-bottom: 25px;
         }
 
+        .printable-sheet .table th,
+        .printable-sheet .table td {
+            padding: 10px 8px;
+            font-size: 12px;
+        }
         @media (max-width: 1024px) {
             .filter-grid-5col {
                 grid-template-columns: 1fr;
@@ -178,7 +183,7 @@
                 <div class="report-header-banner">
                     <div>
                         <div style="font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--color-texto);">
-                            NOMBRE - COSMETOLOG&Iacute;A PROFESIONAL
+                            DERMO ERP - COSMETOLOG&Iacute;A PROFESIONAL
                         </div>
                         <div style="font-size: 11px; color: var(--color-texto-suave); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px;">
                             Distribuidora de Dermocosm&eacute;tica y Cosmec&eacute;utica Profesional

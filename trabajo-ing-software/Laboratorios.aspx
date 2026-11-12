@@ -22,9 +22,12 @@
 
         .split-labs-grid {
             display: grid;
-            grid-template-columns: 1.45fr 0.85fr;
-            gap: 25px;
+            grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.85fr);
+            gap: 22px;
             align-items: start;
+        }
+        .split-labs-grid > div {
+            min-width: 0;
         }
 
         /* Estilos de tabla centrada y armoniosa */
@@ -155,10 +158,12 @@
             margin-top: 20px;
         }
 
-        @media (max-width: 1050px) {
+        @media (max-width: 1380px) {
             .split-labs-grid {
                 grid-template-columns: 1fr;
             }
+        }
+        @media (max-width: 1050px) {
             .filter-toolbar-row {
                 grid-template-columns: 1fr;
             }
@@ -174,6 +179,7 @@
 </asp:Content>
 <asp:Content ID="Contenido" ContentPlaceHolderID="MainContent" runat="server">
     <div class="dashboard compras-contenido">
+        <asp:HiddenField ID="hfIdLaboratorio" runat="server" Value="" />
         <!-- CUERPO PRINCIPAL DEL MODULO -->
         <div class="labs-container-2col">
 
