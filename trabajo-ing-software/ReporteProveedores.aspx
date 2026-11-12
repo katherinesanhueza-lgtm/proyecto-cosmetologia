@@ -112,7 +112,7 @@
                 </div>
             </div>
 
-            <!-- Filtros BI de Proveedores (RF-COM-11) -->
+            <!-- Filtros BI de Proveedores -->
             <div class="card-dermocosmetica no-print" style="margin-bottom: 20px; padding: 16px 20px;">
                 <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
                     <div style="flex: 1 1 220px;">
@@ -152,7 +152,7 @@
                             Distribuidora de Dermocosm&eacute;tica y Cosmec&eacute;utica Profesional
                         </div>
                         <div style="font-size: 12px; margin-top: 8px; color: var(--color-acento); font-weight: 600;">
-                            INFORME ANAL&Iacute;TICO: EVALUACI&Oacute;N DE PROVEEDORES Y LEAD TIME (RF-COM-11)
+                            INFORME ANAL&Iacute;TICO: EVALUACI&Oacute;N DE PROVEEDORES Y LEAD TIME
                         </div>
                     </div>
                     <div style="text-align: right; font-size: 11px; color: var(--color-texto-suave); line-height: 1.6;">

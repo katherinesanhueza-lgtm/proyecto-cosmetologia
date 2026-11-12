@@ -513,7 +513,7 @@
                 <!-- 2. AGREGAR LINEAS DE PRODUCTOS (DETALLE ARANCELARIO) -->
                 <div class="form-section-title" style="margin-top: 15px;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                    2. Cat&aacute;logo de Insumos y Detalle de &Oacute;rden (RF-COM-10)
+                    2. Cat&aacute;logo de Insumos y Detalle de &Oacute;rden
                 </div>
 
                 <div class="form-grid-4col">
@@ -562,7 +562,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
                     <div style="max-width: 450px; padding-top: 10px;">
                         <div style="font-size: 12px; color: var(--color-texto-suave);">
-                            <strong>Nota de Cumplimiento Arancelario:</strong> El impuesto al valor agregado (IVA) est&aacute; fijado en un <asp:Label ID="lblIvaPctNota" runat="server"></asp:Label>% sobre el valor neto de adquisici&oacute;n seg&uacute;n la legislaci&oacute;n tributaria chilena y las directrices del proyecto (RNF-13).
+                            <strong>Nota de Cumplimiento Arancelario:</strong> El impuesto al valor agregado (IVA) est&aacute; fijado en un <asp:Label ID="lblIvaPctNota" runat="server"></asp:Label>% sobre el valor neto de adquisici&oacute;n seg&uacute;n la legislaci&oacute;n tributaria chilena vigente.
                         </div>
                     </div>
 

@@ -1,4 +1,4 @@
-<%@ Page Title="Compras por laboratorio y marca" MasterPageFile="~/Contabilidad.Master" Language="C#" AutoEventWireup="true" CodeBehind="ReporteComprasLaboratorio.aspx.cs" Inherits="trabajo_ing_software.ReporteComprasLaboratorio" ResponseEncoding="utf-8" ContentType="text/html; charset=utf-8" %>
+﻿<%@ Page Title="Compras por laboratorio y marca" MasterPageFile="~/Contabilidad.Master" Language="C#" AutoEventWireup="true" CodeBehind="ReporteComprasLaboratorio.aspx.cs" Inherits="trabajo_ing_software.ReporteComprasLaboratorio" ResponseEncoding="utf-8" ContentType="text/html; charset=utf-8" %>
 <asp:Content ID="Recursos" ContentPlaceHolderID="EstilosPagina" runat="server">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
@@ -123,7 +123,7 @@
                 <div>
                     <span class="pill-badge" style="font-size: 10px; padding: 4px 12px; margin-bottom: 8px;">REPORTE ANAL&Iacute;TICO N&deg; 5 - COMPRAS</span>
                     <h1>An&aacute;lisis de Compras por Laboratorio y Marca</h1>
-                    <p class="text-muted" style="margin-top: 4px;">Consolidado de inversi&oacute;n neta, IVA, participaci&oacute;n presupuestaria y reclamos asociados por laboratorio proveedor y marca (RF-COM-11 / RNF-14).</p>
+                    <p class="text-muted" style="margin-top: 4px;">Consolidado de inversi&oacute;n neta, IVA, participaci&oacute;n presupuestaria y reclamos asociados por laboratorio proveedor y marca.</p>
                 </div>
                 <div class="compras-acciones">
                     <a href="DevolucionesProveedor.aspx" class="btn btn-outline-secondary">
@@ -216,7 +216,7 @@
                             Distribuidora de Dermocosm&eacute;tica y Cosmec&eacute;utica Profesional
                         </div>
                         <div style="font-size: 12px; margin-top: 8px; color: var(--color-acento); font-weight: 600;">
-                            INFORME GERENCIAL: AN&Aacute;LISIS DE COMPRAS POR LABORATORIO Y MARCA (RF-COM-11)
+                            INFORME GERENCIAL: AN&Aacute;LISIS DE COMPRAS POR LABORATORIO Y MARCA
                         </div>
                     </div>
                     <div style="text-align: right; font-size: 11px; color: var(--color-texto-suave); line-height: 1.6;">
