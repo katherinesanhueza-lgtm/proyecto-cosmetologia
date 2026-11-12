@@ -20,6 +20,7 @@ namespace trabajo_ing_software
         private static string _nombreJefeCompras = "Javiera Rail Astudillo";
         private static string _nombreJefeVentas = "Camilo Rodríguez Saldaña";
         private static string _nombreJefeInventario = "Katherine Sanhueza Hernández";
+        private static string _nombreContador = "Contador General";
 
         /// <summary>
         /// Método genérico para consultar cualquier valor de configuración en BD
@@ -95,6 +96,15 @@ namespace trabajo_ing_software
         {
             get => ObtenerValor("NombreJefeInventario", _nombreJefeInventario);
             set => _nombreJefeInventario = value;
+        }
+
+        /// <summary>
+        /// Jefatura / Contador General del Módulo de Contabilidad para firmas de comprobantes de pago y reportes financieros.
+        /// </summary>
+        public static string NombreContador
+        {
+            get => ObtenerValor("NombreContador", _nombreContador);
+            set => _nombreContador = value;
         }
 
                 /// <summary>

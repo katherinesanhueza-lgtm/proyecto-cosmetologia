@@ -108,6 +108,34 @@
                 <div class="nav-links">
                     <a href="Laboratorios.aspx" class="btn btn-outline-secondary">Volver a Laboratorios</a>
                     <button type="button" class="btn btn-primary" onclick="descargarPDF();">Descargar PDF</button>
+                    <asp:Button ID="btnExportarExcel" runat="server" Text="Exportar Excel" CssClass="btn btn-outline-secondary" OnClick="btnExportarExcel_Click" />
+                </div>
+            </div>
+
+            <!-- Filtros BI de Proveedores (RF-COM-11) -->
+            <div class="card-dermocosmetica no-print" style="margin-bottom: 20px; padding: 16px 20px;">
+                <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+                    <div style="flex: 1 1 220px;">
+                        <label class="form-label">Buscar Laboratorio / Marca</label>
+                        <asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control" placeholder="Ej: ISDIN, L'Or&eacute;al, CeraVe..."></asp:TextBox>
+                    </div>
+                    <div style="flex: 0 1 190px;">
+                        <label class="form-label">Pa&iacute;s</label>
+                        <asp:DropDownList ID="ddlFiltroPais" runat="server" CssClass="form-select"></asp:DropDownList>
+                    </div>
+                    <div style="flex: 0 1 190px;">
+                        <label class="form-label">Calificaci&oacute;n</label>
+                        <asp:DropDownList ID="ddlFiltroCalificacion" runat="server" CssClass="form-select">
+                            <asp:ListItem Value="" Text="Todas las Calificaciones"></asp:ListItem>
+                            <asp:ListItem Value="Excelente" Text="Excelente"></asp:ListItem>
+                            <asp:ListItem Value="Aceptable" Text="Aceptable"></asp:ListItem>
+                            <asp:ListItem Value="Cr&#237;tico" Text="Cr&#237;tico"></asp:ListItem>
+                        </asp:DropDownList>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <asp:Button ID="btnFiltrar" runat="server" Text="Filtrar" CssClass="btn btn-primary" OnClick="btnFiltrar_Click" />
+                        <asp:Button ID="btnLimpiar" runat="server" Text="Limpiar" CssClass="btn btn-outline-secondary" OnClick="btnLimpiar_Click" />
+                    </div>
                 </div>
             </div>
 

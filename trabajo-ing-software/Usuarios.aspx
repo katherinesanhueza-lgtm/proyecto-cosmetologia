@@ -250,6 +250,11 @@
                     <asp:TextBox ID="txtJefeInventario" runat="server" CssClass="form-control" placeholder="Nombre completo para firmas de reportes"></asp:TextBox>
                 </div>
 
+                <div class="form-group-dermo" style="margin-bottom: 16px;">
+                    <label class="form-label" style="font-weight: 700;">Contador General (Contabilidad y Recibos)</label>
+                    <asp:TextBox ID="txtNombreContador" runat="server" CssClass="form-control" placeholder="Nombre del Contador para comprobantes de pago"></asp:TextBox>
+                </div>
+
                 <asp:Label ID="lblMensajeJefaturas" runat="server" Font-Size="12.5px" style="display: block; margin-top: 14px;"></asp:Label>
 
                 <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; border-top: 1px solid var(--color-borde-suave); padding-top: 15px;">

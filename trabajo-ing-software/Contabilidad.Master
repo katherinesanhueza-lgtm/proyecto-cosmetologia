@@ -3,11 +3,18 @@
     private static readonly string[][] VistasCompras = {
         new[] { "Compras", "Resumen de Compras" },
         new[] { "Laboratorios", "Laboratorios y proveedores" },
+        new[] { "CotizacionesImportacion", "Cotizaciones de importación" },
         new[] { "OrdenesCompra", "Órdenes de compra" },
         new[] { "Recepciones", "Recepciones y lotes" },
-        new[] { "ReporteProveedores", "Evaluación de proveedores" },
-        new[] { "ReporteOrdenesCompra", "Reporte de órdenes" },
-        new[] { "ReporteIngresos", "Reporte de ingresos" }
+        new[] { "DevolucionesProveedor", "Devoluciones y reclamos" }
+    };
+
+    private static readonly string[] ReportesCompras = {
+        "ReporteProveedores",
+        "ReporteOrdenesCompra",
+        "ReporteIngresos",
+        "ReporteCotizaciones",
+        "ReporteComprasLaboratorio"
     };
 
     private static readonly string[][] VistasVentas = {
@@ -48,7 +55,11 @@
 
     protected bool EsCompras
     {
-        get { return Array.Exists(VistasCompras, vista => vista[0] == PaginaActual); }
+        get
+        {
+            return Array.Exists(VistasCompras, vista => vista[0] == PaginaActual)
+                || Array.Exists(ReportesCompras, r => r == PaginaActual);
+        }
     }
 </script>
 <!DOCTYPE html>
@@ -141,23 +152,25 @@
                     </a>
                     <% } } else if (!EsInicio) {
                         var secciones = new[] {
-                            new[] { "cuentas", "Plan de cuentas" },
-                            new[] { "periodos", "Períodos contables" },
-                            new[] { "diario", "Libro diario" },
-                            new[] { "operaciones", "Operaciones del ERP" },
-                            new[] { "balance", "Balance de comprobación" },
-                            new[] { "resultados", "Estado de resultados" },
-                            new[] { "pagos", "Proyección de pagos" },
-                            new[] { "cobros", "Antigüedad de saldos" },
-                            new[] { "perdidas", "Pérdidas por mermas" },
-                            new[] { "inventario", "Inventario valorizado" }
+                            new[] { "cuentas", "Plan de cuentas", "Contabilidad.aspx?vista=cuentas" },
+                            new[] { "periodos", "Períodos contables", "Contabilidad.aspx?vista=periodos" },
+                            new[] { "diario", "Libro diario", "Contabilidad.aspx?vista=diario" },
+                            new[] { "operaciones", "Operaciones del ERP", "Contabilidad.aspx?vista=operaciones" },
+                            new[] { "CuentasPagar", "Cuentas por pagar", "CuentasPagar.aspx" },
+                            new[] { "balance", "Balance de comprobación", "Contabilidad.aspx?vista=balance" },
+                            new[] { "resultados", "Estado de resultados", "Contabilidad.aspx?vista=resultados" },
+                            new[] { "ReporteFlujoCaja", "Flujo de caja (BI)", "ReporteFlujoCaja.aspx" },
+                            new[] { "pagos", "Proyección de pagos", "Contabilidad.aspx?vista=pagos" },
+                            new[] { "cobros", "Antigüedad de saldos", "Contabilidad.aspx?vista=cobros" },
+                            new[] { "perdidas", "Pérdidas por mermas", "Contabilidad.aspx?vista=perdidas" },
+                            new[] { "inventario", "Inventario valorizado", "Contabilidad.aspx?vista=inventario" }
                         };
-                        string actual = Request.QueryString["vista"] ?? "cuentas";
+                        string actual = PaginaActual == "Contabilidad" ? (Request.QueryString["vista"] ?? "cuentas") : PaginaActual;
                         foreach (var seccion in secciones)
                         {
                     %>
                     <a class="menu-item" aria-current="<%: actual == seccion[0] ? "page" : "false" %>"
-                        href="<%: ResolveUrl("~/Contabilidad.aspx?vista=" + seccion[0]) %>">
+                        href="<%: ResolveUrl("~/" + seccion[2]) %>">
                         <span class="menu-icono" aria-hidden="true">▦</span> <%: seccion[1] %>
                     </a>
                     <% } } %>

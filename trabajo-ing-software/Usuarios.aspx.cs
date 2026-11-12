@@ -343,6 +343,7 @@ namespace trabajo_ing_software
             txtJefeCompras.Text = ConfiguracionGlobal.NombreJefeCompras;
             txtJefeVentas.Text = ConfiguracionGlobal.NombreJefeVentas;
             txtJefeInventario.Text = ConfiguracionGlobal.NombreJefeInventario;
+            txtNombreContador.Text = ConfiguracionGlobal.NombreContador;
             lblMensajeJefaturas.Text = "";
             pnlModalJefaturas.Visible = true;
         }
@@ -357,6 +358,7 @@ namespace trabajo_ing_software
             string jefeCompras = txtJefeCompras.Text.Trim();
             string jefeVentas = txtJefeVentas.Text.Trim();
             string jefeInventario = txtJefeInventario.Text.Trim();
+            string nombreContador = txtNombreContador.Text.Trim();
 
             if (string.IsNullOrEmpty(jefeCompras))
             {
@@ -373,13 +375,17 @@ namespace trabajo_ing_software
                     string sql = @"
                         UPDATE ConfiguracionGlobal SET Valor = @JefeCompras WHERE Clave = 'NombreJefeCompras';
                         UPDATE ConfiguracionGlobal SET Valor = @JefeVentas WHERE Clave = 'NombreJefeVentas';
-                        UPDATE ConfiguracionGlobal SET Valor = @JefeInventario WHERE Clave = 'NombreJefeInventario';";
+                        UPDATE ConfiguracionGlobal SET Valor = @JefeInventario WHERE Clave = 'NombreJefeInventario';
+                        INSERT INTO ConfiguracionGlobal (Clave, Valor, Descripcion)
+                        VALUES ('NombreContador', @NombreContador, 'Firma oficial Contabilidad y Comprobantes de Pago')
+                        ON DUPLICATE KEY UPDATE Valor = VALUES(Valor);";
 
                     using (MySqlCommand cmd = new MySqlCommand(sql, con))
                     {
                         cmd.Parameters.AddWithValue("@JefeCompras", jefeCompras);
                         cmd.Parameters.AddWithValue("@JefeVentas", string.IsNullOrEmpty(jefeVentas) ? "Camilo Rodríguez Saldaña" : jefeVentas);
                         cmd.Parameters.AddWithValue("@JefeInventario", string.IsNullOrEmpty(jefeInventario) ? "Katherine Sanhueza Hernández" : jefeInventario);
+                        cmd.Parameters.AddWithValue("@NombreContador", string.IsNullOrEmpty(nombreContador) ? "Contador General" : nombreContador);
                         cmd.ExecuteNonQuery();
                     }
                 }

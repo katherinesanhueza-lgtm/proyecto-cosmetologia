@@ -396,7 +396,14 @@ namespace trabajo_ing_software
                             }
                         }
 
-                        using (var cuenta = VentaInventario.Comando(con, trans, @"INSERT INTO cuentaporpagar                            (IdRecepcion,IdLaboratorio,Monto,Estado,IdUsuario)                            SELECT r.IdRecepcion,oc.IdLaboratorio,                                ROUND(SUM(d.Cantidad*d.CostoUnitario)*(1+COALESCE(oc.Iva/NULLIF(oc.Neto,0),0)),2),                                'Pendiente',@p1                            FROM recepcioncompra r JOIN ordencompra oc ON oc.IdOC=r.IdOC                            JOIN detallerecepcion d ON d.IdRecepcion=r.IdRecepcion                            WHERE r.IdRecepcion=@p0                            GROUP BY r.IdRecepcion,oc.IdLaboratorio,oc.Iva,oc.Neto", idRecepcion,idUsuario))                        {                            if (cuenta.ExecuteNonQuery() != 1)                                throw new InvalidOperationException("No se pudo crear la cuenta por pagar de la recepción.");                        }                        trans.Commit();
+                        using (MySqlCommand cmdSp = new MySqlCommand("usp_CrearCuentaPorPagar", con, trans))
+                        {
+                            cmdSp.CommandType = CommandType.StoredProcedure;
+                            cmdSp.Parameters.AddWithValue("p_IdRecepcion", idRecepcion);
+                            cmdSp.Parameters.AddWithValue("p_IdUsuario", idUsuario);
+                            cmdSp.ExecuteNonQuery();
+                        }
+                        trans.Commit();
 
                         MostrarMensaje("Recepción REC-" + idRecepcion.ToString("D4") + " aprobada exitosamente. Se ingresaron " + totalItemsRecibiendo + " unidades a bodega con sus respectivos lotes (RF-COM-05 / RF-COM-06).", true);
                         pnlFormularioRec.Visible = false;

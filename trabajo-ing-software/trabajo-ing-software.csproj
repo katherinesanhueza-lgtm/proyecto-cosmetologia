@@ -165,6 +165,7 @@
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="Content\Estilos.css" />
     <Content Include="Content\Site.css" />
+    <Content Include="CotizacionesImportacion.aspx" />
     <Content Include="Default.aspx" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
@@ -176,6 +177,11 @@
     <Content Include="ReporteOrdenesCompra.aspx" />
     <Content Include="Recepciones.aspx" />
     <Content Include="ReporteIngresos.aspx" />
+    <Content Include="ReporteCotizaciones.aspx" />
+    <Content Include="DevolucionesProveedor.aspx" />
+    <Content Include="ReporteComprasLaboratorio.aspx" />
+    <Content Include="CuentasPagar.aspx" />
+    <Content Include="ReporteFlujoCaja.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
@@ -254,6 +260,13 @@
     <Compile Include="About.aspx.designer.cs">
       <DependentUpon>About.aspx</DependentUpon>
     </Compile>
+    <Compile Include="CotizacionesImportacion.aspx.cs">
+      <DependentUpon>CotizacionesImportacion.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="CotizacionesImportacion.aspx.designer.cs">
+      <DependentUpon>CotizacionesImportacion.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Perfiles.aspx.cs">
       <DependentUpon>Perfiles.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -316,6 +329,41 @@
     <Compile Include="ReporteOrdenesCompra.aspx.designer.cs">
       <DependentUpon>ReporteOrdenesCompra.aspx</DependentUpon>
     </Compile>
+    <Compile Include="ReporteCotizaciones.aspx.cs">
+      <DependentUpon>ReporteCotizaciones.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ReporteCotizaciones.aspx.designer.cs">
+      <DependentUpon>ReporteCotizaciones.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="DevolucionesProveedor.aspx.cs">
+      <DependentUpon>DevolucionesProveedor.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="DevolucionesProveedor.aspx.designer.cs">
+      <DependentUpon>DevolucionesProveedor.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ReporteComprasLaboratorio.aspx.cs">
+      <DependentUpon>ReporteComprasLaboratorio.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ReporteComprasLaboratorio.aspx.designer.cs">
+      <DependentUpon>ReporteComprasLaboratorio.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="CuentasPagar.aspx.cs">
+      <DependentUpon>CuentasPagar.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="CuentasPagar.aspx.designer.cs">
+      <DependentUpon>CuentasPagar.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ReporteFlujoCaja.aspx.cs">
+      <DependentUpon>ReporteFlujoCaja.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ReporteFlujoCaja.aspx.designer.cs">
+      <DependentUpon>ReporteFlujoCaja.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Recepciones.aspx.cs">
       <DependentUpon>Recepciones.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -359,9 +407,7 @@
       <DependentUpon>ViewSwitcher.ascx</DependentUpon>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="App_Data\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="packages.config" />
     <Content Include="Scripts\jquery-3.7.0.slim.min.map" />
@@ -414,8 +460,13 @@
   <ItemGroup>
     <Content Include="Contabilidad.aspx" />
     <Content Include="Compras.aspx" />
-    <Compile Include="Compras.aspx.cs"><DependentUpon>Compras.aspx</DependentUpon></Compile>
-    <Compile Include="Compras.aspx.designer.cs"><DependentUpon>Compras.aspx</DependentUpon></Compile>
+    <Compile Include="Compras.aspx.cs">
+      <DependentUpon>Compras.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Compras.aspx.designer.cs">
+      <DependentUpon>Compras.aspx</DependentUpon>
+    </Compile>
     <Content Include="Content\ComprasResumen.css" />
     <Compile Include="RecepcionInventario.cs" />
     <Content Include="Contabilidad.Master" />
@@ -427,6 +478,7 @@
     <Compile Include="ContabilidadExportacion.cs" />
     <Compile Include="Contabilidad.aspx.cs">
       <DependentUpon>Contabilidad.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Contabilidad.aspx.designer.cs">
       <DependentUpon>Contabilidad.aspx</DependentUpon>
@@ -436,6 +488,7 @@
     <Content Include="Clientes.aspx" />
     <Compile Include="Clientes.aspx.cs">
       <DependentUpon>Clientes.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Clientes.aspx.designer.cs">
       <DependentUpon>Clientes.aspx</DependentUpon>
@@ -443,6 +496,7 @@
     <Content Include="Cotizaciones.aspx" />
     <Compile Include="Cotizaciones.aspx.cs">
       <DependentUpon>Cotizaciones.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Cotizaciones.aspx.designer.cs">
       <DependentUpon>Cotizaciones.aspx</DependentUpon>
@@ -450,6 +504,7 @@
     <Content Include="Despachos.aspx" />
     <Compile Include="Despachos.aspx.cs">
       <DependentUpon>Despachos.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Despachos.aspx.designer.cs">
       <DependentUpon>Despachos.aspx</DependentUpon>
@@ -457,6 +512,7 @@
     <Content Include="Devoluciones.aspx" />
     <Compile Include="Devoluciones.aspx.cs">
       <DependentUpon>Devoluciones.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Devoluciones.aspx.designer.cs">
       <DependentUpon>Devoluciones.aspx</DependentUpon>
@@ -464,6 +520,7 @@
     <Content Include="ReporteVentas.aspx" />
     <Compile Include="ReporteVentas.aspx.cs">
       <DependentUpon>ReporteVentas.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="ReporteVentas.aspx.designer.cs">
       <DependentUpon>ReporteVentas.aspx</DependentUpon>
@@ -471,6 +528,7 @@
     <Content Include="Ventas.aspx" />
     <Compile Include="Ventas.aspx.cs">
       <DependentUpon>Ventas.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Ventas.aspx.designer.cs">
       <DependentUpon>Ventas.aspx</DependentUpon>
@@ -478,20 +536,30 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="VentaInventario.cs" />
-    <Compile Include="PaginaVentas.cs" />
+    <Compile Include="PaginaVentas.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
     <Content Include="App_Data\003_ventas.sql" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Inventario.aspx" />
-    <Compile Include="Inventario.aspx.cs" />
+    <Compile Include="Inventario.aspx.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
     <Compile Include="Inventario.aspx.designer.cs" />
     <Content Include="Gestion.aspx" />
-    <Compile Include="Gestion.aspx.cs" />
+    <Compile Include="Gestion.aspx.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
     <Content Include="ReporteInventario.aspx" />
-    <Compile Include="ReporteInventario.aspx.cs" />
+    <Compile Include="ReporteInventario.aspx.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
     <Compile Include="ReporteInventario.aspx.designer.cs" />
     <Compile Include="InventarioDatos.cs" />
-    <Compile Include="PaginaInventario.cs" />
+    <Compile Include="PaginaInventario.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
     <Content Include="App_Data\004_contabilidad_mysql.sql" />
   </ItemGroup>
 </Project>

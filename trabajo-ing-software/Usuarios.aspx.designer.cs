@@ -138,6 +138,7 @@ namespace trabajo_ing_software
         protected global::System.Web.UI.WebControls.TextBox txtJefeCompras;
         protected global::System.Web.UI.WebControls.TextBox txtJefeVentas;
         protected global::System.Web.UI.WebControls.TextBox txtJefeInventario;
+        protected global::System.Web.UI.WebControls.TextBox txtNombreContador;
         protected global::System.Web.UI.WebControls.Label lblMensajeJefaturas;
         protected global::System.Web.UI.WebControls.Button btnCancelarJefaturas;
         protected global::System.Web.UI.WebControls.Button btnGuardarJefaturas;
