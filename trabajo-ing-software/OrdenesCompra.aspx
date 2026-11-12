@@ -513,7 +513,7 @@
                 <!-- 2. AGREGAR LINEAS DE PRODUCTOS (DETALLE ARANCELARIO) -->
                 <div class="form-section-title" style="margin-top: 15px;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                    2. Cat&aacute;logo de Insumos y Detalle de &Oacute;rden (RF-COM-10)
+                    2. Cat&aacute;logo de Insumos y Detalle de &Oacute;rden
                 </div>
 
                 <div class="form-grid-4col">
@@ -562,7 +562,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;">
                     <div style="max-width: 450px; padding-top: 10px;">
                         <div style="font-size: 12px; color: var(--color-texto-suave);">
-                            <strong>Nota de Cumplimiento Arancelario:</strong> El impuesto al valor agregado (IVA) est&aacute; fijado en un <asp:Label ID="lblIvaPctNota" runat="server"></asp:Label>% sobre el valor neto de adquisici&oacute;n seg&uacute;n la legislaci&oacute;n tributaria chilena y las directrices del proyecto (RNF-13).
+                            <strong>Nota de Cumplimiento Arancelario:</strong> El impuesto al valor agregado (IVA) est&aacute; fijado en un <asp:Label ID="lblIvaPctNota" runat="server"></asp:Label>% sobre el valor neto de adquisici&oacute;n seg&uacute;n la legislaci&oacute;n tributaria chilena vigente.
                         </div>
                     </div>
 
@@ -630,10 +630,17 @@
                     <Columns>
                         <asp:TemplateField HeaderText="N&deg; &Oacute;RDEN" HeaderStyle-CssClass="col-center" ItemStyle-CssClass="col-center">
                             <ItemTemplate>
-                                <span class="oc-folio-pill">
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-                                    <%# Eval("NumeroOC") %>
-                                </span>
+                                <div>
+                                    <span class="oc-folio-pill">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                                        <%# Eval("NumeroOC") %>
+                                    </span>
+                                </div>
+                                <div style="margin-top: 4px;">
+                                    <%# Eval("IdCotizacion") != DBNull.Value && Eval("IdCotizacion") != null ? 
+                                        "<span style='font-size: 10px; font-weight: 600; color: #7A5E47; background-color: #F5EFEB; border: 1px solid #D8C7B5; border-radius: 10px; padding: 1px 7px; display: inline-flex; align-items: center; gap: 3px;' title='Generada desde Cotización de Importación'><svg width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'></path><polyline points='14 2 14 8 20 8'></polyline></svg> COT-" + string.Format("{0:D4}", Eval("IdCotizacion")) + "</span>" : 
+                                        "<span style='font-size: 10px; color: #A09990;'>Compra directa</span>" %>
+                                </div>
                             </ItemTemplate>
                         </asp:TemplateField>
 
@@ -715,6 +722,7 @@
                     <div><strong>RUT:</strong> <asp:Label ID="lblModalRut" runat="server"></asp:Label></div>
                     <div><strong>Fecha Emisi&oacute;n:</strong> <asp:Label ID="lblModalFecha" runat="server"></asp:Label></div>
                     <div><strong>Fecha Entrega:</strong> <asp:Label ID="lblModalFechaEsperada" runat="server"></asp:Label></div>
+                    <div><strong>Origen:</strong> <asp:Label ID="lblModalOrigen" runat="server"></asp:Label></div>
                     <div><strong>Estado:</strong> <asp:Label ID="lblModalEstado" runat="server" Font-Bold="true"></asp:Label></div>
                 </div>
 
@@ -779,10 +787,6 @@
                     </div>
                     <asp:Button ID="btnCerrarConfig" runat="server" Text="Cerrar" CssClass="btn btn-outline-secondary" OnClick="btnCerrarConfig_Click" />
                 </div>
-
-                <p class="text-muted" style="font-size: 13px; line-height: 1.5; margin-bottom: 20px;">
-                    Par&aacute;metro tributario legal en Chile (RF-COM-04) registrado en <code>ConfiguracionGlobal</code>. Aplica de forma inmediata al c&aacute;lculo de impuestos en todas las &oacute;rdenes de compra.
-                </p>
 
                 <div class="form-group-dermo">
                     <label class="form-label" style="font-weight: 700;">Tasa de IVA Legal Vigente (%)</label>

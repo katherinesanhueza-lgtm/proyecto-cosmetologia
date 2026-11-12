@@ -1,4 +1,4 @@
-<%@ Page Title="Devoluciones y reclamos" Language="C#" MasterPageFile="~/Contabilidad.Master" AutoEventWireup="true" CodeBehind="DevolucionesProveedor.aspx.cs" Inherits="trabajo_ing_software.DevolucionesProveedor" ResponseEncoding="utf-8" ContentType="text/html; charset=utf-8" %>
+﻿<%@ Page Title="Devoluciones y reclamos" Language="C#" MasterPageFile="~/Contabilidad.Master" AutoEventWireup="true" CodeBehind="DevolucionesProveedor.aspx.cs" Inherits="trabajo_ing_software.DevolucionesProveedor" ResponseEncoding="utf-8" ContentType="text/html; charset=utf-8" %>
 
 <asp:Content ID="Recursos" ContentPlaceHolderID="EstilosPagina" runat="server">
     <style>
@@ -122,7 +122,7 @@
                 <div>
                     <span class="pill-badge" style="font-size: 10px; padding: 4px 12px; margin-bottom: 8px;">M&Oacute;DULO DE COMPRAS - CONTROL DE CALIDAD</span>
                     <h1>Devoluciones y Reclamos a Proveedor</h1>
-                    <p class="text-muted" style="margin-top: 4px;">Registro de no conformidades sobre recepciones y lotes, seguimiento de reclamos y compensaciones de proveedor (RF-COM-09).</p>
+                    <p class="text-muted" style="margin-top: 4px;">Registro de no conformidades sobre recepciones y lotes, seguimiento de reclamos y compensaciones de proveedor.</p>
                 </div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <a href="ReporteComprasLaboratorio.aspx" class="btn btn-outline-secondary">Reporte Lab. y Marca</a>

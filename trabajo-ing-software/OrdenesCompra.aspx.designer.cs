@@ -427,6 +427,7 @@ namespace trabajo_ing_software
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblModalFechaEsperada;
+        protected global::System.Web.UI.WebControls.Label lblModalOrigen;
 
         /// <summary>
         /// Control lblModalEstado.

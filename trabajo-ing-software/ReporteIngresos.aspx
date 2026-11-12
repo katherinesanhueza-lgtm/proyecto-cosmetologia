@@ -101,7 +101,7 @@
                 <div>
                     <span class="pill-badge" style="font-size: 10px; padding: 4px 12px; margin-bottom: 8px;">REPORTE ANAL&Iacute;TICO N&deg; 4 - COMPRAS E INVENTARIO</span>
                     <h1>Consolidado de Ingresos por Rango de Fechas</h1>
-                    <p class="text-muted" style="margin-top: 4px;">Auditor&iacute;a de entradas de insumos a bodega, trazabilidad de lotes asignados y valorizaci&oacute;n de adquisiciones (RF-COM-11).</p>
+                    <p class="text-muted" style="margin-top: 4px;">Auditor&iacute;a de entradas de insumos a bodega, trazabilidad de lotes asignados y valorizaci&oacute;n de adquisiciones.</p>
                 </div>
                 <div class="compras-acciones">
                     <a href="Recepciones.aspx" class="btn btn-outline-secondary"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>Volver a Recepciones</a>
@@ -189,7 +189,7 @@
                             Distribuidora de Dermocosm&eacute;tica y Cosmec&eacute;utica Profesional
                         </div>
                         <div style="font-size: 12px; margin-top: 8px; color: var(--color-acento); font-weight: 600;">
-                            INFORME CONSOLIDADO DE INGRESOS A BODEGA Y TRAZABILIDAD DE LOTES (RF-COM-11)
+                            INFORME CONSOLIDADO DE INGRESOS A BODEGA Y TRAZABILIDAD DE LOTES
                         </div>
                     </div>
                     <div style="text-align: right; font-size: 11px; color: var(--color-texto-suave); line-height: 1.6;">

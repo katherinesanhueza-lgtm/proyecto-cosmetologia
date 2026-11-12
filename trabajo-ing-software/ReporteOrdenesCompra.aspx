@@ -116,7 +116,7 @@
                 <div>
                     <span class="pill-badge" style="font-size: 10px; padding: 4px 12px; margin-bottom: 8px;">REPORTE ANAL&Iacute;TICO N&deg; 3 - COMPRAS</span>
                     <h1>Estado de &Oacute;rdenes de Compra</h1>
-                    <p class="text-muted" style="margin-top: 4px;">Monitoreo anal&iacute;tico de pedidos pendientes, recibidos y anulados, con liquidaci&oacute;n de IVA Cr&eacute;dito Fiscal (RF-COM-11 / RNF-14).</p>
+                    <p class="text-muted" style="margin-top: 4px;">Monitoreo anal&iacute;tico de pedidos pendientes, recibidos y anulados, con liquidaci&oacute;n de IVA Cr&eacute;dito Fiscal.</p>
                 </div>
                 <div class="compras-acciones">
                     <a href="OrdenesCompra.aspx" class="btn btn-outline-secondary"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>Volver a &Oacute;rdenes</a>
@@ -205,7 +205,7 @@
                             Distribuidora de Dermocosm&eacute;tica y Cosmec&eacute;utica Profesional
                         </div>
                         <div style="font-size: 12px; margin-top: 8px; color: var(--color-acento); font-weight: 600;">
-                            INFORME GERENCIAL: ESTADO DE &Oacute;RDENES DE COMPRA (RF-COM-11)
+                            INFORME GERENCIAL: ESTADO DE &Oacute;RDENES DE COMPRA
                         </div>
                     </div>
                     <div style="text-align: right; font-size: 11px; color: var(--color-texto-suave); line-height: 1.6;">

@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 // <generado automáticamente>
 //     Este código fue generado por una herramienta.
 //
@@ -127,5 +127,8 @@ namespace trabajo_ing_software
         protected global::System.Web.UI.WebControls.DropDownList ddlFiltroCalificacion;
         protected global::System.Web.UI.WebControls.Button btnFiltrar;
         protected global::System.Web.UI.WebControls.Button btnLimpiar;
+        protected global::System.Web.UI.WebControls.Label lblFirmaCompras;
+        protected global::System.Web.UI.WebControls.Label lblFirmaVentas;
+        protected global::System.Web.UI.WebControls.Label lblFirmaInventario;
     }
 }

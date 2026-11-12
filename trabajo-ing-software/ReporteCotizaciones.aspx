@@ -1,4 +1,4 @@
-<%@ Page Title="Variación de costos de insumos" MasterPageFile="~/Contabilidad.Master" Language="C#" AutoEventWireup="true" CodeBehind="ReporteCotizaciones.aspx.cs" Inherits="trabajo_ing_software.ReporteCotizaciones" ResponseEncoding="utf-8" ContentType="text/html; charset=utf-8" %>
+﻿<%@ Page Title="Variación de costos de insumos" MasterPageFile="~/Contabilidad.Master" Language="C#" AutoEventWireup="true" CodeBehind="ReporteCotizaciones.aspx.cs" Inherits="trabajo_ing_software.ReporteCotizaciones" ResponseEncoding="utf-8" ContentType="text/html; charset=utf-8" %>
 <asp:Content ID="Recursos" ContentPlaceHolderID="EstilosPagina" runat="server">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
@@ -127,7 +127,7 @@
                 <div>
                     <span class="pill-badge" style="font-size: 10px; padding: 4px 12px; margin-bottom: 8px;">REPORTE ANAL&Iacute;TICO N&deg; 2 - COMPRAS</span>
                     <h1>Historial de Variaci&oacute;n de Costos de Insumos</h1>
-                    <p class="text-muted" style="margin-top: 4px;">Comparativa hist&oacute;rica de costos cotizados en importaci&oacute;n y adquiridos en &oacute;rdenes de compra por SKU, laboratorio y tipo de cambio (RF-COM-03 / RF-COM-11).</p>
+                    <p class="text-muted" style="margin-top: 4px;">Comparativa hist&oacute;rica de costos cotizados en importaci&oacute;n y adquiridos en &oacute;rdenes de compra por SKU, laboratorio y tipo de cambio.</p>
                 </div>
                 <div class="compras-acciones">
                     <a href="CotizacionesImportacion.aspx" class="btn btn-outline-secondary">
@@ -221,7 +221,7 @@
                             Distribuidora de Dermocosm&eacute;tica y Cosmec&eacute;utica Profesional
                         </div>
                         <div style="font-size: 12px; margin-top: 8px; color: var(--color-acento); font-weight: 600;">
-                            INFORME ANAL&Iacute;TICO: HISTORIAL DE VARIACI&Oacute;N DE COSTOS DE INSUMOS (RF-COM-03)
+                            INFORME ANAL&Iacute;TICO: HISTORIAL DE VARIACI&Oacute;N DE COSTOS DE INSUMOS
                         </div>
                     </div>
                     <div style="text-align: right; font-size: 11px; color: var(--color-texto-suave); line-height: 1.6;">
@@ -293,7 +293,7 @@
                 <!-- PIE DE REPORTE -->
                 <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; border-top: 1px solid var(--color-borde-suave); padding-top: 20px; flex-wrap: wrap; gap: 12px;">
                     <div style="font-size: 11px; color: var(--color-texto-suave); max-width: 560px;">
-                        <em>Documento anal&iacute;tico generado autom&aacute;ticamente por el m&oacute;dulo de Compras y Abastecimiento (RF-COM-03). Compara precios unitarios cotizados en divisa extranjera (convertidos a CLP seg&uacute;n tipo de cambio) y costos adquiridos en &oacute;rdenes de compra frente al registro previo del mismo SKU y su Costo Promedio Ponderado actual.</em>
+                        <em>Documento anal&iacute;tico generado autom&aacute;ticamente por el m&oacute;dulo de Compras y Abastecimiento. Compara precios unitarios cotizados en divisa extranjera (convertidos a CLP seg&uacute;n tipo de cambio) y costos adquiridos en &oacute;rdenes de compra frente al registro previo del mismo SKU y su Costo Promedio Ponderado actual.</em>
                     </div>
                     <div style="text-align: right; font-size: 13px;">
                         <div>Costo Unit. Promedio Per&iacute;odo: <strong style="font-size: 18px; color: var(--color-acento);"><asp:Label ID="lblResumenPromedio" runat="server" Text="$0"></asp:Label></strong></div>
