@@ -172,12 +172,12 @@ namespace trabajo_ing_software
 
             if (info.FueEnVivo)
             {
-                lblInfoTipoCambio.Text = $"🟢 Sincronizado hoy ({info.FechaDesc}) · Editable";
+                lblInfoTipoCambio.Text = $"Sincronizado hoy ({info.FechaDesc}) · Editable";
                 lblInfoTipoCambio.ForeColor = System.Drawing.ColorTranslator.FromHtml("#1E8449");
             }
             else
             {
-                lblInfoTipoCambio.Text = $"🟢 Al día ({info.FechaDesc}) · Editable";
+                lblInfoTipoCambio.Text = $"Al día ({info.FechaDesc}) · Editable";
                 lblInfoTipoCambio.ForeColor = System.Drawing.ColorTranslator.FromHtml("#27AE60");
             }
         }

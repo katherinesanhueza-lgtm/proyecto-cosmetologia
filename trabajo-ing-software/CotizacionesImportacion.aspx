@@ -216,11 +216,11 @@
                                 <label class="form-label" style="margin-bottom: 2px;">Tipo Cambio (CLP)</label>
                                 <asp:LinkButton ID="btnActualizarTC" runat="server" OnClick="btnActualizarTC_Click" CausesValidation="false" 
                                     style="font-size: 0.72rem; color: #8A6D3B; text-decoration: none; font-weight: 600;" 
-                                    ToolTip="Sincronizar tasa oficial en vivo">&#x21bb; Actualizar hoy</asp:LinkButton>
+                                    ToolTip="Sincronizar tasa oficial en vivo">Actualizar hoy</asp:LinkButton>
                             </div>
                             <asp:TextBox ID="txtTipoCambio" runat="server" CssClass="form-control" Text="950"></asp:TextBox>
                             <small style="display: block; font-size: 0.72rem; margin-top: 2px;">
-                                <asp:Label ID="lblInfoTipoCambio" runat="server" Text="🟢 Al d&iacute;a · Editable" ForeColor="#27AE60"></asp:Label>
+                                <asp:Label ID="lblInfoTipoCambio" runat="server" Text="Al d&iacute;a · Editable" ForeColor="#27AE60"></asp:Label>
                             </small>
                         </div>
                     </div>
