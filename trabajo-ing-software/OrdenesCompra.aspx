@@ -788,10 +788,6 @@
                     <asp:Button ID="btnCerrarConfig" runat="server" Text="Cerrar" CssClass="btn btn-outline-secondary" OnClick="btnCerrarConfig_Click" />
                 </div>
 
-                <p class="text-muted" style="font-size: 13px; line-height: 1.5; margin-bottom: 20px;">
-                    Par&aacute;metro tributario legal en Chile (RF-COM-04) registrado en <code>ConfiguracionGlobal</code>. Aplica de forma inmediata al c&aacute;lculo de impuestos en todas las &oacute;rdenes de compra.
-                </p>
-
                 <div class="form-group-dermo">
                     <label class="form-label" style="font-weight: 700;">Tasa de IVA Legal Vigente (%)</label>
                     <div style="display: flex; align-items: center; gap: 8px;">
