@@ -1,10 +1,7 @@
-﻿using MySql.Data.MySqlClient;
+using MySql.Data.MySqlClient;
 using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
-using System.Linq;
-using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -12,17 +9,21 @@ namespace trabajo_ing_software
 {
     public partial class Cotizaciones : PaginaVentas
     {
-        string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+        private string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
 
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
             {
-                // 1. Llenar listas desde MySQL
+                using (var con = new MySqlConnection(connectionString))
+                {
+                    con.Open();
+                    VentaInventario.AsegurarEsquema(con);
+                }
                 CargarClientes();
                 CargarProductos();
+                txtFechaVencimiento.Text = DateTime.Today.AddDays(15).ToString("yyyy-MM-dd");
 
-                // 2. Crear estructura vacía del carrito (Ahora incluye IdVariante para la BD)
                 DataTable dtDetalle = new DataTable();
                 dtDetalle.Columns.Add("IdVariante");
                 dtDetalle.Columns.Add("Producto");
@@ -34,8 +35,19 @@ namespace trabajo_ing_software
                 gvDetalleCotizacion.DataSource = dtDetalle;
                 gvDetalleCotizacion.DataBind();
 
-                // 3. Cargar el historial de cotizaciones de la tabla inferior
                 CargarHistorial();
+            }
+        }
+
+        public string GetClaseEstado(string estado)
+        {
+            switch (estado)
+            {
+                case "Vigente": return "badge-vigente";
+                case "Aceptado": return "badge-aceptado";
+                case "Vencido": return "badge-vencido";
+                case "Rechazado": return "badge-rechazado";
+                default: return "badge-vigente";
             }
         }
 
@@ -43,7 +55,7 @@ namespace trabajo_ing_software
         {
             using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                string query = "SELECT IdCliente, Nombre FROM Cliente ORDER BY Nombre ASC";
+                string query = "SELECT IdCliente, Nombre FROM cliente ORDER BY Nombre ASC";
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     con.Open();
@@ -63,15 +75,18 @@ namespace trabajo_ing_software
         {
             using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                // Volvemos a leer de VarianteProducto respetando la BD original
-                string query = "SELECT IdVariante, NombreVariante FROM VarianteProducto ORDER BY NombreVariante ASC";
+                string query = @"SELECT v.IdVariante, CONCAT(p.Nombre, ' (', v.NombreVariante, ' - SKU: ', v.Sku, ')') AS NombreCompleto 
+                                 FROM varianteproducto v 
+                                 INNER JOIN producto p ON v.IdProducto = p.IdProducto 
+                                 WHERE v.Activo = 1 AND p.Activo = 1 AND v.PrecioVenta > 0 
+                                 ORDER BY p.Nombre ASC, v.NombreVariante ASC";
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     con.Open();
                     using (MySqlDataReader sdr = cmd.ExecuteReader())
                     {
                         ddlProductos.DataSource = sdr;
-                        ddlProductos.DataTextField = "NombreVariante";
+                        ddlProductos.DataTextField = "NombreCompleto";
                         ddlProductos.DataValueField = "IdVariante";
                         ddlProductos.DataBind();
                     }
@@ -82,50 +97,64 @@ namespace trabajo_ing_software
 
         private void CargarHistorial()
         {
-            // Este método llena la grilla inferior con las cotizaciones guardadas
             using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                string query = @"SELECT c.IdCotizacion, cl.Nombre AS Cliente, c.FechaEmision, c.Estado, c.Total 
-                                 FROM Cotizacion c 
-                                 INNER JOIN Cliente cl ON c.IdCliente = cl.IdCliente 
+                // Auto-actualiza a 'Vencido' aquellas cotizaciones vigentes cuya fecha de vencimiento ya pasó
+                string actualizaVencidos = @"UPDATE cotizacion 
+                                             SET Estado = 'Vencido' 
+                                             WHERE Estado = 'Vigente' AND FechaVencimiento IS NOT NULL AND FechaVencimiento < CURDATE()";
+                try
+                {
+                    con.Open();
+                    using (MySqlCommand cmdUpd = new MySqlCommand(actualizaVencidos, con))
+                    {
+                        cmdUpd.ExecuteNonQuery();
+                    }
+                }
+                catch { }
+
+                string query = @"SELECT c.IdCotizacion, cl.Nombre AS Cliente, c.FechaEmision, 
+                                        c.FechaVencimiento, c.Estado, c.Total 
+                                 FROM cotizacion c 
+                                 INNER JOIN cliente cl ON c.IdCliente = cl.IdCliente 
                                  ORDER BY c.IdCotizacion DESC";
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
+                using (MySqlDataAdapter sda = new MySqlDataAdapter(cmd))
                 {
-                    using (MySqlDataAdapter sda = new MySqlDataAdapter(cmd))
-                    {
-                        DataTable dtHistorial = new DataTable();
-                        sda.Fill(dtHistorial);
-                        gvHistorialCotizaciones.DataSource = dtHistorial;
-                        gvHistorialCotizaciones.DataBind();
-                    }
+                    DataTable dtHistorial = new DataTable();
+                    sda.Fill(dtHistorial);
+                    gvHistorialCotizaciones.DataSource = dtHistorial;
+                    gvHistorialCotizaciones.DataBind();
                 }
             }
         }
-        
 
         protected void btnAgregarProducto_Click(object sender, EventArgs e)
         {
-            // Validaciones
             if (ddlClientes.SelectedValue == "")
             {
-                ScriptManager.RegisterStartupScript(this, this.GetType(), "alert", "alert('Seleccione un cliente primero.');", true);
+                MostrarMensaje("Seleccione un cliente primero.", false);
                 return;
             }
             if (ddlProductos.SelectedValue == "" || string.IsNullOrEmpty(txtCantidad.Text) || string.IsNullOrEmpty(txtPrecio.Text))
             {
-                ScriptManager.RegisterStartupScript(this, this.GetType(), "alert", "alert('Seleccione producto, cantidad y precio.');", true);
+                MostrarMensaje("Seleccione producto, cantidad y precio válido.", false);
                 return;
             }
 
-            // BLOQUEAR CLIENTE: Ya no se puede cambiar porque la cotización inició
+            int cantidad;
+            int precio;
+            if (!int.TryParse(txtCantidad.Text, out cantidad) || cantidad <= 0 || !int.TryParse(txtPrecio.Text, out precio) || precio <= 0)
+            {
+                MostrarMensaje("La cantidad y precio deben ser mayores a cero.", false);
+                return;
+            }
+
             ddlClientes.Enabled = false;
 
             DataTable dtDetalle = (DataTable)ViewState["DetalleCotizacion"];
-
             string idVariante = ddlProductos.SelectedValue;
             string nombreProducto = ddlProductos.SelectedItem.Text;
-            int cantidad = int.Parse(txtCantidad.Text);
-            int precio = int.Parse(txtPrecio.Text);
             int subtotal = cantidad * precio;
 
             dtDetalle.Rows.Add(idVariante, nombreProducto, cantidad, precio, subtotal);
@@ -139,6 +168,7 @@ namespace trabajo_ing_software
             ddlProductos.SelectedIndex = 0;
             txtCantidad.Text = "1";
             txtPrecio.Text = "";
+            lblMensajeCotizacion.Text = "";
         }
 
         private void ActualizarTotal(DataTable dt)
@@ -157,12 +187,17 @@ namespace trabajo_ing_software
 
             if (ddlClientes.SelectedValue == "" || dtDetalle.Rows.Count == 0)
             {
-                ScriptManager.RegisterStartupScript(this, this.GetType(), "alert", "alert('Seleccione un cliente y agregue productos.');", true);
+                MostrarMensaje("Seleccione un cliente y agregue al menos un producto al presupuesto.", false);
                 return;
             }
 
             string idCliente = ddlClientes.SelectedValue;
             string estado = ddlEstado.SelectedValue;
+
+            DateTime? fechaVence = null;
+            if (DateTime.TryParse(txtFechaVencimiento.Text, out DateTime parsedVence))
+                fechaVence = parsedVence;
+
             decimal totalFinal = 0;
             foreach (DataRow fila in dtDetalle.Rows) totalFinal += Convert.ToDecimal(fila["Subtotal"]);
 
@@ -173,14 +208,14 @@ namespace trabajo_ing_software
                 {
                     try
                     {
-                        // 1. INSERTAR CABECERA (Acorde a tu modelo de BD)
-                        string queryCabecera = @"INSERT INTO Cotizacion (FechaEmision, Estado, Total, IdCliente, IdUsuario) 
-                                                 VALUES (NOW(), @estado, @total, @idCliente, @idUsuario);
+                        string queryCabecera = @"INSERT INTO cotizacion (FechaEmision, FechaVencimiento, Estado, Total, IdCliente, IdUsuario) 
+                                                 VALUES (NOW(), @vence, @estado, @total, @idCliente, @idUsuario);
                                                  SELECT LAST_INSERT_ID();";
 
                         int idCotizacion;
                         using (MySqlCommand cmdCab = new MySqlCommand(queryCabecera, con, tr))
                         {
+                            cmdCab.Parameters.AddWithValue("@vence", (object)fechaVence ?? DBNull.Value);
                             cmdCab.Parameters.AddWithValue("@estado", estado);
                             cmdCab.Parameters.AddWithValue("@total", totalFinal);
                             cmdCab.Parameters.AddWithValue("@idCliente", idCliente);
@@ -189,8 +224,7 @@ namespace trabajo_ing_software
                             idCotizacion = Convert.ToInt32(cmdCab.ExecuteScalar());
                         }
 
-                        // 2. INSERTAR DETALLE
-                        string queryDetalle = @"INSERT INTO CotizacionDetalle (IdCotizacion, IdVariante, Cantidad, PrecioUnitario) 
+                        string queryDetalle = @"INSERT INTO cotizaciondetalle (IdCotizacion, IdVariante, Cantidad, PrecioUnitario) 
                                                 VALUES (@idCot, @idVar, @cant, @precio)";
 
                         using (MySqlCommand cmdDet = new MySqlCommand(queryDetalle, con, tr))
@@ -208,41 +242,63 @@ namespace trabajo_ing_software
 
                         tr.Commit();
                         LimpiarPantalla();
-                        CargarHistorial(); // Refresca la tabla inferior automáticamente
-                        ScriptManager.RegisterStartupScript(this, this.GetType(), "alert", "alert('¡Cotización N° " + idCotizacion + " guardada exitosamente!');", true);
+                        CargarHistorial();
+                        MostrarMensaje("¡Cotización N° " + idCotizacion + " registrada exitosamente!", true);
                     }
                     catch (Exception ex)
                     {
                         tr.Rollback();
-                        ScriptManager.RegisterStartupScript(this, this.GetType(), "alert", "alert('Error: " + ex.Message.Replace("'", "") + "');", true);
+                        MostrarMensaje("Error al guardar cotización: " + ex.Message, false);
                     }
                 }
             }
         }
 
-        // EVENTOS DE LA GRILLA INFERIOR (Ver y Editar)
         protected void gvHistorialCotizaciones_RowCommand(object sender, GridViewCommandEventArgs e)
         {
-            if (e.CommandName == "VerDetalle")
+            if (e.CommandName == "ConvertirVenta")
             {
                 string idCotizacion = e.CommandArgument.ToString();
-                // Lógica para abrir un modal o redireccionar a la vista de detalle
-                ScriptManager.RegisterStartupScript(this, this.GetType(), "alert", "alert('Funcionalidad Ver Detalle para Cotización N° " + idCotizacion + " en construcción');", true);
+                // Redirige al punto de venta cargando esta cotización
+                Response.Redirect("Ventas.aspx?idCotizacion=" + idCotizacion);
             }
-            else if (e.CommandName == "EditarCotizacion")
+            else if (e.CommandName == "MarcarAceptado")
             {
-                string idCotizacion = e.CommandArgument.ToString();
-                // Lógica para cargar los datos nuevamente en el formulario de arriba
-                ScriptManager.RegisterStartupScript(this, this.GetType(), "alert", "alert('Funcionalidad Editar para Cotización N° " + idCotizacion + " en construcción');", true);
+                CambiarEstado(Convert.ToInt32(e.CommandArgument), "Aceptado");
             }
+            else if (e.CommandName == "MarcarRechazado")
+            {
+                CambiarEstado(Convert.ToInt32(e.CommandArgument), "Rechazado");
+            }
+        }
+
+        private void CambiarEstado(int idCotizacion, string nuevoEstado)
+        {
+            string query = "UPDATE cotizacion SET Estado = @Estado WHERE IdCotizacion = @Id";
+            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlCommand cmd = new MySqlCommand(query, con))
+            {
+                cmd.Parameters.AddWithValue("@Estado", nuevoEstado);
+                cmd.Parameters.AddWithValue("@Id", idCotizacion);
+                con.Open();
+                cmd.ExecuteNonQuery();
+            }
+            CargarHistorial();
+            MostrarMensaje("Cotización N° " + idCotizacion + " marcada como " + nuevoEstado + ".", true);
+        }
+
+        private void MostrarMensaje(string texto, bool exito)
+        {
+            lblMensajeCotizacion.Text = texto;
+            lblMensajeCotizacion.ForeColor = exito ? System.Drawing.Color.Green : System.Drawing.Color.Red;
         }
 
         private void LimpiarPantalla()
         {
             ddlClientes.SelectedIndex = 0;
-            ddlClientes.Enabled = true; // DESBLOQUEAR EL CLIENTE
-
+            ddlClientes.Enabled = true;
             ddlEstado.SelectedIndex = 0;
+            txtFechaVencimiento.Text = DateTime.Today.AddDays(15).ToString("yyyy-MM-dd");
             lblTotal.Text = "0";
 
             DataTable dt = (DataTable)ViewState["DetalleCotizacion"];
@@ -258,8 +314,7 @@ namespace trabajo_ing_software
             {
                 using (MySqlConnection con = new MySqlConnection(connectionString))
                 {
-                    // Volvemos a buscar el PrecioVenta en VarianteProducto
-                    string query = "SELECT PrecioVenta FROM VarianteProducto WHERE IdVariante = @id";
+                    string query = "SELECT PrecioVenta FROM varianteproducto WHERE IdVariante = @id";
                     using (MySqlCommand cmd = new MySqlCommand(query, con))
                     {
                         cmd.Parameters.AddWithValue("@id", ddlProductos.SelectedValue);
@@ -267,7 +322,7 @@ namespace trabajo_ing_software
                         object result = cmd.ExecuteScalar();
                         if (result != null)
                         {
-                            txtPrecio.Text = result.ToString();
+                            txtPrecio.Text = Convert.ToInt32(Convert.ToDecimal(result)).ToString();
                         }
                     }
                 }
@@ -276,11 +331,6 @@ namespace trabajo_ing_software
             {
                 txtPrecio.Text = "";
             }
-        }
-
-        protected void txtCantidad_TextChanged(object sender, EventArgs e)
-        {
-
         }
     }
 }

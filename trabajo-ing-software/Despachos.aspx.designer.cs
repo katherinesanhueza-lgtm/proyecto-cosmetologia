@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // <generado automáticamente>
 //     Este código fue generado por una herramienta.
 //
@@ -19,7 +19,6 @@ namespace trabajo_ing_software
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.DropDownList ddlDocumentoOrigen;
 
@@ -28,7 +27,6 @@ namespace trabajo_ing_software
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtCliente;
 
@@ -37,7 +35,6 @@ namespace trabajo_ing_software
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.DropDownList ddlEstadoDespacho;
 
@@ -46,7 +43,6 @@ namespace trabajo_ing_software
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtFechaEstimada;
 
@@ -55,25 +51,46 @@ namespace trabajo_ing_software
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.DropDownList ddlTransportista;
+
+        /// <summary>
+        /// Control txtObservaciones.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtObservaciones;
+
+        /// <summary>
+        /// Control lblMensajeDespacho.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblMensajeDespacho;
 
         /// <summary>
         /// Control btnGuardarDespacho.
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnGuardarDespacho;
+
+        /// <summary>
+        /// Control ddlFiltroEstado.
+        /// </summary>
+        /// <remarks>
+        /// Campo generado automáticamente.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlFiltroEstado;
 
         /// <summary>
         /// Control gvDespachos.
         /// </summary>
         /// <remarks>
         /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.GridView gvDespachos;
     }
