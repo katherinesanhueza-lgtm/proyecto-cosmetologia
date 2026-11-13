@@ -1,10 +1,7 @@
-﻿using MySql.Data.MySqlClient;
+using MySql.Data.MySqlClient;
 using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
-using System.Linq;
-using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -12,18 +9,35 @@ namespace trabajo_ing_software
 {
     public partial class Despachos : PaginaVentas
     {
-        string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+        private string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            // Conexión manual de eventos (Método infalible)
             ddlDocumentoOrigen.SelectedIndexChanged += new EventHandler(ddlDocumentoOrigen_SelectedIndexChanged);
 
             if (!IsPostBack)
             {
+                using (var con = new MySqlConnection(connectionString))
+                {
+                    con.Open();
+                    VentaInventario.AsegurarEsquema(con);
+                }
                 CargarVentas();
                 CargarHistorial();
-                txtFechaEstimada.Text = DateTime.Now.AddDays(3).ToString("yyyy-MM-dd"); // Sugiere fecha 3 días después
+                txtFechaEstimada.Text = DateTime.Now.AddDays(3).ToString("yyyy-MM-dd");
+            }
+        }
+
+        public string GetClaseEstado(string estado)
+        {
+            switch (estado)
+            {
+                case "Pendiente": return "badge-pendiente";
+                case "En Preparacion": return "badge-preparacion";
+                case "En Ruta": return "badge-ruta";
+                case "Entregado": return "badge-entregado";
+                case "Cancelado": return "badge-cancelado";
+                default: return "badge-pendiente";
             }
         }
 
@@ -31,21 +45,25 @@ namespace trabajo_ing_software
         {
             using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                // Carga las ventas disponibles desde la tabla Venta
-                string query = "SELECT IdVenta, CONCAT('Venta N° ', IdVenta) AS NombreVenta FROM Venta WHERE TipoDocumento <> 'Nota de Credito' ORDER BY IdVenta DESC";
+                string query = @"SELECT IdVenta, 
+                                 CONCAT(TipoDocumento, ' N° ', COALESCE(Folio, IdVenta), ' · Total: $', FORMAT(Total, 0)) AS DescripcionVenta 
+                                 FROM venta 
+                                 WHERE TipoDocumento <> 'Nota de Credito' 
+                                 ORDER BY IdVenta DESC LIMIT 50";
+
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     con.Open();
                     using (MySqlDataReader sdr = cmd.ExecuteReader())
                     {
                         ddlDocumentoOrigen.DataSource = sdr;
-                        ddlDocumentoOrigen.DataTextField = "NombreVenta";
+                        ddlDocumentoOrigen.DataTextField = "DescripcionVenta";
                         ddlDocumentoOrigen.DataValueField = "IdVenta";
                         ddlDocumentoOrigen.DataBind();
                     }
                 }
             }
-            ddlDocumentoOrigen.Items.Insert(0, new ListItem("-- Seleccione una Venta --", ""));
+            ddlDocumentoOrigen.Items.Insert(0, new ListItem("-- Seleccione un Documento de Venta --", ""));
         }
 
         protected void ddlDocumentoOrigen_SelectedIndexChanged(object sender, EventArgs e)
@@ -54,10 +72,9 @@ namespace trabajo_ing_software
             {
                 using (MySqlConnection con = new MySqlConnection(connectionString))
                 {
-                    // Busca el nombre del cliente asociado a esa venta
                     string query = @"SELECT c.Nombre 
-                                     FROM Venta v 
-                                     INNER JOIN Cliente c ON v.IdCliente = c.IdCliente 
+                                     FROM venta v 
+                                     INNER JOIN cliente c ON v.IdCliente = c.IdCliente 
                                      WHERE v.IdVenta = @idVenta";
                     using (MySqlCommand cmd = new MySqlCommand(query, con))
                     {
@@ -81,15 +98,14 @@ namespace trabajo_ing_software
         {
             if (ddlDocumentoOrigen.SelectedValue == "" || ddlTransportista.SelectedValue == "" || string.IsNullOrEmpty(txtFechaEstimada.Text))
             {
-                ScriptManager.RegisterStartupScript(this, this.GetType(), "alert", "alert('Complete todos los campos obligatorios.');", true);
+                MostrarMensaje("Complete todos los campos obligatorios del despacho.", false);
                 return;
             }
 
             using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                // INSERT exactamente igual a tu tabla Despacho en bd.sql
-                string query = @"INSERT INTO Despacho (IdVenta, Estado, FechaEstimada, Tipo, IdUsuario) 
-                                 VALUES (@idVenta, @estado, @fecha, @tipo, @idUsuario)";
+                string query = @"INSERT INTO despacho (IdVenta, Estado, FechaEstimada, Tipo, Observaciones, IdUsuario) 
+                                 VALUES (@idVenta, @estado, @fecha, @tipo, @obs, @idUsuario)";
 
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
@@ -97,6 +113,7 @@ namespace trabajo_ing_software
                     cmd.Parameters.AddWithValue("@estado", ddlEstadoDespacho.SelectedValue);
                     cmd.Parameters.AddWithValue("@fecha", Convert.ToDateTime(txtFechaEstimada.Text).ToString("yyyy-MM-dd"));
                     cmd.Parameters.AddWithValue("@tipo", ddlTransportista.SelectedValue);
+                    cmd.Parameters.AddWithValue("@obs", txtObservaciones.Text.Trim());
                     cmd.Parameters.AddWithValue("@idUsuario", UsuarioVenta);
 
                     try
@@ -106,27 +123,52 @@ namespace trabajo_ing_software
 
                         LimpiarFormulario();
                         CargarHistorial();
-                        ScriptManager.RegisterStartupScript(this, this.GetType(), "alert", "alert('Despacho registrado correctamente.');", true);
+                        MostrarMensaje("Despacho programado correctamente.", true);
                     }
                     catch (Exception ex)
                     {
-                        ScriptManager.RegisterStartupScript(this, this.GetType(), "alert", "alert('Error: " + ex.Message.Replace("'", "") + "');", true);
+                        MostrarMensaje("Error al programar despacho: " + ex.Message, false);
                     }
                 }
             }
         }
 
+        protected void ddlFiltroEstado_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CargarHistorial();
+        }
+
         private void CargarHistorial()
         {
+            string filtro = "";
+            if (ddlFiltroEstado.SelectedValue != "Todos")
+            {
+                filtro = "WHERE d.Estado = @EstadoFiltro";
+            }
+
             using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                string query = @"SELECT d.IdDespacho, d.IdVenta, c.Nombre AS Cliente, d.Tipo, d.FechaEstimada, d.Estado 
-                                 FROM Despacho d 
-                                 INNER JOIN Venta v ON d.IdVenta = v.IdVenta 
-                                 INNER JOIN Cliente c ON v.IdCliente = c.IdCliente 
-                                 ORDER BY d.IdDespacho DESC";
+                string query = $@"SELECT d.IdDespacho, 
+                                         CONCAT(v.TipoDocumento, ' #', COALESCE(v.Folio, v.IdVenta)) AS Documento,
+                                         c.Nombre AS Cliente, 
+                                         d.Tipo, 
+                                         d.FechaEstimada, 
+                                         d.FechaEntrega,
+                                         d.Estado,
+                                         d.Observaciones 
+                                  FROM despacho d 
+                                  INNER JOIN venta v ON d.IdVenta = v.IdVenta 
+                                  INNER JOIN cliente c ON v.IdCliente = c.IdCliente 
+                                  {filtro}
+                                  ORDER BY d.IdDespacho DESC";
+
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
+                    if (ddlFiltroEstado.SelectedValue != "Todos")
+                    {
+                        cmd.Parameters.AddWithValue("@EstadoFiltro", ddlFiltroEstado.SelectedValue);
+                    }
+
                     using (MySqlDataAdapter sda = new MySqlDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
@@ -138,12 +180,65 @@ namespace trabajo_ing_software
             }
         }
 
+        protected void gvDespachos_RowCommand(object sender, GridViewCommandEventArgs e)
+        {
+            if (e.CommandName == "CambiarEstado")
+            {
+                string[] partes = Convert.ToString(e.CommandArgument).Split('|');
+                if (partes.Length == 2)
+                {
+                    int idDespacho = Convert.ToInt32(partes[0]);
+                    string nuevoEstado = partes[1];
+                    ActualizarEstadoDespacho(idDespacho, nuevoEstado, null);
+                }
+            }
+            else if (e.CommandName == "RegistrarEntrega")
+            {
+                int idDespacho = Convert.ToInt32(e.CommandArgument);
+                // RF-VEN-08: Registrar entrega con fecha efectiva
+                ActualizarEstadoDespacho(idDespacho, "Entregado", DateTime.Today);
+            }
+        }
+
+        private void ActualizarEstadoDespacho(int idDespacho, string nuevoEstado, DateTime? fechaEntrega)
+        {
+            using (MySqlConnection con = new MySqlConnection(connectionString))
+            {
+                string query = "UPDATE despacho SET Estado = @Estado, FechaEntrega = @FechaEntrega WHERE IdDespacho = @Id";
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@Estado", nuevoEstado);
+                    cmd.Parameters.AddWithValue("@FechaEntrega", (object)fechaEntrega ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@Id", idDespacho);
+
+                    try
+                    {
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                        CargarHistorial();
+                        MostrarMensaje($"Despacho #{idDespacho} actualizado a '{nuevoEstado}'.", true);
+                    }
+                    catch (Exception ex)
+                    {
+                        MostrarMensaje("Error al actualizar despacho: " + ex.Message, false);
+                    }
+                }
+            }
+        }
+
+        private void MostrarMensaje(string texto, bool exito)
+        {
+            lblMensajeDespacho.Text = texto;
+            lblMensajeDespacho.ForeColor = exito ? System.Drawing.Color.Green : System.Drawing.Color.Red;
+        }
+
         private void LimpiarFormulario()
         {
             ddlDocumentoOrigen.SelectedIndex = 0;
             txtCliente.Text = "";
             ddlEstadoDespacho.SelectedIndex = 0;
             ddlTransportista.SelectedIndex = 0;
+            txtObservaciones.Text = "";
             txtFechaEstimada.Text = DateTime.Now.AddDays(3).ToString("yyyy-MM-dd");
         }
     }
