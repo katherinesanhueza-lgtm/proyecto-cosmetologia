@@ -94,7 +94,7 @@
         <!-- HEADER GLOBAL -->
         <header class="top-header">
             <div class="brand-block">
-                <span class="brand-logo">Dermo ERP</span>
+                <span class="brand-logo">NOMBRE</span>
                 <span class="brand-sub">COSMETOLOG&Iacute;A PROFESIONAL</span>
             </div>
             <nav>
@@ -140,7 +140,7 @@
                             <label class="form-label-dermo">CORREO ELECTR&Oacute;NICO</label>
                             <div class="input-icon-wrapper">
                                 <svg class="field-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                                <asp:TextBox ID="txtCorreo" runat="server" CssClass="input-pill-dermo input-with-icon" placeholder="usuario@dermo.cl"></asp:TextBox>
+                                <asp:TextBox ID="txtCorreo" runat="server" CssClass="input-pill-dermo input-with-icon" placeholder="paciente@nombrecosmetologia.com"></asp:TextBox>
                             </div>
                         </div>
 
@@ -245,7 +245,7 @@
         <footer class="footer-dermo">
             <div class="footer-grid">
                 <div>
-                    <div class="brand-logo" style="margin-bottom: 8px;">Dermo ERP</div>
+                    <div class="brand-logo" style="margin-bottom: 8px;">NOMBRE</div>
                     <p class="text-muted" style="max-width: 340px; line-height: 1.6; margin-bottom: 14px;">
                         Cosmetolog&iacute;a m&eacute;dica y alta est&eacute;tica avanzada. Rigor cient&iacute;fico, armon&iacute;a integral y formulaciones sensoriales de excelencia.
                     </p>
@@ -279,7 +279,7 @@
                     <div class="text-muted" style="font-size: 12px; line-height: 1.8;">
                         <div>Av. Libertador 4520, Piso 6</div>
                         <div>Distrito M&eacute;dico Especializado</div>
-                        <div>clinica@dermoerp.cl</div>
+                        <div>clinica@nombrecosmetologia.com</div>
                         <div>+56 (11) 4890-3300</div>
                         <div style="margin-top: 10px; color: var(--color-acento); font-weight: 600; display: flex; align-items: center; gap: 5px;">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -290,7 +290,7 @@
             </div>
 
             <div style="max-width: 1200px; margin: 35px auto 0 auto; padding-top: 20px; border-top: 1px solid var(--color-borde-suave); display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--color-texto-suave); flex-wrap: wrap; gap: 15px;">
-                <div>&copy; 2026 Dermo ERP &middot; Cosmetolog&iacute;a Profesional. Todos los derechos reservados.</div>
+                <div>&copy; 2024 NOMBRE Cosmetolog&iacute;a Profesional. Todos los derechos reservados.</div>
                 <div style="display: flex; gap: 20px;">
                     <a href="#" style="color: inherit; text-decoration: none;">Privacidad M&eacute;dica</a>
                     <a href="#" style="color: inherit; text-decoration: none;">T&eacute;rminos Cl&iacute;nicos</a>

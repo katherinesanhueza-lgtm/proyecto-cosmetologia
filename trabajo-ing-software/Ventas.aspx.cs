@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Web.UI.WebControls;
@@ -11,10 +11,23 @@ namespace trabajo_ing_software
         protected void Page_Load(object sender, EventArgs e)
         {
             if (IsPostBack) return;
-            CargarLista(ddlClientes, "SELECT IdCliente AS Id,Nombre FROM cliente ORDER BY Nombre", "Selecciona un cliente");
-            CargarLista(ddlBodega, "SELECT IdBodega AS Id,Nombre FROM bodega WHERE Activo=1 ORDER BY Nombre", "Selecciona una bodega");
+
+            CargarLista(ddlClientes, "SELECT IdCliente AS Id, Nombre FROM cliente ORDER BY Nombre", "Selecciona un cliente");
+            CargarLista(ddlBodega, "SELECT IdBodega AS Id, Nombre FROM bodega WHERE Activo=1 ORDER BY Nombre", "Selecciona una bodega");
             CargarProductos();
             InicializarCarrito();
+
+            // Seleccionar primera bodega activa si existe
+            if (ddlBodega.Items.Count > 1)
+            {
+                ddlBodega.SelectedIndex = 1;
+            }
+
+            // RF-VEN-02: Cargar cotización si proviene del botón "Convertir a Venta"
+            if (!string.IsNullOrEmpty(Request.QueryString["idCotizacion"]) && int.TryParse(Request.QueryString["idCotizacion"], out int idCot))
+            {
+                CargarDesdeCotizacion(idCot);
+            }
         }
 
         private static void CargarLista(DropDownList lista, string consulta, string opcion)
@@ -29,9 +42,9 @@ namespace trabajo_ing_software
         private void CargarProductos()
         {
             CargarLista(ddlProductos, @"SELECT v.IdVariante AS Id,
-                CONCAT(p.Nombre,' · ',v.Sku,' · $',v.PrecioVenta) AS Nombre
+                CONCAT(p.Nombre, ' · ', v.NombreVariante, ' (SKU: ', v.Sku, ') · $', v.PrecioVenta) AS Nombre
                 FROM varianteproducto v JOIN producto p ON p.IdProducto=v.IdProducto
-                WHERE v.Activo=1 AND p.Activo=1 AND v.PrecioVenta>0 ORDER BY p.Nombre,v.Sku", "Selecciona un SKU");
+                WHERE v.Activo=1 AND p.Activo=1 AND v.PrecioVenta>0 ORDER BY p.Nombre, v.Sku", "Selecciona un SKU / Producto");
         }
 
         private DataTable Carrito => (DataTable)ViewState["Carrito"];
@@ -52,6 +65,155 @@ namespace trabajo_ing_software
             ActualizarCarrito();
         }
 
+        private void CargarDesdeCotizacion(int idCotizacion)
+        {
+            var dtCot = VentaInventario.Consultar(
+                "SELECT IdCotizacion, IdCliente, Total FROM cotizacion WHERE IdCotizacion = @p0", idCotizacion);
+
+            if (dtCot.Rows.Count == 0) return;
+
+            int idCliente = Convert.ToInt32(dtCot.Rows[0]["IdCliente"]);
+            if (ddlClientes.Items.FindByValue(idCliente.ToString()) != null)
+            {
+                ddlClientes.SelectedValue = idCliente.ToString();
+                ActualizarInfoCreditoCliente(idCliente);
+            }
+
+            var dtDet = VentaInventario.Consultar(
+                @"SELECT cd.IdVariante, CONCAT(p.Nombre, ' · ', v.NombreVariante) AS Nombre, 
+                         cd.Cantidad, cd.PrecioUnitario, (cd.Cantidad * cd.PrecioUnitario) AS Subtotal
+                  FROM cotizaciondetalle cd
+                  JOIN varianteproducto v ON cd.IdVariante = v.IdVariante
+                  JOIN producto p ON v.IdProducto = p.IdProducto
+                  WHERE cd.IdCotizacion = @p0", idCotizacion);
+
+            foreach (DataRow row in dtDet.Rows)
+            {
+                int varId = Convert.ToInt32(row["IdVariante"]);
+                string nombre = row["Nombre"].ToString();
+                decimal precio = Convert.ToDecimal(row["PrecioUnitario"]);
+                int cant = Convert.ToInt32(row["Cantidad"]);
+                Carrito.Rows.Add(varId, nombre, precio, cant, precio * cant);
+            }
+
+            ViewState["IdCotizacionOrigen"] = idCotizacion;
+            pnlCotizacionInfo.Visible = true;
+            lblCotizacionInfo.Text = $"Cotización N° {idCotizacion} (Cliente vinculado, {dtDet.Rows.Count} producto(s) agregados).";
+            ActualizarCarrito();
+        }
+
+        protected void btnDesvincularCotizacion_Click(object sender, EventArgs e)
+        {
+            ViewState["IdCotizacionOrigen"] = null;
+            pnlCotizacionInfo.Visible = false;
+        }
+
+        protected void ddlClientes_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (int.TryParse(ddlClientes.SelectedValue, out int idCliente))
+            {
+                ActualizarInfoCreditoCliente(idCliente);
+            }
+            else
+            {
+                lblInfoCredito.Text = "";
+            }
+        }
+
+        private void ActualizarInfoCreditoCliente(int idCliente)
+        {
+            var dt = VentaInventario.Consultar("SELECT * FROM cliente WHERE IdCliente = @p0", idCliente);
+            if (dt.Rows.Count == 0) return;
+
+            DataRow r = dt.Rows[0];
+            decimal limite = dt.Columns.Contains("LimiteCredito") && r["LimiteCredito"] != DBNull.Value ? Convert.ToDecimal(r["LimiteCredito"]) : 0;
+            int dias = dt.Columns.Contains("DiasCredito") && r["DiasCredito"] != DBNull.Value ? Convert.ToInt32(r["DiasCredito"]) : 0;
+            int activo = dt.Columns.Contains("Activo") && r["Activo"] != DBNull.Value ? Convert.ToInt32(r["Activo"]) : 1;
+
+            if (activo == 0)
+            {
+                lblInfoCredito.Text = "<span class='badge-credito-alerta'>⚠️ Cliente Inactivo</span>";
+                return;
+            }
+
+            // Consultar saldo pendiente en cuentascobrar
+            var dtDeuda = VentaInventario.Consultar(
+                @"SELECT COALESCE(SUM(cc.MontoPendiente), 0) AS Deuda 
+                  FROM cuentascobrar cc 
+                  INNER JOIN venta v ON cc.IdVenta = v.IdVenta 
+                  WHERE v.IdCliente = @p0 AND cc.EstadoPago <> 'Pagado'", idCliente);
+
+            decimal deuda = Convert.ToDecimal(dtDeuda.Rows[0]["Deuda"]);
+            decimal disponible = limite - deuda;
+
+            if (limite > 0)
+            {
+                string clase = disponible > 0 ? "badge-credito-ok" : "badge-credito-alerta";
+                lblInfoCredito.Text = $"<span class='{clase}'>💳 Línea de Crédito: ${limite:N0} | Deuda Vigente: ${deuda:N0} | Disponible: ${disponible:N0} (Plazo habitual: {dias} días)</span>";
+                if (ddlPago.SelectedValue == "credito" && string.IsNullOrEmpty(txtVence.Text))
+                {
+                    txtVence.Text = DateTime.Today.AddDays(dias > 0 ? dias : 30).ToString("yyyy-MM-dd");
+                }
+            }
+            else
+            {
+                lblInfoCredito.Text = "<span class='text-muted' style='font-size:12px;'>El cliente no registra línea de crédito autorizada ($0). Ventas solo al contado.</span>";
+            }
+        }
+
+        protected void ddlPago_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (ddlPago.SelectedValue == "credito")
+            {
+                if (int.TryParse(ddlClientes.SelectedValue, out int idCliente))
+                {
+                    ActualizarInfoCreditoCliente(idCliente);
+                }
+            }
+        }
+
+        protected void ddlBodega_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ConsultarStockTiempoReal();
+        }
+
+        protected void ddlProductos_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ConsultarStockTiempoReal();
+        }
+
+        private int ConsultarStockTiempoReal()
+        {
+            if (!int.TryParse(ddlBodega.SelectedValue, out int bodega) || !int.TryParse(ddlProductos.SelectedValue, out int variante))
+            {
+                lblStockDisponible.Text = "Selecciona bodega y producto para ver stock";
+                lblStockDisponible.CssClass = "badge-stock";
+                return 0;
+            }
+
+            var dtStock = VentaInventario.Consultar(
+                @"SELECT COALESCE(StockActual, 0) - COALESCE(StockReservado, 0) AS Disponible
+                  FROM inventario WHERE IdVariante = @p0 AND IdBodega = @p1", variante, bodega);
+
+            int disponible = 0;
+            if (dtStock.Rows.Count > 0)
+            {
+                disponible = Convert.ToInt32(dtStock.Rows[0]["Disponible"]);
+            }
+
+            if (disponible > 0)
+            {
+                lblStockDisponible.Text = $"✓ Stock disponible en bodega: {disponible} unidad(es)";
+                lblStockDisponible.CssClass = "badge-stock";
+            }
+            else
+            {
+                lblStockDisponible.Text = "⚠️ Sin stock disponible en esta bodega";
+                lblStockDisponible.CssClass = "badge-credito-alerta";
+            }
+            return disponible;
+        }
+
         protected void btnAgregar_Click(object sender, EventArgs e)
         {
             if (!int.TryParse(ddlProductos.SelectedValue, out int variante)
@@ -61,7 +223,24 @@ namespace trabajo_ing_software
                 return;
             }
 
-            var datos = VentaInventario.Consultar(@"SELECT CONCAT(p.Nombre,' · ',v.Sku) AS Nombre,v.PrecioVenta
+            if (!int.TryParse(ddlBodega.SelectedValue, out int bodega))
+            {
+                Mostrar("Selecciona una bodega de salida para validar existencias.", false);
+                return;
+            }
+
+            // RF-VEN-04: Validación de stock en tiempo real
+            int stockDisponible = ConsultarStockTiempoReal();
+            DataRow filaExistente = Carrito.Rows.Find(variante);
+            int cantidadPrevia = filaExistente == null ? 0 : (int)filaExistente["Cantidad"];
+
+            if (cantidad + cantidadPrevia > stockDisponible)
+            {
+                Mostrar($"Stock insuficiente en bodega (RF-VEN-04): Disponible: {stockDisponible}, solicitado: {cantidad + cantidadPrevia}.", false);
+                return;
+            }
+
+            var datos = VentaInventario.Consultar(@"SELECT CONCAT(p.Nombre, ' · ', v.NombreVariante) AS Nombre, v.PrecioVenta
                 FROM varianteproducto v JOIN producto p ON p.IdProducto=v.IdProducto
                 WHERE v.IdVariante=@p0 AND v.Activo=1 AND p.Activo=1 AND v.PrecioVenta>0", variante);
             if (datos.Rows.Count != 1)
@@ -73,24 +252,21 @@ namespace trabajo_ing_software
 
             var producto = datos.Rows[0];
             decimal precio = Convert.ToDecimal(producto["PrecioVenta"]);
-            DataRow fila = Carrito.Rows.Find(variante);
-            int anterior = fila == null ? 0 : (int)fila["Cantidad"];
-            if (cantidad > int.MaxValue - anterior)
-            {
-                Mostrar("La cantidad supera el máximo permitido.", false);
-                return;
-            }
+            int total = cantidadPrevia + cantidad;
 
-            int total = anterior + cantidad;
-            if (fila == null) Carrito.Rows.Add(variante, producto["Nombre"], precio, total, precio * total);
+            if (filaExistente == null)
+                Carrito.Rows.Add(variante, producto["Nombre"], precio, total, precio * total);
             else
             {
-                fila["Precio"] = precio;
-                fila["Cantidad"] = total;
-                fila["Subtotal"] = precio * total;
+                filaExistente["Precio"] = precio;
+                filaExistente["Cantidad"] = total;
+                filaExistente["Subtotal"] = precio * total;
             }
+
             lblMensajeVenta.Text = "";
+            txtCantidad.Text = "1";
             ActualizarCarrito();
+            ConsultarStockTiempoReal();
         }
 
         protected void gvCarrito_RowCommand(object sender, GridViewCommandEventArgs e)
@@ -100,16 +276,37 @@ namespace trabajo_ing_software
             {
                 Carrito.Rows.RemoveAt(indice);
                 ActualizarCarrito();
+                ConsultarStockTiempoReal();
             }
+        }
+
+        protected void txtDescuento_TextChanged(object sender, EventArgs e)
+        {
+            ActualizarCarrito();
         }
 
         private void ActualizarCarrito()
         {
             gvCarrito.DataSource = Carrito;
             gvCarrito.DataBind();
-            decimal total = 0;
-            foreach (DataRow fila in Carrito.Rows) total += (decimal)fila["Subtotal"];
-            lblTotal.Text = "$" + total.ToString("N2");
+
+            decimal subtotalBruto = 0;
+            foreach (DataRow fila in Carrito.Rows)
+                subtotalBruto += Convert.ToDecimal(fila["Subtotal"]);
+
+            decimal.TryParse(txtDescuento.Text.Trim(), out decimal descuento);
+            if (descuento < 0) descuento = 0;
+            if (descuento > subtotalBruto) descuento = subtotalBruto;
+
+            decimal totalNeto = Math.Round((subtotalBruto - descuento) / 1.19m, 2);
+            decimal totalIva = (subtotalBruto - descuento) - totalNeto;
+            decimal totalPagar = subtotalBruto - descuento;
+
+            lblSubtotalBruto.Text = "$" + subtotalBruto.ToString("N0");
+            lblDescuento.Text = "-$" + descuento.ToString("N0");
+            lblNeto.Text = "$" + totalNeto.ToString("N0");
+            lblIva.Text = "$" + totalIva.ToString("N0");
+            lblTotal.Text = "$" + totalPagar.ToString("N0");
         }
 
         protected void btnFinalizarVenta_Click(object sender, EventArgs e)
@@ -123,7 +320,7 @@ namespace trabajo_ing_software
             if (Carrito.Rows.Count == 0 || !int.TryParse(ddlClientes.SelectedValue, out int cliente)
                 || !int.TryParse(ddlBodega.SelectedValue, out int bodega))
             {
-                Mostrar("Selecciona un cliente, una bodega y al menos un producto.", false);
+                Mostrar("Selecciona un cliente, una bodega y al menos un producto en el carrito.", false);
                 return;
             }
 
@@ -131,16 +328,25 @@ namespace trabajo_ing_software
             foreach (DataRow fila in Carrito.Rows)
                 cantidades.Add((int)fila["IdVariante"], (int)fila["Cantidad"]);
 
+            string tipoDoc = ddlTipoDocumento.SelectedValue;
+            string formaPago = ddlPago.SelectedValue;
+            decimal.TryParse(txtDescuento.Text.Trim(), out decimal descuento);
+
             DateTime? vence = null;
-            if (ddlPago.SelectedValue == "credito")
+            if (formaPago == "credito")
             {
-                if (!DateTime.TryParseExact(txtVence.Text, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture,
-                    System.Globalization.DateTimeStyles.None, out DateTime fecha) || fecha.Date < DateTime.Today)
+                if (!DateTime.TryParse(txtVence.Text, out DateTime fecha) || fecha.Date < DateTime.Today)
                 {
                     Mostrar("Indica una fecha de vencimiento válida para la venta a crédito.", false);
                     return;
                 }
                 vence = fecha;
+            }
+
+            int? idCotizacionOrigen = null;
+            if (ViewState["IdCotizacionOrigen"] != null && int.TryParse(ViewState["IdCotizacionOrigen"].ToString(), out int idCot))
+            {
+                idCotizacionOrigen = idCot;
             }
 
             try
@@ -149,11 +355,28 @@ namespace trabajo_ing_software
                 using (var conexion = VentaInventario.Abrir())
                 using (var transaccion = conexion.BeginTransaction())
                 {
-                    venta = VentaInventario.Registrar(conexion, transaccion, cliente, UsuarioVenta, bodega, cantidades, vence);
+                    venta = VentaInventario.Registrar(
+                        conexion,
+                        transaccion,
+                        cliente,
+                        UsuarioVenta,
+                        bodega,
+                        tipoDoc,
+                        descuento,
+                        formaPago,
+                        cantidades,
+                        vence,
+                        idCotizacionOrigen
+                    );
                     transaccion.Commit();
                 }
+
                 InicializarCarrito();
-                Mostrar("Venta #" + venta + " registrada. Se actualizaron las existencias de la bodega.", true);
+                txtDescuento.Text = "0";
+                pnlCotizacionInfo.Visible = false;
+                ViewState["IdCotizacionOrigen"] = null;
+
+                Mostrar($"¡{tipoDoc} emitida exitosamente bajo N° {venta}! Se aplicó descuento FEFO y la integración contable automática.", true);
             }
             catch (InvalidOperationException ex)
             {
@@ -162,7 +385,7 @@ namespace trabajo_ing_software
             catch (MySqlException ex)
             {
                 System.Diagnostics.Trace.TraceError(ex.ToString());
-                Mostrar("No se pudo registrar la venta. Revisa los datos y vuelve a intentarlo.", false);
+                Mostrar("No se pudo registrar la venta: " + ex.Message, false);
             }
         }
 

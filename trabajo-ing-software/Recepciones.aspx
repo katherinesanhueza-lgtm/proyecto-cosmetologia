@@ -141,7 +141,7 @@
                 <div>
                     <span class="pill-badge" style="font-size: 10px; padding: 4px 12px; margin-bottom: 8px;">M&Oacute;DULO DE COMPRAS - RECEPCI&Oacute;N Y BODEGA</span>
                     <h1>Recepci&oacute;n de Mercader&iacute;a y Asignaci&oacute;n de Lotes</h1>
-                    <p class="text-muted" style="margin-top: 4px;">Registro de gu&iacute;a de despacho, control f&iacute;sico de insumos contra &Oacute;rdenes de Compra, y asignaci&oacute;n de lotes y fechas de vencimiento bajo criterio FEFO.</p>
+                    <p class="text-muted" style="margin-top: 4px;">Registro de gu&iacute;a de despacho, control f&iacute;sico de insumos contra &Oacute;rdenes de Compra, y asignaci&oacute;n de lotes y fechas de vencimiento bajo criterio FEFO (RF-COM-05 / RF-COM-06 / RF-COM-07).</p>
                 </div>
                 <div class="compras-acciones">
                     <a href="ReporteIngresos.aspx" class="btn btn-outline-secondary">
@@ -241,7 +241,7 @@
                 <!-- 2. DETALLE DE PRODUCTOS A RECEPCIONAR Y ASIGNACION DE LOTES -->
                 <div class="form-section-title">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                    2. Asignaci&oacute;n de Lotes, Vencimientos y Conteo F&iacute;sico (Criterio FEFO)
+                    2. Asignaci&oacute;n de Lotes, Vencimientos y Conteo F&iacute;sico (RF-COM-06 / FEFO)
                 </div>
 
                 <p class="text-muted" style="margin-bottom: 12px; font-size: 12px;">
@@ -303,7 +303,7 @@
             <div class="filter-toolbar-row card-dermocosmetica">
                 <div style="position: relative; display: flex; align-items: center;">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 14px; color: var(--color-texto-suave);"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control" style="padding-left: 38px;" placeholder="Buscar por N&deg; recepci&oacute;n, gu&iacute;a, OC o proveedor..." AutoPostBack="true" OnTextChanged="txtBuscar_TextChanged"></asp:TextBox>
+                    <asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control" placeholder="Buscar por N&deg; recepci&oacute;n, gu&iacute;a, OC o proveedor..." AutoPostBack="true" OnTextChanged="txtBuscar_TextChanged"></asp:TextBox>
                 </div>
 
                 <div>

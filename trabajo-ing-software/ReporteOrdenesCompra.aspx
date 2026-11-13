@@ -87,11 +87,6 @@
         .badge-oc-recibida { background: #E8F8F0; color: #27AE60; }
         .badge-oc-anulada { background: #FDEDEC; color: #C0392B; }
 
-        .printable-sheet .table th,
-        .printable-sheet .table td {
-            padding: 10px 8px;
-            font-size: 12.5px;
-        }
         @media (max-width: 1024px) {
             .filter-grid-5col {
                 grid-template-columns: 1fr;
@@ -116,7 +111,7 @@
                 <div>
                     <span class="pill-badge" style="font-size: 10px; padding: 4px 12px; margin-bottom: 8px;">REPORTE ANAL&Iacute;TICO N&deg; 3 - COMPRAS</span>
                     <h1>Estado de &Oacute;rdenes de Compra</h1>
-                    <p class="text-muted" style="margin-top: 4px;">Monitoreo anal&iacute;tico de pedidos pendientes, recibidos y anulados, con liquidaci&oacute;n de IVA Cr&eacute;dito Fiscal.</p>
+                    <p class="text-muted" style="margin-top: 4px;">Monitoreo anal&iacute;tico de pedidos pendientes, recibidos y anulados, con liquidaci&oacute;n de IVA Cr&eacute;dito Fiscal (RF-COM-11 / RNF-14).</p>
                 </div>
                 <div class="compras-acciones">
                     <a href="OrdenesCompra.aspx" class="btn btn-outline-secondary"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>Volver a &Oacute;rdenes</a>
@@ -199,13 +194,13 @@
                 <div class="report-header-banner">
                     <div>
                         <div style="font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--color-texto);">
-                            DERMO ERP - COSMETOLOG&Iacute;A PROFESIONAL
+                            NOMBRE - COSMETOLOG&Iacute;A PROFESIONAL
                         </div>
                         <div style="font-size: 11px; color: var(--color-texto-suave); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px;">
                             Distribuidora de Dermocosm&eacute;tica y Cosmec&eacute;utica Profesional
                         </div>
                         <div style="font-size: 12px; margin-top: 8px; color: var(--color-acento); font-weight: 600;">
-                            INFORME GERENCIAL: ESTADO DE &Oacute;RDENES DE COMPRA
+                            INFORME GERENCIAL: ESTADO DE &Oacute;RDENES DE COMPRA (RF-COM-11)
                         </div>
                     </div>
                     <div style="text-align: right; font-size: 11px; color: var(--color-texto-suave); line-height: 1.6;">

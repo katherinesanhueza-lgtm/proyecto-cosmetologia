@@ -76,11 +76,6 @@
             font-weight: 600;
             display: inline-block;
         }
-        .table-dermo-container .table th,
-        .table-dermo-container .table td {
-            padding: 10px 8px;
-            font-size: 12.5px;
-        }
         @media print {
             .no-print {
                 display: none !important;
@@ -99,7 +94,7 @@
 </asp:Content>
 <asp:Content ID="Contenido" ContentPlaceHolderID="MainContent" runat="server">
     <div class="dashboard compras-contenido">
-        <div class="container">
+        <div class="container" id="reporte-proveedores">
             <div class="header-top no-print">
                 <div>
                     <h1>Reporte: Evaluaci&oacute;n de Proveedores</h1>
@@ -108,59 +103,15 @@
                 <div class="nav-links">
                     <a href="Laboratorios.aspx" class="btn btn-outline-secondary">Volver a Laboratorios</a>
                     <button type="button" class="btn btn-primary" onclick="descargarPDF();">Descargar PDF</button>
-                    <asp:Button ID="btnExportarExcel" runat="server" Text="Exportar Excel" CssClass="btn btn-outline-secondary" OnClick="btnExportarExcel_Click" />
                 </div>
             </div>
 
-            <!-- Filtros BI de Proveedores -->
-            <div class="card-dermocosmetica no-print" style="margin-bottom: 20px; padding: 16px 20px;">
-                <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
-                    <div style="flex: 1 1 220px;">
-                        <label class="form-label">Buscar Laboratorio / Marca</label>
-                        <asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control" placeholder="Ej: ISDIN, L'Or&eacute;al, CeraVe..."></asp:TextBox>
-                    </div>
-                    <div style="flex: 0 1 190px;">
-                        <label class="form-label">Pa&iacute;s</label>
-                        <asp:DropDownList ID="ddlFiltroPais" runat="server" CssClass="form-select"></asp:DropDownList>
-                    </div>
-                    <div style="flex: 0 1 190px;">
-                        <label class="form-label">Calificaci&oacute;n</label>
-                        <asp:DropDownList ID="ddlFiltroCalificacion" runat="server" CssClass="form-select">
-                            <asp:ListItem Value="" Text="Todas las Calificaciones"></asp:ListItem>
-                            <asp:ListItem Value="Excelente" Text="Excelente"></asp:ListItem>
-                            <asp:ListItem Value="Aceptable" Text="Aceptable"></asp:ListItem>
-                            <asp:ListItem Value="Cr&#237;tico" Text="Cr&#237;tico"></asp:ListItem>
-                        </asp:DropDownList>
-                    </div>
-                    <div style="display: flex; gap: 8px;">
-                        <asp:Button ID="btnFiltrar" runat="server" Text="Filtrar" CssClass="btn btn-primary" OnClick="btnFiltrar_Click" />
-                        <asp:Button ID="btnLimpiar" runat="server" Text="Limpiar" CssClass="btn btn-outline-secondary" OnClick="btnLimpiar_Click" />
-                    </div>
-                </div>
+            <!-- Titulo del informe -->
+            <div style="margin-bottom: 20px;">
+                <h2 style="margin-bottom: 5px;">Distribuidora de Dermocosm&eacute;tica Profesional</h2>
+                <p style="margin: 0; font-size: 14px; color: var(--color-texto-suave);">Informe Anal&iacute;tico de Rendimiento, Lead Time y Control de Calidad</p>
+                <small style="color: gray;">Fecha de emisi&oacute;n: <%= DateTime.Now.ToString("dd/MM/yyyy HH:mm") %></small>
             </div>
-
-            <!-- HOJA FORMAL DEL REPORTE (EXPORTABLE A PDF) -->
-            <div id="reporte-imprimible" class="printable-sheet" style="background-color: var(--color-blanco); border: 1px solid var(--color-borde-suave); border-radius: 18px; padding: 24px; box-shadow: 0 4px 15px rgba(122, 94, 71, 0.05);">
-
-                <!-- Titulo del informe -->
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid var(--color-borde-suave); padding-bottom: 15px;">
-                    <div>
-                        <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 700; color: var(--color-texto);">
-                            DERMO ERP - COSMETOLOG&Iacute;A PROFESIONAL
-                        </div>
-                        <div style="font-size: 11px; color: var(--color-texto-suave); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px;">
-                            Distribuidora de Dermocosm&eacute;tica y Cosmec&eacute;utica Profesional
-                        </div>
-                        <div style="font-size: 12px; margin-top: 8px; color: var(--color-acento); font-weight: 600;">
-                            INFORME ANAL&Iacute;TICO: EVALUACI&Oacute;N DE PROVEEDORES Y LEAD TIME
-                        </div>
-                    </div>
-                    <div style="text-align: right; font-size: 11px; color: var(--color-texto-suave); line-height: 1.6;">
-                        <div><strong>Fecha Reporte:</strong> <%= DateTime.Now.ToString("dd/MM/yyyy HH:mm") %></div>
-                        <div><strong>M&oacute;dulo:</strong> Compras y Abastecimiento</div>
-                        <div><strong>Sistema:</strong> ERP Dermo-Cosm&eacute;tica .NET</div>
-                    </div>
-                </div>
 
             <!-- Fila de Tarjetas KPI con Ajustes de BI -->
             <div class="kpi-grid">
@@ -236,7 +187,7 @@
 
             <!-- Resumen explicativo de Business Intelligence -->
             <div style="background-color: var(--color-blanco); border: 1px solid var(--color-borde-suave); border-radius: 16px; padding: 22px; font-size: 13px; line-height: 1.6; color: var(--color-texto-suave);">
-                <div style="font-weight: 700; color: var(--color-acento); font-size: 14px; margin-bottom: 8px;">
+                <div style="font-weight: 700; color: var(--color-primario); font-size: 14px; margin-bottom: 8px;">
                     Indicadores de Business Intelligence (BI) y Criterios de Evaluaci&oacute;n:
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
@@ -252,40 +203,19 @@
                     </div>
                 </div>
             </div>
-
-            <!-- FIRMAS DE RESPONSABILIDAD DEL EQUIPO (DINÁMICAS DESDE CONFIGURACIONGLOBAL) -->
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 40px; text-align: center; font-size: 11px;">
-                <div>
-                    <div style="border-top: 1px solid #736E67; width: 80%; margin: 0 auto 6px auto;"></div>
-                    <strong><asp:Label ID="lblFirmaCompras" runat="server"></asp:Label></strong><br />
-                    M&oacute;dulo de Compras y Abastecimiento
-                </div>
-                <div>
-                    <div style="border-top: 1px solid #736E67; width: 80%; margin: 0 auto 6px auto;"></div>
-                    <strong><asp:Label ID="lblFirmaVentas" runat="server"></asp:Label></strong><br />
-                    M&oacute;dulo de Ventas y Facturaci&oacute;n
-                </div>
-                <div>
-                    <div style="border-top: 1px solid #736E67; width: 80%; margin: 0 auto 6px auto;"></div>
-                    <strong><asp:Label ID="lblFirmaInventario" runat="server"></asp:Label></strong><br />
-                    M&oacute;dulo de Inventario y Kardex
-                </div>
-            </div>
-
-            </div> <!-- Fin #reporte-imprimible -->
-        </div> <!-- Fin .container -->
+        </div>
 
         <!-- Boton de respaldo para el diseñador -->
         <asp:Button ID="btnVolver" runat="server" Visible="false" OnClick="btnVolver_Click" />
 
         <script>
             function descargarPDF() {
-                var elemento = document.getElementById('reporte-imprimible');
+                var elemento = document.getElementById('reporte-proveedores');
                 var opt = {
                     margin:       [10, 10, 10, 10],
                     filename:     'Reporte_Evaluacion_Proveedores_BI.pdf',
                     image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true },
+                    html2canvas:  { scale: 2 },
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
                 };
                 html2pdf().set(opt).from(elemento).save();

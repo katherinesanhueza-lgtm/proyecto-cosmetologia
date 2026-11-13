@@ -13,7 +13,7 @@ namespace trabajo_ing_software
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            // Verificación de seguridad de sesión
+            // Verificaci�n de seguridad de sesi�n
             if (Session["IdUsuario"] == null)
             {
                 Response.Redirect("Login.aspx");
@@ -22,7 +22,7 @@ namespace trabajo_ing_software
 
             ActualizarTextosIvaDinamicos();
 
-            // Control de acceso por perfil (RBAC): Sólo Administrador y Contador pueden gestionar parámetros legales
+            // Control de acceso por perfil (RBAC): S�lo Administrador y Contador pueden gestionar par�metros legales
             string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
             btnAbrirConfig.Visible = rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase) || 
                                      rolUsuario.Equals("Contador", StringComparison.OrdinalIgnoreCase);
@@ -46,7 +46,7 @@ namespace trabajo_ing_software
             }
         }
 
-        #region Inicialización y Estructura Temporal de ítems
+        #region Inicializaci�n y Estructura Temporal de �tems
         public string GetIniciales(string nombre)
         {
             if (string.IsNullOrWhiteSpace(nombre)) return "OC";
@@ -80,7 +80,7 @@ namespace trabajo_ing_software
         }
         #endregion
 
-        #region Carga de Datos y Catálogos
+        #region Carga de Datos y Cat�logos
         private void CargarLaboratoriosFiltro()
         {
             ddlFiltroLaboratorio.Items.Clear();
@@ -189,7 +189,7 @@ namespace trabajo_ing_software
                             {
                                 lblInfoRut.Text = dr["Rut"].ToString();
                                 int dias = dr["DiasPago"] != DBNull.Value ? Convert.ToInt32(dr["DiasPago"]) : 30;
-                                lblInfoDiasPago.Text = dias + " días de crédito";
+                                lblInfoDiasPago.Text = dias + " d�as de cr�dito";
                                 lblInfoContacto.Text = dr["Contacto"].ToString();
                                 lblInfoPais.Text = dr["Pais"].ToString();
 
@@ -244,21 +244,21 @@ namespace trabajo_ing_software
         {
             if (string.IsNullOrEmpty(ddlProductoVariante.SelectedValue))
             {
-                MostrarMensaje("Debe seleccionar un producto del catálogo para agregarlo a la orden.", false);
+                MostrarMensaje("Debe seleccionar un producto del cat�logo para agregarlo a la orden.", false);
                 return;
             }
 
             int cantidad;
             if (!int.TryParse(txtCantidad.Text, out cantidad) || cantidad <= 0)
             {
-                MostrarMensaje("Ingrese una cantidad válida mayor a 0.", false);
+                MostrarMensaje("Ingrese una cantidad v�lida mayor a 0.", false);
                 return;
             }
 
             decimal costo;
             if (!decimal.TryParse(txtCostoUnitario.Text, out costo) || costo < 0)
             {
-                MostrarMensaje("Ingrese un costo unitario válido.", false);
+                MostrarMensaje("Ingrese un costo unitario v�lido.", false);
                 return;
             }
 
@@ -319,7 +319,7 @@ namespace trabajo_ing_software
 
             RecalcularTotalesFinancieros();
 
-            // Restablecer inputs de ítem
+            // Restablecer inputs de �tem
             ddlProductoVariante.SelectedIndex = 0;
             txtCantidad.Text = "1";
             txtCostoUnitario.Text = "";
@@ -353,7 +353,7 @@ namespace trabajo_ing_software
                 neto += Convert.ToDecimal(row["Subtotal"]);
             }
 
-            // Cálculo dinámico según tasa de IVA consultada desde ConfiguracionGlobal (Ajuste Lógico RF-COM-04)
+            // C�lculo din�mico seg�n tasa de IVA consultada desde ConfiguracionGlobal (Ajuste L�gico RF-COM-04)
             decimal iva = neto * ConfiguracionGlobal.TasaIva;
             decimal total = neto + iva;
 
@@ -382,7 +382,7 @@ namespace trabajo_ing_software
             DateTime fechaEmision;
             if (!DateTime.TryParse(txtFechaEmision.Text, out fechaEmision))
             {
-                MostrarMensaje("Seleccione una fecha de emisión válida.", false);
+                MostrarMensaje("Seleccione una fecha de emisi�n v�lida.", false);
                 return;
             }
 
@@ -397,7 +397,7 @@ namespace trabajo_ing_software
             {
                 neto += Convert.ToDecimal(row["Subtotal"]);
             }
-            // Cálculo dinámico según tasa de IVA consultada desde ConfiguracionGlobal (Ajuste Lógico RF-COM-04)
+            // C�lculo din�mico seg�n tasa de IVA consultada desde ConfiguracionGlobal (Ajuste L�gico RF-COM-04)
             decimal iva = neto * ConfiguracionGlobal.TasaIva;
             decimal total = neto + iva;
 
@@ -497,7 +497,7 @@ namespace trabajo_ing_software
         }
         #endregion
 
-        #region Visualización y Listado de Órdenes (GridView Principal)
+        #region Visualizaci�n y Listado de �rdenes (GridView Principal)
         private void ActualizarTextosIvaDinamicos()
         {
             decimal tasa = ConfiguracionGlobal.TasaIva;
@@ -525,7 +525,7 @@ namespace trabajo_ing_software
             string estado = ddlFiltroEstado.SelectedValue;
             string idLab = ddlFiltroLaboratorio.SelectedValue;
 
-            string query = @"SELECT oc.IdOC, oc.NumeroOC, oc.IdCotizacion, l.RazonSocial, l.Rut, oc.Fecha, oc.FechaEsperada, oc.Estado, oc.Neto, oc.Iva, oc.Total
+            string query = @"SELECT oc.IdOC, oc.NumeroOC, l.RazonSocial, l.Rut, oc.Fecha, oc.FechaEsperada, oc.Estado, oc.Neto, oc.Iva, oc.Total
                              FROM OrdenCompra oc
                              INNER JOIN Laboratorio l ON oc.IdLaboratorio = l.IdLaboratorio
                              WHERE 1=1";
@@ -657,7 +657,7 @@ namespace trabajo_ing_software
 
         private void CargarModalDetalle(int idOC)
         {
-            string queryCab = @"SELECT oc.NumeroOC, oc.IdCotizacion, l.RazonSocial, l.Rut, oc.Fecha, oc.FechaEsperada, oc.Estado, oc.Neto, oc.Iva, oc.Total
+            string queryCab = @"SELECT oc.NumeroOC, l.RazonSocial, l.Rut, oc.Fecha, oc.FechaEsperada, oc.Estado, oc.Neto, oc.Iva, oc.Total
                                 FROM OrdenCompra oc
                                 INNER JOIN Laboratorio l ON oc.IdLaboratorio = l.IdLaboratorio
                                 WHERE oc.IdOC = @IdOC";
@@ -676,19 +676,7 @@ namespace trabajo_ing_software
                             lblModalLaboratorio.Text = dr["RazonSocial"].ToString();
                             lblModalRut.Text = dr["Rut"].ToString();
                             lblModalFecha.Text = Convert.ToDateTime(dr["Fecha"]).ToString("dd/MM/yyyy");
-                            lblModalFechaEsperada.Text = Convert.ToDateTime(dr["FechaEsperada"]).ToString("dd/MM/yyyy");
-
-                            if (lblModalOrigen != null)
-                            {
-                                if (dr["IdCotizacion"] != DBNull.Value && dr["IdCotizacion"] != null)
-                                {
-                                    lblModalOrigen.Text = "Cotizaci&oacute;n COT-" + string.Format("{0:D4}", dr["IdCotizacion"]);
-                                }
-                                else
-                                {
-                                    lblModalOrigen.Text = "Compra directa (Sin cotizaci&oacute;n)";
-                                }
-                            }
+                            lblModalFechaEsperada.Text = Convert.ToDateTime(dr["FechaEsperada"]).ToString("dd/MM/yyyy");
                             lblModalEstado.Text = dr["Estado"].ToString();
                             lblModalNeto.Text = string.Format("{0:C0}", dr["Neto"]);
                             lblModalIva.Text = string.Format("{0:C0}", dr["Iva"]);
@@ -697,7 +685,7 @@ namespace trabajo_ing_software
                             {
                                 lblModalIvaPct.Text = (ConfiguracionGlobal.TasaIva * 100m).ToString("0.#");
                             }
-                            // Inyección dinámica de Jefatura de Compras bajo la firma (Ajuste Lógico)
+                            // Inyecci�n din�mica de Jefatura de Compras bajo la firma (Ajuste L�gico)
                             lblModalFirmaJefe.Text = ConfiguracionGlobal.NombreJefeCompras;
                         }
                     }
