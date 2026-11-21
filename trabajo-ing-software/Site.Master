@@ -50,6 +50,9 @@
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/">Inicio</a></li>
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/About">Acerca de</a></li>
                         <li class="nav-item"><a class="nav-link" runat="server" href="~/Contact">Contacto</a></li>
+                        <li class="nav-item"><a class="nav-link" runat="server" href="~/Contabilidad.aspx">Contabilidad</a></li>
+                        <li class="nav-item"><a class="nav-link" runat="server" href="~/Compras.aspx">Compras</a></li>
+                        <li class="nav-item"><a class="nav-link" runat="server" href="~/Ventas.aspx">Ventas</a></li>
                     </ul>
                 </div>
             </div>

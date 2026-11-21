@@ -427,6 +427,7 @@ namespace trabajo_ing_software
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblModalFechaEsperada;
+        protected global::System.Web.UI.WebControls.Label lblModalOrigen;
 
         /// <summary>
         /// Control lblModalEstado.
@@ -503,9 +504,6 @@ namespace trabajo_ing_software
         protected global::System.Web.UI.WebControls.Button btnCerrarConfig;
         protected global::System.Web.UI.WebControls.TextBox txtConfigIva;
         protected global::System.Web.UI.WebControls.Label lblIvaActualDb;
-        protected global::System.Web.UI.WebControls.TextBox txtConfigJefeCompras;
-        protected global::System.Web.UI.WebControls.TextBox txtConfigJefeVentas;
-        protected global::System.Web.UI.WebControls.TextBox txtConfigJefeInventario;
         protected global::System.Web.UI.WebControls.Label lblConfigMensaje;
         protected global::System.Web.UI.WebControls.Button btnCancelarConfig;
         protected global::System.Web.UI.WebControls.Button btnGuardarConfig;

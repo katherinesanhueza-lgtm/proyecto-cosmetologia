@@ -1,6 +1,7 @@
-using System;
+﻿using System;
 using System.Data;
-using System.Data.SqlClient;
+using System.Configuration;
+using MySql.Data.MySqlClient;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -8,10 +9,23 @@ namespace trabajo_ing_software
 {
     public partial class Perfiles : System.Web.UI.Page
     {
-        string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ingsofDB;Integrated Security=True;TrustServerCertificate=True;";
+        string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=;";
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (Session["IdUsuario"] == null)
+            {
+                Response.Redirect("Login.aspx");
+                return;
+            }
+
+            string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
+            if (!rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase))
+            {
+                ConfiguracionGlobal.RedirigirSegunRol(Response, rolUsuario);
+                return;
+            }
+
             if (!IsPostBack)
             {
                 CargarPerfiles();
@@ -20,12 +34,12 @@ namespace trabajo_ing_software
 
         private void CargarPerfiles()
         {
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 string query = "SELECT IdRol, Nombre FROM Rol";
-                using (SqlCommand cmd = new SqlCommand(query, conn))
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
-                    using (SqlDataAdapter sda = new SqlDataAdapter(cmd))
+                    using (MySqlDataAdapter sda = new MySqlDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
                         sda.Fill(dt);
@@ -45,10 +59,10 @@ namespace trabajo_ing_software
                 return;
             }
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 string query = "INSERT INTO Rol (Nombre) VALUES (@Nombre)";
-                using (SqlCommand cmd = new SqlCommand(query, conn))
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@Nombre", txtNombrePerfil.Text.Trim());
 
@@ -68,10 +82,10 @@ namespace trabajo_ing_software
         {
             int idRol = Convert.ToInt32(gvPerfiles.DataKeys[e.RowIndex].Value);
 
-            using (SqlConnection conn = new SqlConnection(connectionString))
+            using (MySqlConnection conn = new MySqlConnection(connectionString))
             {
                 string query = "DELETE FROM Rol WHERE IdRol = @IdRol";
-                using (SqlCommand cmd = new SqlCommand(query, conn))
+                using (MySqlCommand cmd = new MySqlCommand(query, conn))
                 {
                     cmd.Parameters.AddWithValue("@IdRol", idRol);
                     try
@@ -81,7 +95,7 @@ namespace trabajo_ing_software
                         lblMensaje.Text = "Perfil eliminado correctamente.";
                         lblMensaje.ForeColor = System.Drawing.Color.Blue;
                     }
-                    catch (SqlException)
+                    catch (MySqlException)
                     {
                         lblMensaje.Text = "No se puede eliminar este perfil porque está asignado a uno o más usuarios.";
                         lblMensaje.ForeColor = System.Drawing.Color.Red;

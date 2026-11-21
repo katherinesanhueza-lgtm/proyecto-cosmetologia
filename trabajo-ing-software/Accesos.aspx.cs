@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
-using System.Data.SqlClient;
+using System.Configuration;
+using MySql.Data.MySqlClient;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -8,7 +9,7 @@ namespace trabajo_ing_software
 {
     public partial class Accesos : System.Web.UI.Page
     {
-        string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ingsofDB;Integrated Security=True;TrustServerCertificate=True;";
+        string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=;";
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -51,12 +52,12 @@ namespace trabajo_ing_software
 
         private void CargarUsuarios()
         {
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
                 string query = "SELECT IdUsuario, Nombre FROM Usuario WHERE Activo = 1";
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
-                    using (SqlDataAdapter sda = new SqlDataAdapter(cmd))
+                    using (MySqlDataAdapter sda = new MySqlDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
                         sda.Fill(dt);
@@ -71,12 +72,12 @@ namespace trabajo_ing_software
 
         private void CargarPerfiles()
         {
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
                 string query = "SELECT IdRol, Nombre FROM Rol";
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
-                    using (SqlDataAdapter sda = new SqlDataAdapter(cmd))
+                    using (MySqlDataAdapter sda = new MySqlDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
                         sda.Fill(dt);
@@ -91,14 +92,14 @@ namespace trabajo_ing_software
 
         private void CargarTablaAccesos()
         {
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
-                string query = @"SELECT u.Nombre, u.Correo, ISNULL(r.Nombre, 'Sin Asignar') AS Perfil
+                string query = @"SELECT u.Nombre, u.Correo, IFNULL(r.Nombre, 'Sin Asignar') AS Perfil
                                  FROM Usuario u
                                  LEFT JOIN Rol r ON u.IdRol = r.IdRol";
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
-                    using (SqlDataAdapter sda = new SqlDataAdapter(cmd))
+                    using (MySqlDataAdapter sda = new MySqlDataAdapter(cmd))
                     {
                         DataTable dt = new DataTable();
                         sda.Fill(dt);
@@ -126,10 +127,10 @@ namespace trabajo_ing_software
                 return;
             }
 
-            using (SqlConnection con = new SqlConnection(connectionString))
+            using (MySqlConnection con = new MySqlConnection(connectionString))
             {
                 string query = "UPDATE Usuario SET IdRol = @IdRol, Rol = @NombreRol WHERE IdUsuario = @IdUsuario";
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
                     cmd.Parameters.AddWithValue("@IdRol", ddlPerfiles.SelectedValue);
                     cmd.Parameters.AddWithValue("@NombreRol", ddlPerfiles.SelectedItem.Text);

@@ -1,44 +1,178 @@
-﻿<%@ Page Title="Home Page" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="trabajo_ing_software._Default" %>
+﻿<%@ Page Title="Inicio" Language="C#" MasterPageFile="~/Contabilidad.Master"
+    AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="trabajo_ing_software._Default" ResponseEncoding="utf-8" %>
+
+<asp:Content ID="EstilosInicio" ContentPlaceHolderID="EstilosPagina" runat="server">
+    <link href="<%: ResolveUrl("~/Content/Inicio.css?v=5") %>" rel="stylesheet" />
+</asp:Content>
+
+<asp:Content ID="Acciones" ContentPlaceHolderID="AccionesUsuario" runat="server">
+    <asp:Button ID="btnLogout" runat="server" Text="Cerrar Sesión" CssClass="btn btn-outline-secondary btn-sm cierre-compras" OnClick="btnLogout_Click" CausesValidation="false" />
+</asp:Content>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
+    <div class="dashboard inicio-dashboard">
+        <header class="dashboard-header">
+            <div>
+                <p class="dashboard-etiqueta">Panel ejecutivo central</p>
+                <h1>Bienvenido a Dermo ERP</h1>
+                <p class="dashboard-descripcion">Resumen consolidado de compras, ventas, inventario FEFO y contabilidad general en tiempo real.</p>
+            </div>
+            <div class="inicio-fecha">
+                <span>Fecha del sistema</span>
+                <asp:Label ID="lblFecha" runat="server" />
+            </div>
+        </header>
 
-    <main>
-        <section class="row" aria-labelledby="aspnetTitle">
-            <h1 id="aspnetTitle">ASP.NET</h1>
-            <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS, and JavaScript.</p>
-            <p><a href="http://www.asp.net" class="btn btn-primary btn-md">Learn more &raquo;</a></p>
+        <section aria-labelledby="resumen-inicio">
+            <div class="inicio-seccion-header">
+                <div>
+                    <h2 id="resumen-inicio">Resumen general de los módulos</h2>
+                    <p>Indicadores clave consolidados de cada área operativa del ERP.</p>
+                </div>
+            </div>
+
+            <div class="inicio-indicadores-4">
+                <!-- RESUMEN COMPRAS -->
+                <div class="card-dermocosmetica inicio-indicador">
+                    <span class="inicio-icono" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14v14H5z M9 8V6a3 3 0 0 1 6 0v2" /></svg>
+                    </span>
+                    <div class="inicio-indicador-cuerpo">
+                        <span class="inicio-indicador-titulo">Compras vigentes</span>
+                        <asp:Label ID="lblComprasTotal" runat="server" Text="$0" CssClass="inicio-valor" />
+                        <asp:Label ID="lblComprasDetalle" runat="server" Text="0 órdenes · 0 laboratorios" CssClass="inicio-detalle" />
+                    </div>
+                </div>
+
+                <!-- RESUMEN VENTAS -->
+                <div class="card-dermocosmetica inicio-indicador">
+                    <span class="inicio-icono" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h14l2 4v7H3v-7z M7 9V4h10v5 M7 15h3 M15 15h2" /></svg>
+                    </span>
+                    <div class="inicio-indicador-cuerpo">
+                        <span class="inicio-indicador-titulo">Ventas acumuladas</span>
+                        <asp:Label ID="lblVentasTotal" runat="server" Text="$0" CssClass="inicio-valor" />
+                        <asp:Label ID="lblVentasDetalle" runat="server" Text="0 documentos · 0 clientes" CssClass="inicio-detalle" />
+                    </div>
+                </div>
+
+                <!-- RESUMEN INVENTARIO -->
+                <div class="card-dermocosmetica inicio-indicador">
+                    <span class="inicio-icono" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18v5H3z M5 9v11h14V9 M10 13h4" /></svg>
+                    </span>
+                    <div class="inicio-indicador-cuerpo">
+                        <span class="inicio-indicador-titulo">Productos activos</span>
+                        <asp:Label ID="lblProductos" runat="server" Text="0" CssClass="inicio-valor" />
+                        <asp:Label ID="lblInventarioDetalle" runat="server" Text="0 unidades en stock" CssClass="inicio-detalle" />
+                    </div>
+                </div>
+
+                <!-- RESUMEN CONTABILIDAD -->
+                <div class="card-dermocosmetica inicio-indicador">
+                    <span class="inicio-icono" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-6 9 6H3z M5 20h14 M7 10v7 M12 10v7 M17 10v7" /></svg>
+                    </span>
+                    <div class="inicio-indicador-cuerpo">
+                        <span class="inicio-indicador-titulo">Asientos contables</span>
+                        <asp:Label ID="lblContabilidadTotal" runat="server" Text="0" CssClass="inicio-valor" />
+                        <asp:Label ID="lblContabilidadDetalle" runat="server" Text="0 CxP · 0 CxC vigentes" CssClass="inicio-detalle" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="inicio-indicadores" style="margin-top: 14px;">
+                <div class="card-dermocosmetica inicio-indicador">
+                    <span class="inicio-icono inicio-icono-alerta" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z M12 9v4 M12 17h.01" /></svg>
+                    </span>
+                    <div class="inicio-indicador-cuerpo">
+                        <span class="inicio-indicador-titulo">Productos con stock bajo</span>
+                        <asp:Label ID="lblStockBajo" runat="server" Text="0" CssClass="inicio-valor" />
+                        <span class="inicio-detalle">Existencias al mínimo o por debajo</span>
+                    </div>
+                </div>
+
+                <div class="card-dermocosmetica inicio-indicador">
+                    <span class="inicio-icono" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10 12 4l9 6v10H3zM8 20v-7h8v7M8 16h8" /></svg>
+                    </span>
+                    <div class="inicio-indicador-cuerpo">
+                        <span class="inicio-indicador-titulo">Bodegas activas</span>
+                        <asp:Label ID="lblBodegas" runat="server" Text="0" CssClass="inicio-valor" />
+                        <span class="inicio-detalle">Puntos de almacenamiento habilitados</span>
+                    </div>
+                </div>
+
+                <div class="card-dermocosmetica inicio-indicador">
+                    <span class="inicio-icono" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z M3.27 6.96L12 12.01l8.73-5.05 M12 22.08V12" /></svg>
+                    </span>
+                    <div class="inicio-indicador-cuerpo">
+                        <span class="inicio-indicador-titulo">Lotes y logística activa</span>
+                        <asp:Label ID="lblOperacionesCurso" runat="server" Text="0" CssClass="inicio-valor" />
+                        <span class="inicio-detalle">Lotes vigentes con trazabilidad FEFO</span>
+                    </div>
+                </div>
+            </div>
         </section>
 
-        <div class="row">
-            <section class="col-md-4" aria-labelledby="gettingStartedTitle">
-                <h2 id="gettingStartedTitle">Getting started</h2>
-                <p>
-                    ASP.NET Web Forms lets you build dynamic websites using a familiar drag-and-drop, event-driven model.
-                A design surface and hundreds of controls and components let you rapidly build sophisticated, powerful UI-driven sites with data access.
-                </p>
-                <p>
-                    <a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301948">Learn more &raquo;</a>
-                </p>
-            </section>
-            <section class="col-md-4" aria-labelledby="librariesTitle">
-                <h2 id="librariesTitle">Get more libraries</h2>
-                <p>
-                    NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.
-                </p>
-                <p>
-                    <a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301949">Learn more &raquo;</a>
-                </p>
-            </section>
-            <section class="col-md-4" aria-labelledby="hostingTitle">
-                <h2 id="hostingTitle">Web Hosting</h2>
-                <p>
-                    You can easily find a web hosting company that offers the right mix of features and price for your applications.
-                </p>
-                <p>
-                    <a class="btn btn-default" href="https://go.microsoft.com/fwlink/?LinkId=301950">Learn more &raquo;</a>
-                </p>
-            </section>
-        </div>
-    </main>
+        <section class="inicio-seccion" aria-labelledby="modulos-inicio">
+            <div class="inicio-seccion-header">
+                <div>
+                    <h2 id="modulos-inicio">Accesos rápidos</h2>
+                    <p>Navega directamente al módulo operativo que necesitas gestionar.</p>
+                </div>
+                <a class="btn btn-outline-secondary" href="<%: ResolveUrl("~/ReporteInventario.aspx") %>">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    Reporte de inventario
+                </a>
+            </div>
+            <div class="inicio-modulos">
+                <a href="<%: ResolveUrl("~/Inventario.aspx") %>" class="inicio-modulo">
+                    <span class="inicio-icono" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18v5H3z M5 9v11h14V9 M10 13h4" /></svg>
+                    </span>
+                    <h3>Inventario</h3>
+                    <p>Consulta existencias por SKU y bodega, control de lotes FEFO y movimientos de kardex.</p>
+                    <span class="inicio-enlace">Ver inventario</span>
+                </a>
+                <a href="<%: ResolveUrl("~/Compras.aspx") %>" class="inicio-modulo">
+                    <span class="inicio-icono" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14v14H5z M9 8V6a3 3 0 0 1 6 0v2" /></svg>
+                    </span>
+                    <h3>Compras</h3>
+                    <p>Administra laboratorios proveedores, cotizaciones de importación, órdenes y recepciones.</p>
+                    <span class="inicio-enlace">Ir a compras</span>
+                </a>
+                <a href="<%: ResolveUrl("~/Ventas.aspx") %>" class="inicio-modulo">
+                    <span class="inicio-icono" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h14l2 4v7H3v-7z M7 9V4h10v5 M7 15h3 M15 15h2" /></svg>
+                    </span>
+                    <h3>Ventas</h3>
+                    <p>Gestiona cartera de clientes, presupuestos, emisión de boletas y facturas y despachos.</p>
+                    <span class="inicio-enlace">Ir a ventas</span>
+                </a>
+                <a href="<%: ResolveUrl("~/Contabilidad.aspx") %>" class="inicio-modulo">
+                    <span class="inicio-icono" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-6 9 6H3z M5 20h14 M7 10v7 M12 10v7 M17 10v7" /></svg>
+                    </span>
+                    <h3>Contabilidad</h3>
+                    <p>Consulta plan de cuentas, libro diario, cuentas por pagar y por cobrar y flujo de caja.</p>
+                    <span class="inicio-enlace">Ir a contabilidad</span>
+                </a>
+            </div>
+        </section>
 
+        <section class="inicio-seccion" aria-labelledby="estado-inicio">
+            <h2 id="estado-inicio">Estado del sistema</h2>
+            <div class="card-dermocosmetica inicio-estado" role="status">
+                <span id="indicadorEstado" runat="server" class="inicio-estado-punto" aria-hidden="true"></span>
+                <div>
+                    <strong><asp:Label ID="lblEstadoSistema" runat="server" /></strong>
+                    <p><asp:Label ID="lblDescripcionEstado" runat="server" /></p>
+                </div>
+            </div>
+        </section>
+    </div>
 </asp:Content>

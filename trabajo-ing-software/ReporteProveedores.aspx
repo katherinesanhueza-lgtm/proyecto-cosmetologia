@@ -1,18 +1,7 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="ReporteProveedores.aspx.cs" Inherits="trabajo_ing_software.ReporteProveedores" ResponseEncoding="utf-8" ContentType="text/html; charset=utf-8" %>
-
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="es">
-<head runat="server">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Reporte: Evaluaci&oacute;n de Proveedores - Dermocosm&eacute;tica</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,500;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    <link href="Content/Estilos.css" rel="stylesheet" type="text/css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <style>
+﻿<%@ Page Title="Evaluación de proveedores" MasterPageFile="~/Contabilidad.Master" Language="C#" AutoEventWireup="true" CodeBehind="ReporteProveedores.aspx.cs" Inherits="trabajo_ing_software.ReporteProveedores" ResponseEncoding="utf-8" ContentType="text/html; charset=utf-8" %>
+<asp:Content ID="Recursos" ContentPlaceHolderID="EstilosPagina" runat="server">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
         .container {
             max-width: 1320px;
             margin: 30px auto;
@@ -21,7 +10,9 @@
         .header-top {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 14px;
             margin-bottom: 25px;
             padding-bottom: 15px;
             border-bottom: 1px solid var(--color-borde-suave);
@@ -29,14 +20,24 @@
         .nav-links {
             display: flex;
             align-items: center;
-            gap: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .nav-links .btn {
+            white-space: nowrap;
         }
         /* Tarjetas de Metricas (KPIs) */
         .kpi-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 18px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        @media (max-width: 1120px) {
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
         .kpi-card {
             background-color: var(--color-blanco);
@@ -87,6 +88,11 @@
             font-weight: 600;
             display: inline-block;
         }
+        .table-dermo-container .table th,
+        .table-dermo-container .table td {
+            padding: 10px 8px;
+            font-size: 12.5px;
+        }
         @media print {
             .no-print {
                 display: none !important;
@@ -98,94 +104,35 @@
             }
         }
     </style>
-</head>
-<body>
-    <form id="form1" runat="server">
-        <!-- HEADER GLOBAL -->
-        <header class="top-header no-print">
-            <div class="brand-block">
-                <span class="brand-logo">NOMBRE</span>
-                <span class="brand-sub">COSMETOLOG&Iacute;A PROFESIONAL</span>
-            </div>
-            <nav>
-                <ul class="nav-links-menu">
-                    <% 
-                        string rolNav = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
-                        bool esAdmin = rolNav.Equals("Administrador", StringComparison.OrdinalIgnoreCase);
-                        bool esComprador = rolNav.Equals("Comprador", StringComparison.OrdinalIgnoreCase);
-                        bool esBodeguero = rolNav.Equals("Bodeguero", StringComparison.OrdinalIgnoreCase);
-                        bool esContador = rolNav.Equals("Contador", StringComparison.OrdinalIgnoreCase);
-                        bool esVendedor = rolNav.Equals("Vendedor", StringComparison.OrdinalIgnoreCase);
-
-                        // Matriz Oficial RBAC 6.1.2
-                        bool puedeVerCompras = esAdmin || esComprador || esContador;
-                        bool puedeVerInventario = esAdmin || esBodeguero || esComprador || esContador || esVendedor;
-                    %>
-                    <li><a href="Default.aspx" class="nav-item-link">Inicio</a></li>
-
-                    <%-- ADMINISTRACIÃ“N (Solo Administrador General) --%>
-                    <% if (esAdmin) { %>
-                    <li><a href="Usuarios.aspx" class="nav-item-link">Usuarios</a></li>
-                    <% } %>
-
-                    <%-- COMPRAS (Admin y Comprador Escritura; Contador Solo Consulta) --%>
-                    <% if (esAdmin || esComprador || esContador) { %>
-                    <li><a href="Laboratorios.aspx" class="nav-item-link">Laboratorios</a></li>
-                    <% } %>
-                    <% if (puedeVerCompras) { %>
-                    <li><a href="OrdenesCompra.aspx" class="nav-item-link">&Oacute;rdenes de Compra</a></li>
-                    <% } %>
-                    <% if (esAdmin || esComprador) { %>
-                    <li><a href="ReporteProveedores.aspx" class="nav-item-link">Reporte Evaluaci&oacute;n</a></li>
-                    <% } %>
-                    <% if (puedeVerCompras) { %>
-                    <li><a href="ReporteOrdenesCompra.aspx" class="nav-item-link">Reporte &Oacute;rdenes</a></li>
-                    <% } %>
-
-                    <%-- INVENTARIO (Bodeguero Escritura; Admin Total; Comprador y Contador Consulta) --%>
-                    <% if (esAdmin || esBodeguero || esComprador) { %>
-                    <li><a href="Recepciones.aspx" class="nav-item-link">Recepci&oacute;n y Lotes</a></li>
-                    <% } %>
-                    <% if (puedeVerInventario) { %>
-                    <li><a href="ReporteIngresos.aspx" class="nav-item-link">Reporte Ingresos</a></li>
-                    <% } %>
-
-                    <%-- ACCESOS (Solo Administrador General) --%>
-                    <% if (esAdmin) { %>
-                    <li><a href="Accesos.aspx" class="nav-item-link">Accesos</a></li>
-                    <% } %>
-                </ul>
-            </nav>
-            <div class="header-actions">
-                <asp:Label ID="lblBienvenida" runat="server" Font-Bold="true" Font-Size="13px"></asp:Label>
-                <asp:Button ID="btnLogout" runat="server" Text="Cerrar Sesi&oacute;n" CssClass="btn-dermo-secondary" style="padding: 7px 16px; font-size: 12px;" OnClick="btnLogout_Click" />
-                <div class="user-avatar-btn" title="Usuario">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                </div>
-            </div>
-        </header>
-
+</asp:Content>
+<asp:Content ID="Acciones" ContentPlaceHolderID="AccionesUsuario" runat="server">
+    <asp:Label ID="lblBienvenida" Visible="false" runat="server" Font-Bold="true" Font-Size="13px"></asp:Label>
+                <asp:Button ID="btnLogout" runat="server" Text="Cerrar Sesi&oacute;n" CssClass="btn btn-outline-secondary btn-sm cierre-compras" OnClick="btnLogout_Click" />
+</asp:Content>
+<asp:Content ID="Contenido" ContentPlaceHolderID="MainContent" runat="server">
+    <div class="dashboard compras-contenido">
         <div class="container">
             <div class="header-top no-print">
                 <div>
-                    <h1 style="margin: 0; font-size: 26px;">Reporte: Evaluaci&oacute;n de Proveedores</h1>
-                    <span style="font-size: 13px; color: var(--color-texto-suave);">M&Oacute;DULO DE COMPRAS &bull; CUMPLIMIENTO, TIEMPOS Y AJUSTES DE BUSINESS INTELLIGENCE (BI)</span>
+                    <span class="pill-badge" style="font-size: 10.5px; padding: 5px 14px; margin-bottom: 10px;">M&Oacute;DULO DE COMPRAS &bull; EVALUACI&Oacute;N DE PROVEEDORES</span>
+                    <h1>Reporte: Evaluaci&oacute;n de Proveedores</h1>
+                    <p class="dashboard-descripcion" style="margin-top: 4px;">An&aacute;lisis de cumplimiento de entregas, tiempos de respuesta y calificaci&oacute;n global por laboratorio proveedor.</p>
                 </div>
                 <div class="nav-links">
-                    <a href="Laboratorios.aspx" class="btn-dermo-secondary" style="padding: 8px 18px; font-size: 13px; text-decoration: none;">Volver a Laboratorios</a>
-                    <button type="button" class="btn-dermo-primary" style="padding: 8px 20px; font-size: 13px;" onclick="descargarPDF();">Descargar PDF</button>
+                    <a href="Laboratorios.aspx" class="btn btn-outline-secondary">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                        Volver a Laboratorios
+                    </a>
+                    <button type="button" class="btn btn-primary" onclick="descargarPDF();">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                        Descargar PDF
+                    </button>
+                    <asp:Button ID="btnExportarExcel" runat="server" Text="Exportar Excel" CssClass="btn btn-outline-secondary" OnClick="btnExportarExcel_Click" />
                 </div>
             </div>
 
-            <!-- Titulo del informe -->
-            <div style="margin-bottom: 20px;">
-                <h2 style="margin-bottom: 5px;">Distribuidora de Dermocosm&eacute;tica Profesional</h2>
-                <p style="margin: 0; font-size: 14px; color: var(--color-texto-suave);">Informe Anal&iacute;tico de Rendimiento, Lead Time y Control de Calidad</p>
-                <small style="color: gray;">Fecha de emisi&oacute;n: <%= DateTime.Now.ToString("dd/MM/yyyy HH:mm") %></small>
-            </div>
-
-            <!-- Fila de Tarjetas KPI con Ajustes de BI -->
-            <div class="kpi-grid">
+            <!-- Fila de Tarjetas KPI con Ajustes de BI (solo pantalla, fuera del PDF) -->
+            <div class="kpi-grid no-print">
                 <div class="kpi-card">
                     <span class="kpi-titulo">Laboratorios Activos</span>
                     <div class="kpi-valor"><asp:Label ID="lblTotalLaboratorios" runat="server" Text="0"></asp:Label></div>
@@ -213,12 +160,70 @@
                 </div>
             </div>
 
+            <!-- Filtros BI de Proveedores -->
+            <div class="card-dermocosmetica no-print" style="margin-bottom: 20px; padding: 16px 20px;">
+                <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+                    <div style="flex: 0 1 155px;">
+                        <label class="form-label">Fecha Desde</label>
+                        <asp:TextBox ID="txtFechaDesde" runat="server" TextMode="Date" CssClass="form-control"></asp:TextBox>
+                    </div>
+                    <div style="flex: 0 1 155px;">
+                        <label class="form-label">Fecha Hasta</label>
+                        <asp:TextBox ID="txtFechaHasta" runat="server" TextMode="Date" CssClass="form-control"></asp:TextBox>
+                    </div>
+                    <div style="flex: 1 1 200px;">
+                        <label class="form-label">Buscar Laboratorio / Marca</label>
+                        <asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control" placeholder="Ej: ISDIN, L'Or&eacute;al, CeraVe..."></asp:TextBox>
+                    </div>
+                    <div style="flex: 0 1 170px;">
+                        <label class="form-label">Pa&iacute;s</label>
+                        <asp:DropDownList ID="ddlFiltroPais" runat="server" CssClass="form-select"></asp:DropDownList>
+                    </div>
+                    <div style="flex: 0 1 175px;">
+                        <label class="form-label">Calificaci&oacute;n</label>
+                        <asp:DropDownList ID="ddlFiltroCalificacion" runat="server" CssClass="form-select">
+                            <asp:ListItem Value="" Text="Todas las Calificaciones"></asp:ListItem>
+                            <asp:ListItem Value="Excelente" Text="Excelente"></asp:ListItem>
+                            <asp:ListItem Value="Aceptable" Text="Aceptable"></asp:ListItem>
+                            <asp:ListItem Value="Cr&#237;tico" Text="Cr&#237;tico"></asp:ListItem>
+                        </asp:DropDownList>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <asp:Button ID="btnFiltrar" runat="server" Text="Filtrar" CssClass="btn btn-primary" OnClick="btnFiltrar_Click" />
+                        <asp:Button ID="btnLimpiar" runat="server" Text="Limpiar" CssClass="btn btn-outline-secondary" OnClick="btnLimpiar_Click" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- HOJA FORMAL DEL REPORTE (EXPORTABLE A PDF) -->
+            <div id="reporte-imprimible" class="printable-sheet" style="background-color: var(--color-blanco); border: 1px solid var(--color-borde-suave); border-radius: 18px; padding: 24px; box-shadow: 0 4px 15px rgba(122, 94, 71, 0.05);">
+
+                <!-- Titulo del informe -->
+                <div class="report-header-banner" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 2px solid var(--color-acento); padding-bottom: 15px;">
+                    <div>
+                        <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 20px; font-weight: 700; color: var(--color-texto);">
+                            DERMO ERP - COSMETOLOG&Iacute;A PROFESIONAL
+                        </div>
+                        <div style="font-size: 11px; color: var(--color-texto-suave); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px;">
+                            Distribuidora de Dermocosm&eacute;tica y Cosmec&eacute;utica Profesional
+                        </div>
+                        <div style="font-size: 12px; margin-top: 8px; color: var(--color-acento); font-weight: 600;">
+                            INFORME ANAL&Iacute;TICO: EVALUACI&Oacute;N DE PROVEEDORES Y LEAD TIME
+                        </div>
+                    </div>
+                    <div style="text-align: right; font-size: 11px; color: var(--color-texto-suave); line-height: 1.6;">
+                        <div><strong>Fecha Reporte:</strong> <%= DateTime.Now.ToString("dd/MM/yyyy HH:mm") %></div>
+                        <div><strong>Per&iacute;odo:</strong> <asp:Label ID="lblPeriodoReporte" runat="server" Text="Hist&oacute;rico completo"></asp:Label></div>
+                        <div><strong>M&oacute;dulo:</strong> Compras y Abastecimiento</div>
+                    </div>
+                </div>
+
             <asp:Label ID="lblPromedioDias" runat="server" Visible="false" Text="0"></asp:Label>
 
             <!-- Tabla de Evaluacion Analítica con Métricas BI -->
             <div class="table-dermo-container" style="margin-bottom: 30px;">
                 <asp:GridView ID="gvReporte" runat="server" AutoGenerateColumns="False" 
-                    CssClass="table-dermo-modern" GridLines="None" EmptyDataText="No hay datos de compras u &oacute;rdenes registradas para evaluar.">
+                    CssClass="table table-hover align-middle" GridLines="None" EmptyDataText="No hay datos de compras u &oacute;rdenes registradas para evaluar.">
                     <Columns>
                         <asp:BoundField DataField="RazonSocial" HeaderText="LABORATORIO" />
                         <asp:BoundField DataField="Marca" HeaderText="MARCA" />
@@ -256,42 +261,54 @@
                 </asp:GridView>
             </div>
 
-            <!-- Resumen explicativo de Business Intelligence -->
-            <div style="background-color: var(--color-blanco); border: 1px solid var(--color-borde-suave); border-radius: 16px; padding: 22px; font-size: 13px; line-height: 1.6; color: var(--color-texto-suave);">
-                <div style="font-weight: 700; color: var(--color-primario); font-size: 14px; margin-bottom: 8px;">
-                    Indicadores de Business Intelligence (BI) y Criterios de Evaluaci&oacute;n:
+            <!-- Calificación Global del Proveedor -->
+            <div style="background-color: var(--color-blanco); border: 1px solid var(--color-borde-suave); border-radius: 16px; padding: 20px 24px; font-size: 13px; line-height: 1.7; color: var(--color-texto-suave);">
+                <div style="font-weight: 700; color: var(--color-acento); font-size: 14px; margin-bottom: 10px;">
+                    Calificaci&oacute;n Global del Proveedor
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div style="display: flex; flex-wrap: wrap; gap: 18px; align-items: center;">
                     <div>
-                        <strong>&bull; Lead Time Promedio (Ajuste BI):</strong> Mide los d&iacute;as corridos transcurridos entre la emisi&oacute;n de la Orden de Compra (<code>OrdenCompra.Fecha</code>) y el ingreso f&iacute;sico a bodega (<code>RecepcionCompra.FechaRecepcion</code>). Permite fiscalizar los tiempos de respuesta reales de cada laboratorio.<br />
-                        <strong>&bull; Tasa de Defectos (Ajuste BI):</strong> Porcentaje de incidencias y devoluciones por no-conformidad sanitaria o roturas (<code>DevolucionProveedor</code>) respecto al total de recepciones registradas. Una tasa de 0% indica calidad y lote &iacute;ntegro.
+                        <span class="badge-excelente" style="font-size: 11px;">Excelente</span> Cumplimiento &ge; 90% y tasa de defectos &lt; 5%.
                     </div>
                     <div>
-                        <strong>&bull; Calificaci&oacute;n Global del Proveedor:</strong><br />
-                        <span class="badge-excelente" style="font-size: 11px;">Excelente</span> Cumplimiento &ge; 90% y tasa de defectos &lt; 5%.<br />
-                        <span class="badge-aceptable" style="font-size: 11px; margin-top: 4px;">Aceptable</span> Cumplimiento entre 70% y 89% dentro de la ventana de tolerancia.<br />
-                        <span class="badge-critico" style="font-size: 11px; margin-top: 4px;">Cr&iacute;tico</span> Cumplimiento &lt; 70% o alta tasa de no conformidades.
+                        <span class="badge-aceptable" style="font-size: 11px;">Aceptable</span> Cumplimiento entre 70% y 89% dentro de la ventana de tolerancia.
+                    </div>
+                    <div>
+                        <span class="badge-critico" style="font-size: 11px;">Cr&iacute;tico</span> Cumplimiento &lt; 70% o alta tasa de no conformidades.
                     </div>
                 </div>
             </div>
-        </div>
+
+            <!-- FIRMAS DE RESPONSABILIDAD DEL EQUIPO (DINÁMICAS DESDE CONFIGURACIONGLOBAL) -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 40px; text-align: center; font-size: 11px;">
+                <div>
+                    <div style="border-top: 1px solid #736E67; width: 80%; margin: 0 auto 6px auto;"></div>
+                    <strong><asp:Label ID="lblFirmaCompras" runat="server"></asp:Label></strong><br />
+                    M&oacute;dulo de Compras y Abastecimiento
+                </div>
+                <div>
+                    <div style="border-top: 1px solid #736E67; width: 80%; margin: 0 auto 6px auto;"></div>
+                    <strong><asp:Label ID="lblFirmaVentas" runat="server"></asp:Label></strong><br />
+                    M&oacute;dulo de Ventas y Facturaci&oacute;n
+                </div>
+                <div>
+                    <div style="border-top: 1px solid #736E67; width: 80%; margin: 0 auto 6px auto;"></div>
+                    <strong><asp:Label ID="lblFirmaInventario" runat="server"></asp:Label></strong><br />
+                    M&oacute;dulo de Inventario y Kardex
+                </div>
+            </div>
+
+            </div> <!-- Fin #reporte-imprimible -->
+        </div> <!-- Fin .container -->
 
         <!-- Boton de respaldo para el diseñador -->
         <asp:Button ID="btnVolver" runat="server" Visible="false" OnClick="btnVolver_Click" />
 
         <script>
             function descargarPDF() {
-                var elemento = document.querySelector('.container');
-                var opt = {
-                    margin:       [10, 10, 10, 10],
-                    filename:     'Reporte_Evaluacion_Proveedores_BI.pdf',
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2 },
-                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
-                };
-                html2pdf().set(opt).from(elemento).save();
+                window.dermoDescargarPDF('reporte-imprimible', 'Reporte_Evaluacion_Proveedores.pdf');
             }
         </script>
-    </form>
-</body>
-</html>
+        
+    </div>
+</asp:Content>
