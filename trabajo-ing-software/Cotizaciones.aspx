@@ -119,7 +119,7 @@
                                 <asp:LinkButton ID="btnConvertir" runat="server" CssClass="btn btn-primary btn-sm me-1" 
                                     CommandName="ConvertirVenta" CommandArgument='<%# Eval("IdCotizacion") %>'
                                     Visible='<%# Eval("Estado").ToString() == "Vigente" || Eval("Estado").ToString() == "Aceptado" %>'>
-                                    🛒 Convertir a Venta
+                                    Convertir a Venta
                                 </asp:LinkButton>
                                 <asp:LinkButton ID="btnAceptar" runat="server" CssClass="btn btn-outline-success btn-sm me-1" 
                                     CommandName="MarcarAceptado" CommandArgument='<%# Eval("IdCotizacion") %>'

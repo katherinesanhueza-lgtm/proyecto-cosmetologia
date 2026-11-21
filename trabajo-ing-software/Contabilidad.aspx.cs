@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using MySql.Data.MySqlClient;
 using System.Globalization;
+using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
@@ -37,7 +38,18 @@ namespace trabajo_ing_software
             }
 
             ViewStateUserKey = Session.SessionID;
-            vista = Request.QueryString["vista"] ?? "cuentas";
+            if (!string.IsNullOrEmpty(Request.QueryString["cuenta"]))
+                vista = "cuentas";
+            else
+                vista = Request.QueryString["vista"] ?? "resumen";
+
+            bool esResumen = string.Equals(vista, "resumen", StringComparison.OrdinalIgnoreCase);
+            pnlResumenContabilidad.Visible = esResumen;
+            pnlVistaContabilidad.Visible = !esResumen;
+            Page.Title = esResumen ? "Resumen de Contabilidad" : "Gestión de Contabilidad";
+
+            if (esResumen) return;
+
             try
             {
                 CrearFormulario();
@@ -121,7 +133,7 @@ namespace trabajo_ing_software
                     Texto("Codigo", "Código", 50);
                     Texto("Nombre", "Nombre", 100);
                     var tipo = Lista("Tipo", "Tipo de cuenta");
-                    foreach (string valor in new[] { "Activo", "Pasivo", "Patrimonio", "Ingreso", "Costo", "Gasto" })
+                    foreach (string valor in new[] { "Activo", "Pasivo", "Patrimonio", "Ingreso", "Costo", "Gasto", "Resultado Ganancia", "Resultado Pérdida" })
                         tipo.Items.Add(valor);
                     var padre = Lista("Padre", "Cuenta superior");
                     padre.DataSource = ContabilidadDatos.Consultar("SELECT IdCuentaContable AS Id, CONCAT(Codigo,' · ',Nombre) AS Nombre FROM cuentacontable WHERE Imputable=0 ORDER BY Codigo");
@@ -134,20 +146,31 @@ namespace trabajo_ing_software
                     imputable.Items.Add(new ListItem("No, agrupa otras cuentas", "0"));
                     if (int.TryParse(Request.QueryString["cuenta"], out cuentaEditada) && cuentaEditada > 0)
                     {
+                        Titulo.Text = "Plan de cuentas · Editando cuenta #" + cuentaEditada;
                         padre.Enabled = false;
-                        Boton("Guardar cuenta", EditarCuenta);
+                        Boton("Guardar cambios", EditarCuenta);
+                        var btnCancelar = new HyperLink
+                        {
+                            Text = "Cancelar",
+                            NavigateUrl = "~/Contabilidad.aspx?vista=cuentas",
+                            CssClass = "btn btn-outline-secondary contabilidad-accion"
+                        };
+                        Formulario.Controls.Add(btnCancelar);
                         if (!IsPostBack) CargarCuenta();
                     }
                     else
                     {
                         Boton("Crear cuenta", CrearCuenta);
                     }
-                    Registros.Columns.Add(new HyperLinkField
+                    var colEditar = new HyperLinkField
                     {
+                        HeaderText = "Acción",
                         Text = "Editar",
                         DataNavigateUrlFields = new[] { "Id" },
-                        DataNavigateUrlFormatString = "?vista=cuentas&cuenta={0}"
-                    });
+                        DataNavigateUrlFormatString = "Contabilidad.aspx?vista=cuentas&cuenta={0}"
+                    };
+                    colEditar.ControlStyle.CssClass = "btn btn-outline-secondary btn-sm";
+                    Registros.Columns.Add(colEditar);
                     break;
             }
         }
@@ -274,18 +297,23 @@ namespace trabajo_ing_software
             ((TextBox)campos["Nombre"]).Text = Convert.ToString(cuenta["Nombre"]);
             var tipos = (DropDownList)campos["Tipo"];
             string tipo = Convert.ToString(cuenta["Tipo"]);
-            if (tipos.Items.FindByValue(tipo) != null) tipos.SelectedValue = tipo;
+            if (!string.IsNullOrEmpty(tipo) && tipos.Items.FindByValue(tipo) == null)
+                tipos.Items.Add(new ListItem(tipo, tipo));
+            if (tipos.Items.FindByValue(tipo) != null)
+                tipos.SelectedValue = tipo;
             var padres = (DropDownList)campos["Padre"];
-            string padre = Convert.ToString(cuenta["IdCuentaPadre"]);
-            if (padres.Items.FindByValue(padre) != null) padres.SelectedValue = padre;
-            ((DropDownList)campos["Imputable"]).SelectedValue = Convert.ToBoolean(cuenta["Imputable"]) ? "1" : "0";
+            string padre = cuenta["IdCuentaPadre"] == DBNull.Value ? "" : Convert.ToString(cuenta["IdCuentaPadre"]);
+            if (padres.Items.FindByValue(padre) != null)
+                padres.SelectedValue = padre;
+            bool esImputable = cuenta["Imputable"] == DBNull.Value || Convert.ToInt32(cuenta["Imputable"]) != 0;
+            ((DropDownList)campos["Imputable"]).SelectedValue = esImputable ? "1" : "0";
         }
 
         private void EditarCuenta()
         {
             ContabilidadDatos.EditarCuenta(cuentaEditada, Obligatorio("Codigo", 50),
                 Obligatorio("Nombre", 100), Valor("Tipo"), Valor("Imputable") == "1");
-            Mostrar("Cuenta actualizada.", true);
+            Mostrar("Cuenta contable actualizada correctamente.", true);
         }
 
         private void CerrarPeriodo()
@@ -350,6 +378,11 @@ namespace trabajo_ing_software
         {
             base.OnPreRender(e);
             if (!autorizado) return;
+            if (string.Equals(vista, "resumen", StringComparison.OrdinalIgnoreCase))
+            {
+                CargarResumenContabilidad();
+                return;
+            }
             try
             {
                 Registros.DataSource = ObtenerRegistros();
@@ -360,6 +393,84 @@ namespace trabajo_ing_software
             catch (MySqlException ex) { ErrorSql(ex); }
             catch (System.Data.Common.DbException ex) { ErrorInventario(ex); }
             catch (InvalidOperationException ex) when (vista == "inventario") { ErrorInventario(ex); }
+        }
+
+        private void CargarResumenContabilidad()
+        {
+            try
+            {
+                var cultura = new CultureInfo("es-CL");
+                DataTable dt = ContabilidadDatos.Consultar(@"
+                    SELECT
+                        COALESCE((SELECT COUNT(*) FROM cuentacontable), 0) AS Cuentas,
+                        COALESCE((SELECT COUNT(*) FROM asientocontable), 0) AS Asientos,
+                        COALESCE((SELECT SUM(cp.Monto - COALESCE((SELECT SUM(p.Monto) FROM pagoproveedor p WHERE p.IdCuentaPagar = cp.IdCuentaPagar), 0)) FROM cuentaporpagar cp WHERE COALESCE(cp.Estado,'Pendiente') <> 'Pagada'), 0) AS TotalCxP,
+                        COALESCE((SELECT SUM(MontoPendiente) FROM cuentascobrar WHERE COALESCE(EstadoPago,'Pendiente') <> 'Pagado'), 0) AS TotalCxC");
+                if (dt.Rows.Count > 0)
+                {
+                    DataRow r = dt.Rows[0];
+                    litContCuentas.Text = Convert.ToInt32(r["Cuentas"]).ToString("N0", cultura);
+                    litContAsientos.Text = Convert.ToInt32(r["Asientos"]).ToString("N0", cultura);
+                    litContCxP.Text = Convert.ToDecimal(r["TotalCxP"]).ToString("C0", cultura);
+                    litContCxC.Text = Convert.ToDecimal(r["TotalCxC"]).ToString("C0", cultura);
+                }
+
+                // Gráfico de 6 meses de movimientos contables
+                DateTime hoy = DateTime.Today;
+                DateTime mes = new DateTime(hoy.Year, hoy.Month, 1);
+                DateTime primero = mes.AddMonths(-5);
+                var datosMeses = ContabilidadDatos.Consultar(@"
+                    SELECT EXTRACT(YEAR_MONTH FROM a.Fecha) AS Mes, COALESCE(SUM(d.Debe), 0) AS Total
+                    FROM asientocontable a
+                    LEFT JOIN detalleasiento d ON d.IdAsiento = a.IdAsiento
+                    WHERE a.Fecha >= @Inicio AND a.Fecha < @Fin
+                    GROUP BY EXTRACT(YEAR_MONTH FROM a.Fecha)",
+                    new MySqlParameter("@Inicio", primero),
+                    new MySqlParameter("@Fin", mes.AddMonths(1)));
+                var totales = datosMeses.AsEnumerable().ToDictionary(
+                    fila => Convert.ToInt32(fila["Mes"]),
+                    fila => Convert.ToDecimal(fila["Total"]));
+                decimal maximo = totales.Count == 0 ? 0 : totales.Values.Max();
+                rptMesesContabilidad.DataSource = Enumerable.Range(0, 6).Select(indice =>
+                {
+                    DateTime fecha = primero.AddMonths(indice);
+                    totales.TryGetValue(fecha.Year * 100 + fecha.Month, out decimal valor);
+                    return new
+                    {
+                        Mes = fecha.ToString("MMM", cultura),
+                        Importe = valor.ToString("C0", cultura),
+                        Altura = maximo > 0 ? Math.Round(valor / maximo * 100).ToString(CultureInfo.InvariantCulture) : "0"
+                    };
+                }).ToList();
+                rptMesesContabilidad.DataBind();
+                lblSinAsientosMes.Visible = maximo <= 0;
+
+                // Últimos 5 asientos del libro diario
+                var recientes = ContabilidadDatos.Consultar(@"
+                    SELECT a.IdAsiento,
+                           DATE_FORMAT(a.Fecha, '%d-%m-%Y') AS Fecha,
+                           a.Glosa,
+                           COALESCE(SUM(d.Debe), 0) AS TotalDebe
+                    FROM asientocontable a
+                    LEFT JOIN detalleasiento d ON d.IdAsiento = a.IdAsiento
+                    GROUP BY a.IdAsiento, a.Fecha, a.Glosa
+                    ORDER BY a.Fecha DESC, a.IdAsiento DESC
+                    LIMIT 5");
+                recientes.Columns.Add("Importe", typeof(string));
+                foreach (DataRow fila in recientes.Rows)
+                    fila["Importe"] = Convert.ToDecimal(fila["TotalDebe"]).ToString("C0", cultura);
+                gvAsientosRecientes.DataSource = recientes;
+                gvAsientosRecientes.DataBind();
+                if (gvAsientosRecientes.HeaderRow != null)
+                    gvAsientosRecientes.HeaderRow.TableSection = TableRowSection.TableHeader;
+            }
+            catch
+            {
+                litContCuentas.Text = "0";
+                litContAsientos.Text = "0";
+                litContCxP.Text = "$0";
+                litContCxC.Text = "$0";
+            }
         }
 
         private DataTable ObtenerRegistros()

@@ -76,5 +76,14 @@ namespace trabajo_ing_software
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.GridView gvInventario;
+        protected global::System.Web.UI.WebControls.Panel pnlResumenInventario;
+        protected global::System.Web.UI.WebControls.Panel pnlExistenciasInventario;
+        protected global::System.Web.UI.WebControls.Repeater rptBarrasInventario;
+        protected global::System.Web.UI.WebControls.Label lblSinStockGrafico;
+        protected global::System.Web.UI.WebControls.GridView gvLotesRecientes;
+        protected global::System.Web.UI.WebControls.Literal litInvProductos;
+        protected global::System.Web.UI.WebControls.Literal litInvStockTotal;
+        protected global::System.Web.UI.WebControls.Literal litInvStockBajo;
+        protected global::System.Web.UI.WebControls.Literal litInvLotes;
     }
 }

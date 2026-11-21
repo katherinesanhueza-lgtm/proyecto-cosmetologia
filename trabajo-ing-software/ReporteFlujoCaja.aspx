@@ -108,17 +108,23 @@
             <div>
                 <p class="dashboard-etiqueta">M&Oacute;DULO DE CONTABILIDAD &bull; FLUJO DE CAJA BI</p>
                 <h1>Proyecci&oacute;n de Pagos a Laboratorios</h1>
-                <p class="dashboard-descripcion">Distribuci&oacute;n anal&iacute;tica de deuda pendiente en 4 tramos de vencimiento mediante agrupaci&oacute;n SQL (vencida, 30 d&iacute;as, 60 d&iacute;as y 90+ d&iacute;as).</p>
+                <p class="dashboard-descripcion">Distribuci&oacute;n anal&iacute;tica de deuda pendiente en 4 tramos de vencimiento (vencida, 30 d&iacute;as, 60 d&iacute;as y 90+ d&iacute;as).</p>
             </div>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <a href="CuentasPagar.aspx" class="btn btn-outline-secondary">Volver a Cuentas por Pagar</a>
-                <button type="button" onclick="exportarPDF();" class="btn btn-primary">Descargar PDF</button>
-                <asp:Button ID="btnExportarExcel" runat="server" Text="Exportar CSV" CssClass="btn btn-outline-secondary" OnClick="btnExportarExcel_Click" />
+                <a href="CuentasPagar.aspx" class="btn btn-outline-secondary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                    Volver a Cuentas por Pagar
+                </a>
+                <button type="button" onclick="exportarPDF();" class="btn btn-primary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                    Descargar PDF
+                </button>
+                <asp:Button ID="btnExportarExcel" runat="server" Text="Exportar Excel" CssClass="btn btn-outline-secondary" OnClick="btnExportarExcel_Click" />
             </div>
         </header>
 
-        <!-- KPIS DE LOS 4 TRAMOS DE FLUJO DE CAJA -->
-        <div class="kpi-row-4col">
+        <!-- KPIS DE LOS 4 TRAMOS DE FLUJO DE CAJA (SOLO PANTALLA, FUERA DEL PDF) -->
+        <div class="kpi-row-4col no-print">
             <div class="kpi-card-cont">
                 <div class="kpi-titulo">Deuda Vencida</div>
                 <div class="kpi-valor" style="color: #C0392B;"><asp:Label ID="lblKpiVencida" runat="server" Text="$0"></asp:Label></div>
@@ -142,7 +148,7 @@
         </div>
 
         <!-- BARRA DE FILTROS -->
-        <section class="card-dermocosmetica" style="padding: 20px 24px; margin-bottom: 24px;">
+        <section class="card-dermocosmetica no-print" style="padding: 20px 24px; margin-bottom: 24px;">
             <div class="flujo-filter-grid">
                 <div>
                     <label class="form-label fw-bold">Laboratorio / Proveedor</label>
@@ -272,15 +278,7 @@
 
         <script>
             function exportarPDF() {
-                var elemento = document.getElementById('reporte-imprimible');
-                var opt = {
-                    margin: [10, 10, 10, 10],
-                    filename: 'Reporte_Flujo_Caja_Laboratorios.pdf',
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true },
-                    jsPDF: { unit: 'mm', format: 'letter', orientation: 'landscape' }
-                };
-                html2pdf().set(opt).from(elemento).save();
+                window.dermoDescargarPDF('reporte-imprimible', 'Reporte_Flujo_Caja_Laboratorios.pdf');
             }
         </script>
     </div>

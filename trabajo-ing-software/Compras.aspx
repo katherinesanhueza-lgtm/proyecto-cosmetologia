@@ -7,9 +7,9 @@
     <div class="dashboard compras-resumen">
         <header class="dashboard-header">
             <div>
-                <p class="dashboard-etiqueta">Módulo de compras</p>
+                <p class="dashboard-etiqueta">MÓDULO DE COMPRAS &amp; SUMINISTROS &bull; RESUMEN EJECUTIVO</p>
                 <h1>Resumen de Compras</h1>
-                <p class="dashboard-descripcion">Seguimiento de órdenes, proveedores y recepciones.</p>
+                <p class="dashboard-descripcion">Seguimiento ejecutivo de órdenes de compra vigentes, laboratorios homologados y recepciones registradas en bodega.</p>
             </div>
         </header>
         <asp:PlaceHolder ID="Acceso" runat="server" Visible="false">

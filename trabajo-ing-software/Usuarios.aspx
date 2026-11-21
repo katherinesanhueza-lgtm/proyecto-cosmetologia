@@ -232,7 +232,7 @@
                 </div>
 
                 <p class="text-muted" style="font-size: 13px; line-height: 1.5; margin-bottom: 20px;">
-                    Administraci&oacute;n de los nombres institucionales registrados en <code>ConfiguracionGlobal</code>. Estos nombres figuran oficialmente al pie de las firmas en las &Oacute;rdenes de Compra, Gu&iacute;as de Recepci&oacute;n y Reportes.
+                    Administraci&oacute;n de los nombres institucionales de las jefaturas que figuran oficialmente al pie de las firmas en las &Oacute;rdenes de Compra, Gu&iacute;as de Recepci&oacute;n y Reportes.
                 </p>
 
                 <div class="form-group-dermo" style="margin-bottom: 16px;">

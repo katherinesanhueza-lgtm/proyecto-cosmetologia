@@ -21,7 +21,7 @@
         
         <header class="dashboard-header">
             <div>
-                <p class="dashboard-etiqueta">Módulo de ventas · Logística y distribución (RF-VEN-08)</p>
+                <p class="dashboard-etiqueta">Módulo de ventas · Logística y distribución</p>
                 <h1>Gestión y Control de Despachos</h1>
                 <p class="dashboard-descripcion">Programación de envíos, asignación de transportistas, seguimiento de ruta y registro de entregas.</p>
             </div>
@@ -83,7 +83,7 @@
         <!-- TARJETA 2: CONTROL DE ESTADOS Y REGISTRO DE ENTREGAS -->
         <section class="card-dermocosmetica">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2 style="margin: 0;">Seguimiento y Registro de Entregas (RF-VEN-08)</h2>
+                <h2 style="margin: 0;">Seguimiento y Registro de Entregas</h2>
                 <div class="d-flex align-items-center gap-2">
                     <label class="text-secondary small fw-bold mb-0">Filtrar por Estado:</label>
                     <asp:DropDownList ID="ddlFiltroEstado" runat="server" CssClass="form-select form-select-sm" AutoPostBack="true" OnSelectedIndexChanged="ddlFiltroEstado_SelectedIndexChanged" style="width:auto;">
@@ -115,20 +115,20 @@
                         <asp:BoundField DataField="Observaciones" HeaderText="Observaciones" NullDisplayText="—" />
                         <asp:TemplateField HeaderText="Acciones / Control de Ruta">
                             <ItemTemplate>
-                                <asp:LinkButton ID="btnPreparar" runat="server" CssClass="btn btn-outline-primary btn-sm me-1" 
+                                <asp:LinkButton ID="btnPreparar" runat="server" CssClass="btn btn-outline-secondary btn-sm me-1" 
                                     CommandName="CambiarEstado" CommandArgument='<%# Eval("IdDespacho") + "|En Preparacion" %>'
                                     Visible='<%# Eval("Estado").ToString() == "Pendiente" %>'>
-                                    📦 A Preparación
+                                    A Preparación
                                 </asp:LinkButton>
-                                <asp:LinkButton ID="btnRuta" runat="server" CssClass="btn btn-outline-info btn-sm me-1" 
+                                <asp:LinkButton ID="btnRuta" runat="server" CssClass="btn btn-outline-secondary btn-sm me-1" 
                                     CommandName="CambiarEstado" CommandArgument='<%# Eval("IdDespacho") + "|En Ruta" %>'
                                     Visible='<%# Eval("Estado").ToString() == "En Preparacion" %>'>
-                                    🚚 Enviar a Ruta
+                                    Enviar a Ruta
                                 </asp:LinkButton>
-                                <asp:LinkButton ID="btnEntregar" runat="server" CssClass="btn btn-success btn-sm me-1" 
+                                <asp:LinkButton ID="btnEntregar" runat="server" CssClass="btn btn-primary btn-sm me-1" 
                                     CommandName="RegistrarEntrega" CommandArgument='<%# Eval("IdDespacho") %>'
                                     Visible='<%# Eval("Estado").ToString() == "En Ruta" || Eval("Estado").ToString() == "En Preparacion" || Eval("Estado").ToString() == "Pendiente" %>'>
-                                    ✓ Registrar Entrega
+                                    Registrar Entrega
                                 </asp:LinkButton>
                                 <asp:LinkButton ID="btnCancelar" runat="server" CssClass="btn btn-outline-danger btn-sm" 
                                     CommandName="CambiarEstado" CommandArgument='<%# Eval("IdDespacho") + "|Cancelado" %>'

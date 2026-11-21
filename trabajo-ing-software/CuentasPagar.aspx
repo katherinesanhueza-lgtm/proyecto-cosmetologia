@@ -153,7 +153,10 @@
                 <p class="dashboard-descripcion">Listado por laboratorio y vencimiento, registro de pagos totales o parciales con asiento autom&aacute;tico y emisi&oacute;n de comprobantes.</p>
             </div>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <a href="ReporteFlujoCaja.aspx" class="btn btn-outline-secondary">Proyecci&oacute;n y Flujo de Caja (BI)</a>
+                <a href="ReporteFlujoCaja.aspx" class="btn btn-outline-secondary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    Proyecci&oacute;n y Flujo de Caja (BI)
+                </a>
                 <asp:Button ID="btnTogglePago" runat="server" Text="+ Registrar Pago" CssClass="btn btn-primary" OnClick="btnTogglePago_Click" />
             </div>
         </header>
@@ -376,7 +379,10 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                 <h3 style="margin: 0;">Comprobante Oficial de Egreso / Pago</h3>
                 <div style="display: flex; gap: 8px;">
-                    <button type="button" onclick="descargarReciboPDF();" class="btn btn-primary btn-sm">Descargar PDF</button>
+                    <button type="button" onclick="descargarReciboPDF();" class="btn btn-primary btn-sm">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                        Descargar PDF
+                    </button>
                     <asp:Button ID="btnCerrarRecibo" runat="server" Text="Cerrar" CssClass="btn btn-outline-secondary btn-sm" OnClick="btnCerrarRecibo_Click" CausesValidation="false" />
                 </div>
             </div>

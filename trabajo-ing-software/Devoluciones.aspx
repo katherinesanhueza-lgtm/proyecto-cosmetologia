@@ -1,7 +1,6 @@
 <%@ Page Title="Notas de Crédito y Devoluciones" Language="C#" MasterPageFile="~/Contabilidad.Master" AutoEventWireup="true" CodeBehind="Devoluciones.aspx.cs" Inherits="trabajo_ing_software.Devoluciones" ResponseEncoding="utf-8" %>
 
 <asp:Content ID="Estilos" ContentPlaceHolderID="EstilosPagina" runat="server">
-    <link href="<%: ResolveUrl("~/Content/ComprasResumen.css?v=1") %>" rel="stylesheet" />
     <style>
         .card-dermocosmetica h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 14px; }
         .card-dermocosmetica h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 12px; color: #24211e; }
@@ -12,6 +11,23 @@
         .badge-nc { background-color: #FDEDEC; color: #C0392B; padding: 4px 10px; border-radius: 12px; font-weight: 600; font-size: 12px; }
         .badge-reingreso-si { background-color: #E8F8F0; color: #27AE60; padding: 4px 10px; border-radius: 12px; font-weight: 600; font-size: 12px; }
         .badge-reingreso-no { background-color: #F8F9FA; color: #6C757D; padding: 4px 10px; border-radius: 12px; font-weight: 600; font-size: 12px; }
+        .chk-reingreso-wrap {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .chk-reingreso-box {
+            display: inline-flex;
+            align-items: center;
+            margin-top: 2px;
+        }
+        .chk-reingreso-box input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #796047;
+            cursor: pointer;
+            margin: 0;
+        }
     </style>
 </asp:Content>
 
@@ -80,18 +96,20 @@
                 </div>
             </div>
 
-            <!-- CONTROL DE REINGRESO AL INVENTARIO (RF-VEN-09) -->
-            <div class="mt-4 p-3" style="background-color: #faf8f5; border: 1px solid #e5e0d8; border-radius: 8px;">
+            <!-- CONTROL DE REINGRESO AL INVENTARIO -->
+            <div class="mt-4 p-3" style="background-color: #faf8f5; border: 1px solid #e5e0d8; border-radius: 10px;">
                 <h3 style="font-size: 1.05rem; font-weight: 600; margin-bottom: 12px; color: #24211e;">3. Reingreso al Inventario (Opcional)</h3>
                 <div class="row g-3 align-items-center">
                     <div class="col-md-6">
-                        <div class="form-check form-switch">
-                            <asp:CheckBox ID="chkReingresoInventario" runat="server" CssClass="form-check-input" Checked="true" AutoPostBack="true" OnCheckedChanged="chkReingresoInventario_CheckedChanged" />
-                            <label class="form-check-label" style="font-size: 0.875rem; font-weight: 500; color: #24211e;" for="<%= chkReingresoInventario.ClientID %>">
-                                Reingresar físicamente los productos devueltos a la bodega
-                            </label>
+                        <div class="chk-reingreso-wrap">
+                            <asp:CheckBox ID="chkReingresoInventario" runat="server" CssClass="chk-reingreso-box" Checked="true" AutoPostBack="true" OnCheckedChanged="chkReingresoInventario_CheckedChanged" />
+                            <div>
+                                <label style="font-size: 0.875rem; font-weight: 600; color: #24211e; cursor: pointer; display: block;" for="<%= chkReingresoInventario.ClientID %>">
+                                    Reingresar físicamente los productos devueltos a la bodega
+                                </label>
+                                <small class="text-muted d-block mt-1">Si está marcado, se incrementará el stock y se registrará un movimiento de inventario de entrada.</small>
+                            </div>
                         </div>
-                        <small class="text-muted d-block mt-1">Si está marcado, se incrementará el stock y se registrará un movimiento de inventario de entrada.</small>
                     </div>
                     <div class="col-md-6" id="secBodegaReingreso" runat="server">
                         <label class="form-label">Bodega de Destino</label>

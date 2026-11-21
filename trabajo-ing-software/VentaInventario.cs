@@ -201,7 +201,7 @@ namespace trabajo_ing_software
                 if (totalFinal > disponible)
                 {
                     throw new InvalidOperationException(
-                        $"Venta a crédito rechazada (RF-VEN-07): El monto (${totalFinal:N0}) supera el crédito disponible del cliente (${disponible:N0}). " +
+                        $"Venta a crédito rechazada: El monto (${totalFinal:N0}) supera el crédito disponible del cliente (${disponible:N0}). " +
                         $"Límite total: ${limiteCredito:N0}, Deuda no cancelada: ${deudaActual:N0}.");
                 }
             }

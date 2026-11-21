@@ -9,81 +9,24 @@
 
 namespace trabajo_ing_software
 {
-
-
     public partial class _Default
     {
-
-        /// <summary>
-        /// Control lblFecha.
-        /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnLogout;
         protected global::System.Web.UI.WebControls.Label lblFecha;
-
-        /// <summary>
-        /// Control lblProductos.
-        /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblComprasTotal;
+        protected global::System.Web.UI.WebControls.Label lblComprasDetalle;
+        protected global::System.Web.UI.WebControls.Label lblVentasTotal;
+        protected global::System.Web.UI.WebControls.Label lblVentasDetalle;
         protected global::System.Web.UI.WebControls.Label lblProductos;
-
-        /// <summary>
-        /// Control lblStockBajo.
-        /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblInventarioDetalle;
+        protected global::System.Web.UI.WebControls.Label lblContabilidadTotal;
+        protected global::System.Web.UI.WebControls.Label lblContabilidadDetalle;
         protected global::System.Web.UI.WebControls.Label lblStockBajo;
-
-        /// <summary>
-        /// Control lblBodegas.
-        /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblBodegas;
-
-        /// <summary>
-        /// Control pnlEstado.
-        /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblOperacionesCurso;
         protected global::System.Web.UI.WebControls.Panel pnlEstado;
-
-        /// <summary>
-        /// Control indicadorEstado.
-        /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
         protected global::System.Web.UI.HtmlControls.HtmlGenericControl indicadorEstado;
-
-        /// <summary>
-        /// Control lblEstadoSistema.
-        /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblEstadoSistema;
-
-        /// <summary>
-        /// Control lblDescripcionEstado.
-        /// </summary>
-        /// <remarks>
-        /// Campo generado automáticamente.
-        /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
-        /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblDescripcionEstado;
     }
 }

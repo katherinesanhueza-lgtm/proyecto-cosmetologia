@@ -220,5 +220,14 @@ namespace trabajo_ing_software
         /// Para modificarlo, mueva la declaración del campo del archivo del diseñador al archivo de código subyacente.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblMensajeVenta;
+        protected global::System.Web.UI.WebControls.Panel pnlResumenVentas;
+        protected global::System.Web.UI.WebControls.Panel pnlPuntoVenta;
+        protected global::System.Web.UI.WebControls.Repeater rptMesesVentas;
+        protected global::System.Web.UI.WebControls.Label lblSinVentasMes;
+        protected global::System.Web.UI.WebControls.GridView gvVentasRecientes;
+        protected global::System.Web.UI.WebControls.Literal litVentasMes;
+        protected global::System.Web.UI.WebControls.Literal litDocsEmitidos;
+        protected global::System.Web.UI.WebControls.Literal litPorDespachar;
+        protected global::System.Web.UI.WebControls.Literal litClientesActivos;
     }
 }

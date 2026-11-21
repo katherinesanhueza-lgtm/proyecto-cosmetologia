@@ -1,5 +1,4 @@
-﻿
-<%@ Page Title="Inventario" Language="C#"
+﻿<%@ Page Title="Resumen de Inventario" Language="C#"
     MasterPageFile="~/Contabilidad.Master"
     AutoEventWireup="true"
     CodeBehind="Inventario.aspx.cs"
@@ -9,170 +8,195 @@
     ContentPlaceHolderID="MainContent"
     runat="server">
 
-    <div class="dashboard">
+    <div class="dashboard compras-resumen">
 
-        <div class="dashboard-header">
-            <div>
-                <p class="dashboard-etiqueta">
-                    MÓDULO DE INVENTARIO
-                </p>
-
-                <h1>Gestión de Inventario</h1>
-
-                <p class="dashboard-descripcion">
-                    Consulta de productos, variantes y
-                    existencias registradas en el sistema.
-                </p>
+        <!-- PANTALLA 1: RESUMEN DE INVENTARIO (SEPARADA) -->
+        <asp:Panel ID="pnlResumenInventario" runat="server">
+            <div class="dashboard-header">
+                <div>
+                    <p class="dashboard-etiqueta">
+                        MÓDULO DE INVENTARIO
+                    </p>
+                    <h1>Resumen de Inventario</h1>
+                    <p class="dashboard-descripcion">
+                        Seguimiento de catálogo de productos, stock disponible por bodega, alertas y lotes con criterio FEFO.
+                    </p>
+                </div>
             </div>
-        </div>
 
-        <section class="dashboard-seccion">
+            <div class="compras-indicadores">
+                <section class="card-dermocosmetica compras-kpi">
+                    <h2>Productos activos</h2>
+                    <strong><asp:Literal ID="litInvProductos" runat="server" Mode="Encode" Text="0" /></strong>
+                    <span>Catálogo de productos habilitados</span>
+                </section>
+                <section class="card-dermocosmetica compras-kpi">
+                    <h2>Stock disponible</h2>
+                    <strong><asp:Literal ID="litInvStockTotal" runat="server" Mode="Encode" Text="0" /></strong>
+                    <span>Unidades físicas en bodegas</span>
+                </section>
+                <section class="card-dermocosmetica compras-kpi">
+                    <h2>Alertas de stock</h2>
+                    <strong><asp:Literal ID="litInvStockBajo" runat="server" Mode="Encode" Text="0" /></strong>
+                    <span>Variantes en nivel mínimo o crítico</span>
+                </section>
+                <section class="card-dermocosmetica compras-kpi">
+                    <h2>Lotes vigentes FEFO</h2>
+                    <strong><asp:Literal ID="litInvLotes" runat="server" Mode="Encode" Text="0" /></strong>
+                    <span>Lotes activos con control de caducidad</span>
+                </section>
+            </div>
 
-            <div class="card-dermocosmetica">
+            <div class="compras-paneles">
+                <section class="card-dermocosmetica" aria-labelledby="distribucion-inventario">
+                    <h2 id="distribucion-inventario">Existencias por producto</h2>
+                    <p class="compras-nota">Principales productos en stock · unidades disponibles</p>
+                    <div class="compras-grafico" role="list" aria-label="Unidades en stock por producto">
+                        <asp:Repeater ID="rptBarrasInventario" runat="server">
+                            <ItemTemplate>
+                                <div class="compras-mes" role="listitem">
+                                    <span class="compras-importe"><%#: Eval("Unidades") %></span>
+                                    <div class="compras-barra-espacio" aria-hidden="true"><span style='height: <%#: Eval("Altura") %>%'></span></div>
+                                    <span><%#: Eval("Etiqueta") %></span>
+                                </div>
+                            </ItemTemplate>
+                        </asp:Repeater>
+                    </div>
+                    <asp:Label ID="lblSinStockGrafico" runat="server" CssClass="compras-nota d-block mt-3" Visible="false"
+                        Text="Aún no hay existencias registradas en bodega." />
+                </section>
 
-                <h2>Productos en inventario</h2>
+                <section class="card-dermocosmetica" aria-labelledby="lotes-recientes">
+                    <h2 id="lotes-recientes">Lotes vigentes (FEFO)</h2>
+                    <p class="compras-nota">Próximos lotes según orden de vencimiento</p>
+                    <div class="table-responsive">
+                        <asp:GridView ID="gvLotesRecientes" runat="server" AutoGenerateColumns="false" GridLines="None"
+                            CssClass="table table-hover" EmptyDataText="No hay lotes vigentes registrados.">
+                            <Columns>
+                                <asp:BoundField DataField="NumeroLote" HeaderText="Lote" />
+                                <asp:BoundField DataField="Producto" HeaderText="Producto" />
+                                <asp:BoundField DataField="Vencimiento" HeaderText="Vence" />
+                                <asp:BoundField DataField="Disponible" HeaderText="Unid." />
+                            </Columns>
+                        </asp:GridView>
+                    </div>
+                    <a class="btn btn-outline-secondary" href="<%: ResolveUrl("~/Inventario.aspx?vista=existencias") %>">Ver existencias</a>
+                </section>
+            </div>
+        </asp:Panel>
 
-                <p>
-                    Consulta las existencias disponibles
-                    en las distintas bodegas.
-                </p>
+        <!-- PANTALLA 2: EXISTENCIAS DE INVENTARIO (SEPARADA) -->
+        <asp:Panel ID="pnlExistenciasInventario" runat="server" Visible="false">
+            <div class="dashboard-header">
+                <div>
+                    <p class="dashboard-etiqueta">
+                        MÓDULO DE INVENTARIO · EXISTENCIAS
+                    </p>
+                    <h1>Existencias en Bodega</h1>
+                    <p class="dashboard-descripcion">
+                        Consulta detallada de productos, variantes y existencias disponibles en las distintas bodegas.
+                    </p>
+                </div>
+            </div>
 
-                <!-- BUSCADOR Y FILTROS -->
-                <div class="row g-3 mb-4">
+            <section class="dashboard-seccion">
+                <div class="card-dermocosmetica">
+                    <h2>Productos en inventario</h2>
+                    <p>
+                        Filtra y consulta las existencias disponibles por SKU, bodega y estado de reposición.
+                    </p>
 
-                    <div class="col-md-4">
-                        <label for="txtBuscar" class="form-label">
-                            Buscar producto
-                        </label>
+                    <!-- BUSCADOR Y FILTROS -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label for="txtBuscar" class="form-label">
+                                Buscar producto
+                            </label>
+                            <asp:TextBox
+                                ID="txtBuscar"
+                                runat="server"
+                                CssClass="form-control"
+                                placeholder="Nombre o SKU"
+                                MaxLength="100">
+                            </asp:TextBox>
+                        </div>
 
-                        <asp:TextBox
-                            ID="txtBuscar"
-                            runat="server"
-                            CssClass="form-control"
-                            placeholder="Nombre o SKU"
-                            MaxLength="100">
-                        </asp:TextBox>
+                        <div class="col-md-3">
+                            <label class="form-label">
+                                Bodega
+                            </label>
+                            <asp:DropDownList
+                                ID="ddlBodega"
+                                runat="server"
+                                CssClass="form-select">
+                            </asp:DropDownList>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">
+                                Estado del stock
+                            </label>
+                            <asp:DropDownList
+                                ID="ddlEstado"
+                                runat="server"
+                                CssClass="form-select">
+                                <asp:ListItem Value="">Todos</asp:ListItem>
+                                <asp:ListItem Value="Disponible">Disponible</asp:ListItem>
+                                <asp:ListItem Value="Stock bajo">Stock bajo</asp:ListItem>
+                                <asp:ListItem Value="Sin stock">Sin stock</asp:ListItem>
+                            </asp:DropDownList>
+                        </div>
+
+                        <div class="col-md-2 d-flex align-items-end">
+                            <asp:Button
+                                ID="btnBuscar"
+                                runat="server"
+                                Text="Buscar"
+                                CssClass="btn btn-primary w-100"
+                                OnClick="btnBuscar_Click" />
+                        </div>
                     </div>
 
-                    <div class="col-md-3">
-                        <label class="form-label">
-                            Bodega
-                        </label>
-
-                        <asp:DropDownList
-                            ID="ddlBodega"
-                            runat="server"
-                            CssClass="form-select">
-                        </asp:DropDownList>
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label">
-                            Estado del stock
-                        </label>
-
-                        <asp:DropDownList
-                            ID="ddlEstado"
-                            runat="server"
-                            CssClass="form-select">
-
-                            <asp:ListItem Value="">
-                                Todos
-                            </asp:ListItem>
-
-                            <asp:ListItem Value="Disponible">
-                                Disponible
-                            </asp:ListItem>
-
-                            <asp:ListItem Value="Stock bajo">
-                                Stock bajo
-                            </asp:ListItem>
-
-                            <asp:ListItem Value="Sin stock">
-                                Sin stock
-                            </asp:ListItem>
-
-                        </asp:DropDownList>
-                    </div>
-
-                    <div class="col-md-2 d-flex align-items-end">
+                    <div class="mb-3">
                         <asp:Button
-                            ID="btnBuscar"
+                            ID="btnLimpiar"
                             runat="server"
-                            Text="Buscar"
-                            CssClass="btn btn-primary w-100"
-                            OnClick="btnBuscar_Click" />
+                            Text="Limpiar filtros"
+                            CssClass="btn btn-outline-secondary"
+                            OnClick="btnLimpiar_Click" />
                     </div>
 
-                </div>
-
-                <div class="mb-3">
-                    <asp:Button
-                        ID="btnLimpiar"
+                    <!-- MENSAJES -->
+                    <asp:Label
+                        ID="lblMensaje"
                         runat="server"
-                        Text="Limpiar filtros"
-                        CssClass="btn btn-outline-secondary"
-                        OnClick="btnLimpiar_Click" />
+                        EnableViewState="false"
+                        role="status">
+                    </asp:Label>
+
+                    <!-- TABLA DE INVENTARIO -->
+                    <div class="table-responsive">
+                        <asp:GridView
+                            ID="gvInventario"
+                            runat="server"
+                            AutoGenerateColumns="False"
+                            CssClass="table table-hover"
+                            GridLines="None"
+                            EmptyDataText="No se encontraron productos.">
+                            <Columns>
+                                <asp:BoundField DataField="Producto" HeaderText="Producto" />
+                                <asp:BoundField DataField="SKU" HeaderText="SKU" />
+                                <asp:BoundField DataField="Presentacion" HeaderText="Presentación" />
+                                <asp:BoundField DataField="Bodega" HeaderText="Bodega" />
+                                <asp:BoundField DataField="StockActual" HeaderText="Stock actual" />
+                                <asp:BoundField DataField="StockMinimo" HeaderText="Stock mínimo" />
+                                <asp:BoundField DataField="EstadoStock" HeaderText="Estado" />
+                            </Columns>
+                        </asp:GridView>
+                    </div>
                 </div>
-
-                <!-- MENSAJES -->
-                <asp:Label
-                    ID="lblMensaje"
-                    runat="server"
-                    EnableViewState="false"
-                    role="status">
-                </asp:Label>
-
-                <!-- TABLA DE INVENTARIO -->
-                <div class="table-responsive">
-
-                    <asp:GridView
-                        ID="gvInventario"
-                        runat="server"
-                        AutoGenerateColumns="False"
-                        CssClass="table table-hover"
-                        GridLines="None"
-                        EmptyDataText="No se encontraron productos.">
-
-                        <Columns>
-
-                            <asp:BoundField
-                                DataField="Producto"
-                                HeaderText="Producto" />
-
-                            <asp:BoundField
-                                DataField="SKU"
-                                HeaderText="SKU" />
-
-                            <asp:BoundField
-                                DataField="Presentacion"
-                                HeaderText="Presentación" />
-
-                            <asp:BoundField
-                                DataField="Bodega"
-                                HeaderText="Bodega" />
-
-                            <asp:BoundField
-                                DataField="StockActual"
-                                HeaderText="Stock actual" />
-
-                            <asp:BoundField
-                                DataField="StockMinimo"
-                                HeaderText="Stock mínimo" />
-
-                            <asp:BoundField
-                                DataField="EstadoStock"
-                                HeaderText="Estado" />
-
-                        </Columns>
-
-                    </asp:GridView>
-
-                </div>
-
-            </div>
-
-        </section>
+            </section>
+        </asp:Panel>
 
     </div>
 

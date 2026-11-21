@@ -20,36 +20,47 @@ namespace trabajo_ing_software
         {
             base.OnInit(e); if(Session["InventarioToken"]==null)Session["InventarioToken"]=Guid.NewGuid().ToString("N"); ViewStateUserKey=(string)Session["InventarioToken"];
             modulo=Request.QueryString["m"] ?? "productos";
-            Interfaz.Controls.Add(new LiteralControl("<div class='dashboard'><div class='dashboard-header'><div><p class='dashboard-etiqueta'>CONTROL DE INVENTARIO</p><h1>"+HttpUtility.HtmlEncode(Titulo())+"</h1></div></div>"));
+            Interfaz.Controls.Add(new LiteralControl("<div class='dashboard'><div class='dashboard-header'><div><p class='dashboard-etiqueta'>MÓDULO DE INVENTARIO &bull; CONTROL DE BODEGA</p><h1>"+HttpUtility.HtmlEncode(Titulo())+"</h1><p class='dashboard-descripcion'>"+HttpUtility.HtmlEncode(Descripcion())+"</p></div></div>"));
             mensaje=new Label{ID="mensaje",EnableViewState=false}; Interfaz.Controls.Add(mensaje);
-            Interfaz.Controls.Add(new LiteralControl("<section class='card-dermocosmetica gestion-formulario'>"));
+            Interfaz.Controls.Add(new LiteralControl("<section class='card-dermocosmetica contabilidad-formulario'>"));
             try { Crear(); }
             catch(Exception ex){MostrarError(ex);}
             Interfaz.Controls.Add(new LiteralControl("</section><section class='card-dermocosmetica mt-4'><div class='table-responsive'>"));
             tabla=new GridView{ID="tabla",AutoGenerateColumns=true,CssClass="table table-hover",GridLines=GridLines.None,EmptyDataText="No hay registros para los filtros seleccionados."};
             if(modulo=="productos" || modulo=="variantes" || modulo=="lotes")
-                tabla.Columns.Add(new HyperLinkField{Text="Editar",DataNavigateUrlFields=new[]{"Id"},DataNavigateUrlFormatString="Gestion.aspx?m="+modulo+"&id={0}"});
+            {
+                var colEd = new HyperLinkField{HeaderText="Acción",Text="Editar",DataNavigateUrlFields=new[]{"Id"},DataNavigateUrlFormatString="Gestion.aspx?m="+modulo+"&id={0}"};
+                colEd.ControlStyle.CssClass = "btn btn-outline-secondary btn-sm";
+                tabla.Columns.Add(colEd);
+            }
             Interfaz.Controls.Add(tabla); Interfaz.Controls.Add(new LiteralControl("</div></section></div>"));
         }
         string Titulo(){switch(modulo){case "productos":return "Productos y stock mínimo";case "variantes":return "Variantes y presentaciones";case "lotes":return "Lotes y vencimientos";case "movimientos":return "Entradas, salidas y ajustes";case "historial":return "Historial de movimientos";case "alertas":return "Alertas de inventario";default:return "Reportes de inventario";}}
+        string Descripcion(){switch(modulo){case "productos":return "Catálogo maestro de productos cosmecéuticos, categorías, marcas y umbrales mínimos de reposición.";case "variantes":return "Administración de presentaciones, códigos SKU únicos, volúmenes y formatos comerciales por producto.";case "lotes":return "Registro y seguimiento de lotes físicos por bodega con fechas de vencimiento bajo política FEFO.";case "movimientos":return "Registro transaccional de entradas, salidas, mermas y ajustes de inventario con respaldo en Kardex.";case "historial":return "Auditoría cronológica de todos los movimientos de inventario por lote, bodega y usuario responsable.";case "alertas":return "Monitoreo preventivo de productos con stock crítico y lotes próximos a vencer o vencidos.";default:return "Consulta y seguimiento general de existencias y control logístico de inventario.";}}
         void Texto(string id,string titulo,int longitud=100,string tipo="")
         {
-            var t=new TextBox{ID=id,MaxLength=longitud,CssClass="input-dermo"}; if(tipo!="")t.Attributes["type"]=tipo;
-            Interfaz.Controls.Add(new Label{Text=titulo,AssociatedControlID=id}); Interfaz.Controls.Add(t); campos[id]=t;
+            var t=new TextBox{ID=id,MaxLength=longitud,CssClass="form-control"}; if(tipo!="")t.Attributes["type"]=tipo;
+            var grp=new Panel{CssClass="contabilidad-campo"};
+            grp.Controls.Add(new Label{Text=titulo,AssociatedControlID=id,CssClass="form-label"}); grp.Controls.Add(t);
+            Interfaz.Controls.Add(grp); campos[id]=t;
         }
         void Lista(string id,string titulo,string sql,bool todos=false)
         {
-            var d=new DropDownList{ID=id,CssClass="input-dermo"};
-            Interfaz.Controls.Add(new Label{Text=titulo,AssociatedControlID=id});Interfaz.Controls.Add(d);campos[id]=d;
+            var d=new DropDownList{ID=id,CssClass="form-select"};
+            var grp=new Panel{CssClass="contabilidad-campo"};
+            grp.Controls.Add(new Label{Text=titulo,AssociatedControlID=id,CssClass="form-label"}); grp.Controls.Add(d);
+            Interfaz.Controls.Add(grp); campos[id]=d;
             d.DataSource=InventarioDatos.Tabla(sql);d.DataValueField="Id";d.DataTextField="Nombre";d.DataBind();
             if(todos)d.Items.Insert(0,new ListItem("Todos / sin especificar","0"));
         }
         void Opciones(string id,string titulo,params string[] opciones)
         {
-            var d=new DropDownList{ID=id,CssClass="input-dermo"};foreach(var o in opciones)d.Items.Add(o);
-            Interfaz.Controls.Add(new Label{Text=titulo,AssociatedControlID=id});Interfaz.Controls.Add(d);campos[id]=d;
+            var d=new DropDownList{ID=id,CssClass="form-select"};foreach(var o in opciones)d.Items.Add(o);
+            var grp=new Panel{CssClass="contabilidad-campo"};
+            grp.Controls.Add(new Label{Text=titulo,AssociatedControlID=id,CssClass="form-label"}); grp.Controls.Add(d);
+            Interfaz.Controls.Add(grp); campos[id]=d;
         }
-        void Boton(string texto,EventHandler accion){var b=new Button{Text=texto,CssClass="btn btn-primary m-2",CausesValidation=false};b.Click+=accion;Interfaz.Controls.Add(b);}
+        void Boton(string texto,EventHandler accion){var b=new Button{Text=texto,CssClass="btn btn-primary contabilidad-accion",CausesValidation=false};b.Click+=accion;Interfaz.Controls.Add(b);}
         string V(string id){var c=campos[id];return c is TextBox?((TextBox)c).Text.Trim():((DropDownList)c).SelectedValue;}
         int N(string id,int min=0){int n;if(!int.TryParse(V(id),out n)||n<min)throw new ArgumentException("Revisa el valor de "+id+" (mínimo "+min+").");return n;}
         object FK(string id){int n=N(id);return n==0?(object)null:n;}

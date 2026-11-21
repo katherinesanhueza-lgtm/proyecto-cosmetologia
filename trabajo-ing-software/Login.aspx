@@ -95,23 +95,20 @@
         <header class="top-header">
             <div class="brand-block">
                 <span class="brand-logo">Dermo ERP</span>
-                <span class="brand-sub">COSMETOLOG&Iacute;A PROFESIONAL</span>
+                <span class="brand-sub">SISTEMA DE GESTI&Oacute;N COSMEC&Eacute;UTICA</span>
             </div>
             <nav>
                 <ul class="nav-links-menu">
-                    <li><a href="#" class="nav-item-link active">Inicio</a></li>
-                    <li><a href="#" class="nav-item-link">Tratamientos</a></li>
-                    <li><a href="#" class="nav-item-link">Productos</a></li>
-                    <li><a href="#" class="nav-item-link">Nosotros</a></li>
-                    <li><a href="#" class="nav-item-link">Contacto</a></li>
+                    <li><span class="nav-item-link active">Portal de Acceso</span></li>
+                    <li><span class="nav-item-link">Compras</span></li>
+                    <li><span class="nav-item-link">Inventario</span></li>
+                    <li><span class="nav-item-link">Ventas</span></li>
+                    <li><span class="nav-item-link">Contabilidad</span></li>
                 </ul>
             </nav>
             <div class="header-actions">
-                <button type="button" class="header-icon-btn" title="Buscar">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                </button>
-                <button type="button" class="btn-header-agendar">Agendar Cita</button>
-                <div class="user-avatar-btn" title="Usuario">
+                <span class="pill-badge" style="font-size: 11px; padding: 6px 14px;">ERP Corporativo</span>
+                <div class="user-avatar-btn" title="Acceso de Usuario">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 </div>
             </div>
@@ -125,14 +122,14 @@
                 <div class="card-dermo-luxury" style="display: flex; flex-direction: column; justify-content: space-between;">
                     <div>
                         <div class="pill-badge" style="margin-bottom: 20px;">
-                            &bull; PORTAL EXCLUSIVO &middot; CLIENTES
+                            &bull; ACCESO CORPORATIVO &middot; SISTEMA ERP
                         </div>
 
                         <h1 style="font-size: 34px; margin-bottom: 10px;">
                             Ingreso al <em style="font-family:'Playfair Display', Georgia, serif; font-style: italic; color: var(--color-acento);">Portal</em>
                         </h1>
                         <p class="text-muted" style="line-height: 1.6; margin-bottom: 28px;">
-                            Bienvenido de nuevo. Acceda a sus tratamientos activos, citas cl&iacute;nicas y prescripciones cosmec&eacute;uticas personalizadas.
+                            Bienvenido de nuevo. Ingrese sus credenciales corporativas para acceder a la gesti&oacute;n de compras, inventario, ventas y contabilidad.
                         </p>
 
                         <!-- CAMPO CORREO -->
@@ -148,7 +145,6 @@
                         <div class="form-group-dermo">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                                 <label class="form-label-dermo" style="margin: 0;">CONTRASE&Ntilde;A</label>
-                                <a href="#" style="font-size: 12px; color: var(--color-texto-suave); text-decoration: none;">&iquest;Olvid&oacute; su clave?</a>
                             </div>
                             <div class="input-icon-wrapper">
                                 <svg class="field-icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
@@ -159,7 +155,7 @@
                         <!-- OPCIONES DE SESION -->
                         <div style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0 25px 0; font-size: 13px;">
                             <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--color-texto-suave);">
-                                <input type="checkbox" checked="checked" style="accent-color: var(--color-acento);" /> Recordar sesi&oacute;n m&eacute;dica
+                                <input type="checkbox" checked="checked" style="accent-color: var(--color-acento);" /> Recordar sesi&oacute;n activa
                             </label>
                             <span style="color: var(--color-texto-suave); font-size: 12px; display: flex; align-items: center; gap: 5px;">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
@@ -168,22 +164,16 @@
                         </div>
 
                         <!-- BOTON ACCESO -->
-                        <asp:Button ID="btnLogin" runat="server" Text="Ingresar →" CssClass="btn-dermo-primary" Width="100%" OnClick="btnLogin_Click" />
+                        <asp:Button ID="btnLogin" runat="server" Text="Ingresar al Sistema" CssClass="btn-dermo-primary" Width="100%" OnClick="btnLogin_Click" />
                         
                         <!-- MENSAJE DE ERROR O VALIDACION -->
                         <asp:Label ID="lblMensaje" runat="server" ForeColor="#C0392B" Font-Size="13px" style="display: block; margin-top: 14px; text-align: center; font-weight: 500;"></asp:Label>
-
-                        <div style="text-align: center; margin-top: 25px;">
-                            <a href="#" style="font-size: 12px; color: var(--color-acento); text-decoration: none; font-weight: 600;">
-                                &iquest;A&uacute;n no inici&oacute; su tratamiento profesional? Solicitar diagn&oacute;stico inicial
-                            </a>
-                        </div>
                     </div>
 
                     <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--color-borde-suave); padding-top: 18px; margin-top: 25px; font-size: 11px; color: var(--color-texto-suave);">
                         <span style="display: flex; align-items: center; gap: 6px;">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                            Protocolo de Confidencialidad M&eacute;dica
+                            Protocolo de Seguridad Corporativa
                         </span>
                         <span>v2.4 SECURE</span>
                     </div>
@@ -200,17 +190,17 @@
                     <!-- TARJETA FLOTANTE INFERIOR -->
                     <div class="floating-quote-card">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 11px; font-weight: 700; letter-spacing: 0.8px;">
-                            <span style="color: var(--color-acento);">01 &middot; PRINCIPIO ACTIVO</span>
-                            <span class="text-muted">Eficacia Comprobada</span>
+                            <span style="color: var(--color-acento);">01 &middot; GESTI&Oacute;N INTEGRAL</span>
+                            <span class="text-muted">Calidad Certificada</span>
                         </div>
                         <h3 style="font-size: 20px; line-height: 1.35; margin-bottom: 10px; color: var(--color-texto);">
-                            &ldquo;Ciencia, armon&iacute;a sensorial y resultados visibles en cada estrato cut&aacute;neo.&rdquo;
+                            &ldquo;Trazabilidad, precisi&oacute;n operativa y excelencia en cada proceso dermocosm&eacute;tico.&rdquo;
                         </h3>
                         <p class="text-muted" style="margin: 0 0 16px 0; line-height: 1.5; font-size: 12px;">
-                            Formulaciones biocompatibles dise&ntilde;adas meticulosamente bajo estrictos est&aacute;ndares de dermatolog&iacute;a restaurativa y alta cosm&eacute;tica biol&oacute;gica.
+                            Plataforma unificada para el control de abastecimiento internacional, lotes bajo criterio FEFO, distribuci&oacute;n comercial y balance financiero.
                         </p>
                         <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 600; color: var(--color-acento);">
-                            <span>L&iacute;nea Hidro-Nutritiva Bioactiva</span>
+                            <span>L&iacute;nea Dermocosm&eacute;tica Profesional</span>
                             <span style="color: var(--color-texto-suave); letter-spacing: 2px;">&bull;&bull;&bull;</span>
                         </div>
                     </div>
@@ -218,54 +208,60 @@
 
             </div>
 
-            <!-- CUADRICULA DE TARJETAS RESUMEN DE PROTOCOLO -->
+            <!-- CUADRICULA DE 4 TARJETAS RESUMEN DE MODULOS -->
             <div class="features-grid-4">
                 <div class="feature-card-item">
-                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(--color-texto-suave); margin-bottom: 6px;">01. PROTOCOLOS</div>
-                    <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: var(--color-texto); margin-bottom: 4px;">100%</div>
-                    <div class="text-muted" style="font-size: 11px;">Personalizados por fototipo</div>
+                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(--color-texto-suave); margin-bottom: 6px;">01. ABASTECIMIENTO</div>
+                    <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: var(--color-texto); margin-bottom: 4px;">Compras</div>
+                    <div class="text-muted" style="font-size: 11px;">Laboratorios, importaci&oacute;n y &oacute;rdenes</div>
                 </div>
 
                 <div class="feature-card-item">
-                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(--color-texto-suave); margin-bottom: 6px;">02. SEGUIMIENTO</div>
-                    <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: var(--color-texto); margin-bottom: 4px;">Digital</div>
-                    <div class="text-muted" style="font-size: 11px;">Historial dermo-cosm&eacute;tico</div>
+                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(--color-texto-suave); margin-bottom: 6px;">02. LOG&Iacute;STICA FEFO</div>
+                    <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: var(--color-texto); margin-bottom: 4px;">Inventario</div>
+                    <div class="text-muted" style="font-size: 11px;">Existencias por bodega y lotes</div>
                 </div>
 
                 <div class="feature-card-item">
-                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(--color-texto-suave); margin-bottom: 6px;">03. ASISTENCIA</div>
-                    <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: var(--color-texto); margin-bottom: 4px;">24 / 7</div>
-                    <div class="text-muted" style="font-size: 11px;">Equipo t&eacute;cnico profesional</div>
+                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(--color-texto-suave); margin-bottom: 6px;">03. COMERCIAL</div>
+                    <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: var(--color-texto); margin-bottom: 4px;">Ventas</div>
+                    <div class="text-muted" style="font-size: 11px;">Facturaci&oacute;n, clientes y despachos</div>
+                </div>
+
+                <div class="feature-card-item">
+                    <div style="font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(--color-texto-suave); margin-bottom: 6px;">04. FINANZAS</div>
+                    <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: var(--color-texto); margin-bottom: 4px;">Contabilidad</div>
+                    <div class="text-muted" style="font-size: 11px;">Libro diario, cuentas y flujo de caja</div>
                 </div>
             </div>
 
         </div>
 
-        <!-- FOOTER CLINICO OFICIAL -->
+        <!-- FOOTER CORPORATIVO OFICIAL -->
         <footer class="footer-dermo">
             <div class="footer-grid">
                 <div>
                     <div class="brand-logo" style="margin-bottom: 8px;">Dermo ERP</div>
                     <p class="text-muted" style="max-width: 340px; line-height: 1.6; margin-bottom: 14px;">
-                        Cosmetolog&iacute;a m&eacute;dica y alta est&eacute;tica avanzada. Rigor cient&iacute;fico, armon&iacute;a integral y formulaciones sensoriales de excelencia.
+                        Sistema integral de planificaci&oacute;n de recursos empresariales para la industria dermocosm&eacute;tica. Rigor operativo, trazabilidad y control financiero.
                     </p>
                     <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: var(--color-acento);">
-                        DERMATOLOG&Iacute;A &amp; CUIDADO DE LA PIEL
+                        GESTI&Oacute;N &amp; DISTRIBUCI&Oacute;N DERMOCOSM&Eacute;TICA
                     </div>
                 </div>
 
                 <div>
-                    <div style="font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 14px;">TRATAMIENTOS</div>
+                    <div style="font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 14px;">M&Oacute;DULOS ERP</div>
                     <ul style="list-style: none; padding: 0; margin: 0; font-size: 12px; line-height: 2.2;" class="text-muted">
-                        <li>Diagn&oacute;stico Cut&aacute;neo Digital</li>
-                        <li>Bioestimulaci&oacute;n Lum&iacute;nica</li>
-                        <li>Terapia Regenerativa Facial</li>
-                        <li>Protocolos Pre &amp; Post Quir&uacute;rgicos</li>
+                        <li>Compras y Proveedores</li>
+                        <li>Control de Inventario FEFO</li>
+                        <li>Punto de Venta y Despachos</li>
+                        <li>Contabilidad y Finanzas</li>
                     </ul>
                 </div>
 
                 <div>
-                    <div style="font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 14px;">COSMEC&Eacute;UTICA</div>
+                    <div style="font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 14px;">CAT&Aacute;LOGO</div>
                     <ul style="list-style: none; padding: 0; margin: 0; font-size: 12px; line-height: 2.2;" class="text-muted">
                         <li>S&eacute;rums Concentrados</li>
                         <li>Complejos Antioxidantes</li>
@@ -275,26 +271,26 @@
                 </div>
 
                 <div>
-                    <div style="font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 14px;">CL&Iacute;NICA CENTRAL</div>
+                    <div style="font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 14px;">CASA MATRIZ</div>
                     <div class="text-muted" style="font-size: 12px; line-height: 1.8;">
                         <div>Av. Libertador 4520, Piso 6</div>
-                        <div>Distrito M&eacute;dico Especializado</div>
-                        <div>clinica@dermoerp.cl</div>
-                        <div>+56 (11) 4890-3300</div>
+                        <div>Centro Empresarial Corporativo</div>
+                        <div>contacto@dermoerp.cl</div>
+                        <div>+56 (2) 2890-3300</div>
                         <div style="margin-top: 10px; color: var(--color-acento); font-weight: 600; display: flex; align-items: center; gap: 5px;">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            Certificaci&oacute;n Est&eacute;tica M&eacute;dica
+                            Est&aacute;ndar de Calidad GMP / ISO 22716
                         </div>
                     </div>
                 </div>
             </div>
 
             <div style="max-width: 1200px; margin: 35px auto 0 auto; padding-top: 20px; border-top: 1px solid var(--color-borde-suave); display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--color-texto-suave); flex-wrap: wrap; gap: 15px;">
-                <div>&copy; 2026 Dermo ERP &middot; Cosmetolog&iacute;a Profesional. Todos los derechos reservados.</div>
+                <div>&copy; 2026 Dermo ERP &middot; Sistema de Gesti&oacute;n Empresarial. Todos los derechos reservados.</div>
                 <div style="display: flex; gap: 20px;">
-                    <a href="#" style="color: inherit; text-decoration: none;">Privacidad M&eacute;dica</a>
-                    <a href="#" style="color: inherit; text-decoration: none;">T&eacute;rminos Cl&iacute;nicos</a>
-                    <a href="#" style="color: inherit; text-decoration: none;">Farmacovigilancia</a>
+                    <a href="#" style="color: inherit; text-decoration: none;">Privacidad Corporativa</a>
+                    <a href="#" style="color: inherit; text-decoration: none;">T&eacute;rminos de Uso</a>
+                    <a href="#" style="color: inherit; text-decoration: none;">Soporte T&eacute;cnico</a>
                 </div>
             </div>
         </footer>

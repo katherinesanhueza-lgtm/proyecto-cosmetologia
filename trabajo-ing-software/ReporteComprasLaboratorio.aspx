@@ -134,12 +134,12 @@
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
                         Descargar PDF
                     </button>
-                    <asp:Button ID="btnExportarExcel" runat="server" Text="Exportar CSV" CssClass="btn btn-outline-secondary" OnClick="btnExportarExcel_Click" />
+                    <asp:Button ID="btnExportarExcel" runat="server" Text="Exportar Excel" CssClass="btn btn-outline-secondary" OnClick="btnExportarExcel_Click" />
                 </div>
             </div>
 
-            <!-- KPIS -->
-            <div class="kpi-grid-4col">
+            <!-- KPIS (SOLO PANTALLA, FUERA DEL PDF) -->
+            <div class="kpi-grid-4col no-print">
                 <div class="kpi-card">
                     <div class="kpi-titulo">Inversi&oacute;n Total (c/ IVA)</div>
                     <div class="kpi-valor" style="font-size: 24px;"><asp:Label ID="lblKpiTotal" runat="server" Text="$0"></asp:Label></div>
@@ -166,7 +166,7 @@
             </div>
 
             <!-- FILTROS -->
-            <section class="filter-card card-dermocosmetica" aria-label="Filtros por laboratorio y marca">
+            <section class="filter-card card-dermocosmetica no-print" aria-label="Filtros por laboratorio y marca">
                 <div class="lab-filter-grid">
                     <div class="form-group-dermo" style="margin-bottom: 0;">
                         <asp:Label runat="server" CssClass="form-label" AssociatedControlID="txtFechaDesde">Fecha Desde</asp:Label>
@@ -302,15 +302,7 @@
         </div>
         <script>
         function exportarPDF() {
-            var elemento = document.getElementById('reporte-imprimible');
-            var opt = {
-                margin: [10, 10, 10, 10],
-                filename: 'Reporte_Compras_Laboratorio_Marca.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'mm', format: 'letter', orientation: 'landscape' }
-            };
-            html2pdf().set(opt).from(elemento).save();
+            window.dermoDescargarPDF('reporte-imprimible', 'Reporte_Compras_Laboratorio_Marca.pdf');
         }
         </script>
     </div>

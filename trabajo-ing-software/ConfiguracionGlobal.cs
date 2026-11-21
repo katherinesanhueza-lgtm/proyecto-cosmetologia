@@ -143,12 +143,17 @@ namespace trabajo_ing_software
             return (tasaFinal, fechaRetorno, sincronizado);
         }
 
-        private static decimal ObtenerTasaGuardada(string moneda)
+        private static decimal ObtenerTasaGuardada(string moneda)  //else if para agregar otra moneda
         {
             if (string.Equals(moneda, "EUR", StringComparison.OrdinalIgnoreCase))
             {
                 string valStr = ObtenerValor("TipoCambioEUR", "1020");
                 return decimal.TryParse(valStr.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal eur) ? eur : 1020m;
+            }
+            else if (string.Equals(moneda, "ARG", StringComparison.OrdinalIgnoreCase))
+            {
+                string valStr = ObtenerValor("TipoCambioARG", "0.95");
+                return decimal.TryParse(valStr.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal arg) ? arg : 0.95m;
             }
             else
             {

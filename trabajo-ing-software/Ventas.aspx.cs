@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
+using System.Linq;
 using System.Web.UI.WebControls;
 using MySql.Data.MySqlClient;
 
@@ -10,6 +12,19 @@ namespace trabajo_ing_software
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            bool esPos = string.Equals(Request.QueryString["vista"], "pos", StringComparison.OrdinalIgnoreCase)
+                || !string.IsNullOrEmpty(Request.QueryString["idCotizacion"]);
+
+            pnlResumenVentas.Visible = !esPos;
+            pnlPuntoVenta.Visible = esPos;
+            Page.Title = esPos ? "Punto de Venta" : "Resumen de Ventas";
+
+            if (!esPos)
+            {
+                CargarResumenVentas();
+                return;
+            }
+
             if (IsPostBack) return;
 
             CargarLista(ddlClientes, "SELECT IdCliente AS Id, Nombre FROM cliente ORDER BY Nombre", "Selecciona un cliente");
@@ -23,10 +38,84 @@ namespace trabajo_ing_software
                 ddlBodega.SelectedIndex = 1;
             }
 
-            // RF-VEN-02: Cargar cotización si proviene del botón "Convertir a Venta"
             if (!string.IsNullOrEmpty(Request.QueryString["idCotizacion"]) && int.TryParse(Request.QueryString["idCotizacion"], out int idCot))
             {
                 CargarDesdeCotizacion(idCot);
+            }
+        }
+
+        private void CargarResumenVentas()
+        {
+            try
+            {
+                var cultura = new CultureInfo("es-CL");
+                var dtResumen = VentaInventario.Consultar(@"
+                    SELECT 
+                        COALESCE((SELECT SUM(Total) FROM venta WHERE COALESCE(Estado,'Emitida') <> 'Anulada'), 0) AS TotalVentas,
+                        COALESCE((SELECT COUNT(*) FROM venta WHERE COALESCE(Estado,'Emitida') <> 'Anulada'), 0) AS CantVentas,
+                        COALESCE((SELECT COUNT(*) FROM despacho WHERE COALESCE(Estado,'Pendiente') <> 'Entregado'), 0) AS PorDespachar,
+                        COALESCE((SELECT COUNT(*) FROM cliente WHERE COALESCE(Activo,1) = 1), 0) AS ClientesActivos");
+
+                if (dtResumen.Rows.Count > 0)
+                {
+                    DataRow r = dtResumen.Rows[0];
+                    litVentasMes.Text = Convert.ToDecimal(r["TotalVentas"]).ToString("C0", cultura);
+                    litDocsEmitidos.Text = Convert.ToInt32(r["CantVentas"]).ToString("N0", cultura);
+                    litPorDespachar.Text = Convert.ToInt32(r["PorDespachar"]).ToString("N0", cultura);
+                    litClientesActivos.Text = Convert.ToInt32(r["ClientesActivos"]).ToString("N0", cultura);
+                }
+
+                // Gráfico de 6 meses
+                DateTime hoy = DateTime.Today;
+                DateTime mes = new DateTime(hoy.Year, hoy.Month, 1);
+                DateTime primero = mes.AddMonths(-5);
+                var datosMeses = VentaInventario.Consultar(@"
+                    SELECT EXTRACT(YEAR_MONTH FROM Fecha) AS Mes, COALESCE(SUM(Total), 0) AS Total
+                    FROM venta
+                    WHERE Fecha >= @p0 AND Fecha < @p1 AND COALESCE(Estado,'Emitida') <> 'Anulada'
+                    GROUP BY EXTRACT(YEAR_MONTH FROM Fecha)", primero, mes.AddMonths(1));
+                var totales = datosMeses.AsEnumerable().ToDictionary(
+                    fila => Convert.ToInt32(fila["Mes"]),
+                    fila => Convert.ToDecimal(fila["Total"]));
+                decimal maximo = totales.Count == 0 ? 0 : totales.Values.Max();
+                rptMesesVentas.DataSource = Enumerable.Range(0, 6).Select(indice =>
+                {
+                    DateTime fecha = primero.AddMonths(indice);
+                    totales.TryGetValue(fecha.Year * 100 + fecha.Month, out decimal valor);
+                    return new
+                    {
+                        Mes = fecha.ToString("MMM", cultura),
+                        Importe = valor.ToString("C0", cultura),
+                        Altura = maximo > 0 ? Math.Round(valor / maximo * 100).ToString(CultureInfo.InvariantCulture) : "0"
+                    };
+                }).ToList();
+                rptMesesVentas.DataBind();
+                lblSinVentasMes.Visible = maximo <= 0;
+
+                // Últimas 5 ventas
+                var recientes = VentaInventario.Consultar(@"
+                    SELECT COALESCE(v.Folio, CONCAT(COALESCE(v.TipoDocumento,'BOL'), '-', v.IdVenta)) AS Folio,
+                           c.Nombre AS Cliente,
+                           COALESCE(v.FormaPago, 'Contado') AS FormaPago,
+                           COALESCE(v.Total, 0) AS Total
+                    FROM venta v
+                    INNER JOIN cliente c ON c.IdCliente = v.IdCliente
+                    ORDER BY v.Fecha DESC, v.IdVenta DESC
+                    LIMIT 5");
+                recientes.Columns.Add("Importe", typeof(string));
+                foreach (DataRow fila in recientes.Rows)
+                    fila["Importe"] = Convert.ToDecimal(fila["Total"]).ToString("C0", cultura);
+                gvVentasRecientes.DataSource = recientes;
+                gvVentasRecientes.DataBind();
+                if (gvVentasRecientes.HeaderRow != null)
+                    gvVentasRecientes.HeaderRow.TableSection = TableRowSection.TableHeader;
+            }
+            catch
+            {
+                litVentasMes.Text = "$0";
+                litDocsEmitidos.Text = "0";
+                litPorDespachar.Text = "0";
+                litClientesActivos.Text = "0";
             }
         }
 
@@ -132,7 +221,7 @@ namespace trabajo_ing_software
 
             if (activo == 0)
             {
-                lblInfoCredito.Text = "<span class='badge-credito-alerta'>⚠️ Cliente Inactivo</span>";
+                lblInfoCredito.Text = "<span class='badge-credito-alerta'>Cliente Inactivo</span>";
                 return;
             }
 
@@ -149,7 +238,7 @@ namespace trabajo_ing_software
             if (limite > 0)
             {
                 string clase = disponible > 0 ? "badge-credito-ok" : "badge-credito-alerta";
-                lblInfoCredito.Text = $"<span class='{clase}'>💳 Línea de Crédito: ${limite:N0} | Deuda Vigente: ${deuda:N0} | Disponible: ${disponible:N0} (Plazo habitual: {dias} días)</span>";
+                lblInfoCredito.Text = $"<span class='{clase}'>Línea de Crédito: ${limite:N0} | Deuda Vigente: ${deuda:N0} | Disponible: ${disponible:N0} (Plazo habitual: {dias} días)</span>";
                 if (ddlPago.SelectedValue == "credito" && string.IsNullOrEmpty(txtVence.Text))
                 {
                     txtVence.Text = DateTime.Today.AddDays(dias > 0 ? dias : 30).ToString("yyyy-MM-dd");
@@ -203,12 +292,12 @@ namespace trabajo_ing_software
 
             if (disponible > 0)
             {
-                lblStockDisponible.Text = $"✓ Stock disponible en bodega: {disponible} unidad(es)";
+                lblStockDisponible.Text = $"Stock disponible en bodega: {disponible} unidad(es)";
                 lblStockDisponible.CssClass = "badge-stock";
             }
             else
             {
-                lblStockDisponible.Text = "⚠️ Sin stock disponible en esta bodega";
+                lblStockDisponible.Text = "Sin stock disponible en esta bodega";
                 lblStockDisponible.CssClass = "badge-credito-alerta";
             }
             return disponible;
@@ -229,14 +318,13 @@ namespace trabajo_ing_software
                 return;
             }
 
-            // RF-VEN-04: Validación de stock en tiempo real
             int stockDisponible = ConsultarStockTiempoReal();
             DataRow filaExistente = Carrito.Rows.Find(variante);
             int cantidadPrevia = filaExistente == null ? 0 : (int)filaExistente["Cantidad"];
 
             if (cantidad + cantidadPrevia > stockDisponible)
             {
-                Mostrar($"Stock insuficiente en bodega (RF-VEN-04): Disponible: {stockDisponible}, solicitado: {cantidad + cantidadPrevia}.", false);
+                Mostrar($"Stock insuficiente en bodega: Disponible: {stockDisponible}, solicitado: {cantidad + cantidadPrevia}.", false);
                 return;
             }
 
@@ -375,8 +463,9 @@ namespace trabajo_ing_software
                 txtDescuento.Text = "0";
                 pnlCotizacionInfo.Visible = false;
                 ViewState["IdCotizacionOrigen"] = null;
+                CargarResumenVentas();
 
-                Mostrar($"¡{tipoDoc} emitida exitosamente bajo N° {venta}! Se aplicó descuento FEFO y la integración contable automática.", true);
+                Mostrar($"{tipoDoc} emitida exitosamente bajo N° {venta}. Se aplicó descuento FEFO y la integración contable automática.", true);
             }
             catch (InvalidOperationException ex)
             {

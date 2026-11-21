@@ -230,7 +230,7 @@ namespace trabajo_ing_software
                         txtLimiteCredito.Text = reader["LimiteCredito"].ToString();
                         txtDiasCredito.Text = reader["DiasCredito"].ToString();
 
-                        lblTituloForm.InnerText = "✏️ Modificar Cliente (ID: " + hfIdCliente.Value + ")";
+                        lblTituloForm.InnerText = "Modificar Cliente (ID: " + hfIdCliente.Value + ")";
                         btnGuardar.Text = "Guardar Cambios";
                         btnCancelar.Visible = true;
                         lblMensaje.Text = "";

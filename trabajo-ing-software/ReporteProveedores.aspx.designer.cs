@@ -130,5 +130,8 @@ namespace trabajo_ing_software
         protected global::System.Web.UI.WebControls.Label lblFirmaCompras;
         protected global::System.Web.UI.WebControls.Label lblFirmaVentas;
         protected global::System.Web.UI.WebControls.Label lblFirmaInventario;
+        protected global::System.Web.UI.WebControls.TextBox txtFechaDesde;
+        protected global::System.Web.UI.WebControls.TextBox txtFechaHasta;
+        protected global::System.Web.UI.WebControls.Label lblPeriodoReporte;
     }
 }
