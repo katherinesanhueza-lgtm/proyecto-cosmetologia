@@ -19,13 +19,19 @@
 <asp:Content ID="Contenido" ContentPlaceHolderID="MainContent" runat="server">
     <div class="dashboard compras-resumen">
         
-        <header class="dashboard-header">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
             <div>
-                <p class="dashboard-etiqueta">Módulo de ventas · Logística y distribución</p>
-                <h1>Gestión y Control de Despachos</h1>
-                <p class="dashboard-descripcion">Programación de envíos, asignación de transportistas, seguimiento de ruta y registro de entregas.</p>
+                <span class="pill-badge" style="font-size: 10px; padding: 4px 12px; margin-bottom: 8px;">M&Oacute;DULO DE VENTAS - LOG&Iacute;STICA Y DISTRIBUCI&Oacute;N</span>
+                <h1>Gesti&oacute;n y Control de Despachos</h1>
+                <p class="text-muted" style="margin-top: 4px;">Programaci&oacute;n de env&iacute;os, asignaci&oacute;n de transportistas, seguimiento de ruta y registro de entregas.</p>
             </div>
-        </header>
+            <div class="compras-acciones">
+                <a href="ReporteVentas.aspx?tipo=2&amp;origen=despachos" class="btn btn-outline-secondary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                    Reporte Consolidado
+                </a>
+            </div>
+        </div>
 
         <!-- TARJETA 1: FORMULARIO DE PROGRAMACIÓN -->
         <section class="card-dermocosmetica" style="margin-bottom: 24px;">

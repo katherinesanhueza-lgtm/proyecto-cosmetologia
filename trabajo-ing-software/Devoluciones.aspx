@@ -34,13 +34,19 @@
 <asp:Content ID="Contenido" ContentPlaceHolderID="MainContent" runat="server">
     <div class="dashboard compras-resumen">
         
-        <header class="dashboard-header">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
             <div>
-                <p class="dashboard-etiqueta">Módulo de ventas · Devoluciones y notas de crédito</p>
-                <h1>Notas de Crédito y Devoluciones</h1>
-                <p class="dashboard-descripcion">Emisión de notas de crédito totales o parciales con opción de reingreso al inventario.</p>
+                <span class="pill-badge" style="font-size: 10px; padding: 4px 12px; margin-bottom: 8px;">M&Oacute;DULO DE VENTAS - POSTVENTA Y CALIDAD</span>
+                <h1>Notas de Cr&eacute;dito y Devoluciones</h1>
+                <p class="text-muted" style="margin-top: 4px;">Emisi&oacute;n de notas de cr&eacute;dito totales o parciales con opci&oacute;n de reingreso al inventario.</p>
             </div>
-        </header>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <a href="ReporteVentas.aspx?tipo=4&amp;origen=devoluciones" class="btn btn-outline-secondary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    Reporte Vendedores y NC
+                </a>
+            </div>
+        </div>
 
         <!-- TARJETA 1: FORMULARIO -->
         <section class="card-dermocosmetica" style="margin-bottom: 24px;">

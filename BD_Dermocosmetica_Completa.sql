@@ -2,14 +2,14 @@
 USE ERP_Dermocosmetica;
 -- MySQL dump 10.13  Distrib 8.0.46, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: erp_dermocosmetica
+-- Host: 127.0.0.1    Database: ERP_Dermocosmetica
 -- ------------------------------------------------------
 -- Server version	8.0.46
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8 */;
+/*!50503 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -22,38 +22,28 @@ USE ERP_Dermocosmetica;
 --
 
 DROP TABLE IF EXISTS `asientocontable`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `asientocontable` (
   `IdAsiento` int NOT NULL AUTO_INCREMENT,
   `IdPeriodo` int NOT NULL,
   `Fecha` date NOT NULL,
   `Glosa` varchar(255) DEFAULT NULL,
   `IdUsuario` int NOT NULL,
+  `IdAsientoRevertido` int DEFAULT NULL,
+  `FechaRegistro` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `Origen` varchar(20) DEFAULT NULL,
+  `IdOrigen` int DEFAULT NULL,
   PRIMARY KEY (`IdAsiento`),
   KEY `IdPeriodo` (`IdPeriodo`),
   KEY `IdUsuario` (`IdUsuario`),
   CONSTRAINT `asientocontable_ibfk_1` FOREIGN KEY (`IdPeriodo`) REFERENCES `periodocontable` (`IdPeriodo`),
   CONSTRAINT `asientocontable_ibfk_2` FOREIGN KEY (`IdUsuario`) REFERENCES `usuario` (`IdUsuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `asientocontable`
---
-
-LOCK TABLES `asientocontable` WRITE;
-/*!40000 ALTER TABLE `asientocontable` DISABLE KEYS */;
-/*!40000 ALTER TABLE `asientocontable` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `bodega`
 --
 
 DROP TABLE IF EXISTS `bodega`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `bodega` (
   `IdBodega` int NOT NULL AUTO_INCREMENT,
   `Nombre` varchar(100) NOT NULL,
@@ -61,24 +51,12 @@ CREATE TABLE `bodega` (
   `Activo` tinyint(1) DEFAULT '1',
   PRIMARY KEY (`IdBodega`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `bodega`
---
-
-LOCK TABLES `bodega` WRITE;
-/*!40000 ALTER TABLE `bodega` DISABLE KEYS */;
-/*!40000 ALTER TABLE `bodega` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `categoria`
 --
 
 DROP TABLE IF EXISTS `categoria`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `categoria` (
   `IdCategoria` int NOT NULL AUTO_INCREMENT,
   `Nombre` varchar(100) NOT NULL,
@@ -86,55 +64,39 @@ CREATE TABLE `categoria` (
   `Activo` tinyint(1) DEFAULT '1',
   PRIMARY KEY (`IdCategoria`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `categoria`
---
-
-LOCK TABLES `categoria` WRITE;
-/*!40000 ALTER TABLE `categoria` DISABLE KEYS */;
-/*!40000 ALTER TABLE `categoria` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `cliente`
 --
 
 DROP TABLE IF EXISTS `cliente`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cliente` (
   `IdCliente` int NOT NULL AUTO_INCREMENT,
   `Rut` varchar(20) NOT NULL,
   `Nombre` varchar(150) NOT NULL,
+  `RazonSocial` varchar(150) DEFAULT NULL,
   `Categoria` varchar(50) DEFAULT NULL,
+  `Giro` varchar(150) DEFAULT NULL,
+  `Direccion` varchar(200) DEFAULT NULL,
+  `Contacto` varchar(100) DEFAULT NULL,
   `Correo` varchar(100) DEFAULT NULL,
   `Telefono` varchar(30) DEFAULT NULL,
+  `LimiteCredito` decimal(18,2) NOT NULL DEFAULT '0.00',
+  `DiasCredito` int NOT NULL DEFAULT '0',
+  `Activo` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`IdCliente`),
   UNIQUE KEY `Rut` (`Rut`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `cliente`
---
-
-LOCK TABLES `cliente` WRITE;
-/*!40000 ALTER TABLE `cliente` DISABLE KEYS */;
-/*!40000 ALTER TABLE `cliente` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `cotizacion`
 --
 
 DROP TABLE IF EXISTS `cotizacion`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cotizacion` (
   `IdCotizacion` int NOT NULL AUTO_INCREMENT,
   `FechaEmision` date NOT NULL,
+  `FechaVencimiento` date DEFAULT NULL,
   `Estado` varchar(50) DEFAULT NULL,
   `Total` decimal(18,2) DEFAULT '0.00',
   `IdCliente` int NOT NULL,
@@ -146,24 +108,12 @@ CREATE TABLE `cotizacion` (
   CONSTRAINT `cotizacion_ibfk_2` FOREIGN KEY (`IdUsuario`) REFERENCES `usuario` (`IdUsuario`),
   CONSTRAINT `cotizacion_chk_1` CHECK ((`Estado` in (_utf8mb4'Vigente',_utf8mb4'Aceptado',_utf8mb4'Vencido',_utf8mb4'Rechazado')))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `cotizacion`
---
-
-LOCK TABLES `cotizacion` WRITE;
-/*!40000 ALTER TABLE `cotizacion` DISABLE KEYS */;
-/*!40000 ALTER TABLE `cotizacion` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `cotizaciondetalle`
 --
 
 DROP TABLE IF EXISTS `cotizaciondetalle`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cotizaciondetalle` (
   `IdCotizacionDetalle` int NOT NULL AUTO_INCREMENT,
   `IdCotizacion` int NOT NULL,
@@ -176,24 +126,12 @@ CREATE TABLE `cotizaciondetalle` (
   CONSTRAINT `cotizaciondetalle_ibfk_1` FOREIGN KEY (`IdCotizacion`) REFERENCES `cotizacion` (`IdCotizacion`),
   CONSTRAINT `cotizaciondetalle_ibfk_2` FOREIGN KEY (`IdVariante`) REFERENCES `varianteproducto` (`IdVariante`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `cotizaciondetalle`
---
-
-LOCK TABLES `cotizaciondetalle` WRITE;
-/*!40000 ALTER TABLE `cotizaciondetalle` DISABLE KEYS */;
-/*!40000 ALTER TABLE `cotizaciondetalle` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `cotizacionimportacion`
 --
 
 DROP TABLE IF EXISTS `cotizacionimportacion`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cotizacionimportacion` (
   `IdCotizacion` int NOT NULL AUTO_INCREMENT,
   `IdLaboratorio` int NOT NULL,
@@ -208,49 +146,28 @@ CREATE TABLE `cotizacionimportacion` (
   CONSTRAINT `cotizacionimportacion_ibfk_1` FOREIGN KEY (`IdLaboratorio`) REFERENCES `laboratorio` (`IdLaboratorio`),
   CONSTRAINT `cotizacionimportacion_ibfk_2` FOREIGN KEY (`IdUsuario`) REFERENCES `usuario` (`IdUsuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `cotizacionimportacion`
---
-
-LOCK TABLES `cotizacionimportacion` WRITE;
-/*!40000 ALTER TABLE `cotizacionimportacion` DISABLE KEYS */;
-/*!40000 ALTER TABLE `cotizacionimportacion` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `cuentacontable`
 --
 
 DROP TABLE IF EXISTS `cuentacontable`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cuentacontable` (
   `IdCuentaContable` int NOT NULL AUTO_INCREMENT,
   `Codigo` varchar(50) NOT NULL,
   `Nombre` varchar(100) NOT NULL,
   `Tipo` varchar(50) DEFAULT NULL,
+  `IdCuentaPadre` int DEFAULT NULL,
+  `Nivel` int NOT NULL DEFAULT '1',
+  `Imputable` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`IdCuentaContable`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `cuentacontable`
---
-
-LOCK TABLES `cuentacontable` WRITE;
-/*!40000 ALTER TABLE `cuentacontable` DISABLE KEYS */;
-/*!40000 ALTER TABLE `cuentacontable` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `cuentaporpagar`
 --
 
 DROP TABLE IF EXISTS `cuentaporpagar`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cuentaporpagar` (
   `IdCuentaPagar` int NOT NULL AUTO_INCREMENT,
   `IdRecepcion` int NOT NULL,
@@ -266,24 +183,12 @@ CREATE TABLE `cuentaporpagar` (
   CONSTRAINT `cuentaporpagar_ibfk_2` FOREIGN KEY (`IdLaboratorio`) REFERENCES `laboratorio` (`IdLaboratorio`),
   CONSTRAINT `cuentaporpagar_ibfk_3` FOREIGN KEY (`IdUsuario`) REFERENCES `usuario` (`IdUsuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `cuentaporpagar`
---
-
-LOCK TABLES `cuentaporpagar` WRITE;
-/*!40000 ALTER TABLE `cuentaporpagar` DISABLE KEYS */;
-/*!40000 ALTER TABLE `cuentaporpagar` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `cuentascobrar`
 --
 
 DROP TABLE IF EXISTS `cuentascobrar`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cuentascobrar` (
   `IdCuenta` int NOT NULL AUTO_INCREMENT,
   `IdVenta` int NOT NULL,
@@ -297,24 +202,12 @@ CREATE TABLE `cuentascobrar` (
   CONSTRAINT `cuentascobrar_ibfk_1` FOREIGN KEY (`IdVenta`) REFERENCES `venta` (`IdVenta`),
   CONSTRAINT `cuentascobrar_ibfk_2` FOREIGN KEY (`IdUsuario`) REFERENCES `usuario` (`IdUsuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `cuentascobrar`
---
-
-LOCK TABLES `cuentascobrar` WRITE;
-/*!40000 ALTER TABLE `cuentascobrar` DISABLE KEYS */;
-/*!40000 ALTER TABLE `cuentascobrar` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `declaracioniva`
 --
 
 DROP TABLE IF EXISTS `declaracioniva`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `declaracioniva` (
   `IdDeclaracionIVA` int NOT NULL AUTO_INCREMENT,
   `IdPeriodo` int NOT NULL,
@@ -327,30 +220,20 @@ CREATE TABLE `declaracioniva` (
   CONSTRAINT `declaracioniva_ibfk_1` FOREIGN KEY (`IdPeriodo`) REFERENCES `periodocontable` (`IdPeriodo`),
   CONSTRAINT `declaracioniva_ibfk_2` FOREIGN KEY (`IdUsuario`) REFERENCES `usuario` (`IdUsuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `declaracioniva`
---
-
-LOCK TABLES `declaracioniva` WRITE;
-/*!40000 ALTER TABLE `declaracioniva` DISABLE KEYS */;
-/*!40000 ALTER TABLE `declaracioniva` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `despacho`
 --
 
 DROP TABLE IF EXISTS `despacho`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `despacho` (
   `IdDespacho` int NOT NULL AUTO_INCREMENT,
   `IdVenta` int NOT NULL,
   `Estado` varchar(50) DEFAULT NULL,
   `FechaEstimada` date DEFAULT NULL,
+  `FechaEntrega` date DEFAULT NULL,
   `Tipo` varchar(50) DEFAULT NULL,
+  `Observaciones` varchar(255) DEFAULT NULL,
   `IdUsuario` int NOT NULL,
   PRIMARY KEY (`IdDespacho`),
   KEY `IdVenta` (`IdVenta`),
@@ -358,24 +241,12 @@ CREATE TABLE `despacho` (
   CONSTRAINT `despacho_ibfk_1` FOREIGN KEY (`IdVenta`) REFERENCES `venta` (`IdVenta`),
   CONSTRAINT `despacho_ibfk_2` FOREIGN KEY (`IdUsuario`) REFERENCES `usuario` (`IdUsuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `despacho`
---
-
-LOCK TABLES `despacho` WRITE;
-/*!40000 ALTER TABLE `despacho` DISABLE KEYS */;
-/*!40000 ALTER TABLE `despacho` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `detalleasiento`
 --
 
 DROP TABLE IF EXISTS `detalleasiento`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `detalleasiento` (
   `IdDetalleAsiento` int NOT NULL AUTO_INCREMENT,
   `IdAsiento` int NOT NULL,
@@ -388,24 +259,12 @@ CREATE TABLE `detalleasiento` (
   CONSTRAINT `detalleasiento_ibfk_1` FOREIGN KEY (`IdAsiento`) REFERENCES `asientocontable` (`IdAsiento`),
   CONSTRAINT `detalleasiento_ibfk_2` FOREIGN KEY (`IdCuentaContable`) REFERENCES `cuentacontable` (`IdCuentaContable`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `detalleasiento`
---
-
-LOCK TABLES `detalleasiento` WRITE;
-/*!40000 ALTER TABLE `detalleasiento` DISABLE KEYS */;
-/*!40000 ALTER TABLE `detalleasiento` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `detallecotizacion`
 --
 
 DROP TABLE IF EXISTS `detallecotizacion`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `detallecotizacion` (
   `IdDetalleCot` int NOT NULL AUTO_INCREMENT,
   `IdCotizacion` int NOT NULL,
@@ -418,24 +277,12 @@ CREATE TABLE `detallecotizacion` (
   CONSTRAINT `detallecotizacion_ibfk_1` FOREIGN KEY (`IdCotizacion`) REFERENCES `cotizacionimportacion` (`IdCotizacion`),
   CONSTRAINT `detallecotizacion_ibfk_2` FOREIGN KEY (`IdVariante`) REFERENCES `varianteproducto` (`IdVariante`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `detallecotizacion`
---
-
-LOCK TABLES `detallecotizacion` WRITE;
-/*!40000 ALTER TABLE `detallecotizacion` DISABLE KEYS */;
-/*!40000 ALTER TABLE `detallecotizacion` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `detalleordencompra`
 --
 
 DROP TABLE IF EXISTS `detalleordencompra`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `detalleordencompra` (
   `IdDetalleOC` int NOT NULL AUTO_INCREMENT,
   `IdOC` int NOT NULL,
@@ -449,24 +296,12 @@ CREATE TABLE `detalleordencompra` (
   CONSTRAINT `detalleordencompra_ibfk_1` FOREIGN KEY (`IdOC`) REFERENCES `ordencompra` (`IdOC`),
   CONSTRAINT `detalleordencompra_ibfk_2` FOREIGN KEY (`IdVariante`) REFERENCES `varianteproducto` (`IdVariante`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `detalleordencompra`
---
-
-LOCK TABLES `detalleordencompra` WRITE;
-/*!40000 ALTER TABLE `detalleordencompra` DISABLE KEYS */;
-/*!40000 ALTER TABLE `detalleordencompra` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `detallerecepcion`
 --
 
 DROP TABLE IF EXISTS `detallerecepcion`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `detallerecepcion` (
   `IdDetalleRec` int NOT NULL AUTO_INCREMENT,
   `IdRecepcion` int NOT NULL,
@@ -484,24 +319,12 @@ CREATE TABLE `detallerecepcion` (
   CONSTRAINT `detallerecepcion_ibfk_2` FOREIGN KEY (`IdDetalleOC`) REFERENCES `detalleordencompra` (`IdDetalleOC`),
   CONSTRAINT `detallerecepcion_ibfk_3` FOREIGN KEY (`IdVariante`) REFERENCES `varianteproducto` (`IdVariante`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `detallerecepcion`
---
-
-LOCK TABLES `detallerecepcion` WRITE;
-/*!40000 ALTER TABLE `detallerecepcion` DISABLE KEYS */;
-/*!40000 ALTER TABLE `detallerecepcion` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `devolucionproveedor`
 --
 
 DROP TABLE IF EXISTS `devolucionproveedor`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `devolucionproveedor` (
   `IdDevolucion` int NOT NULL AUTO_INCREMENT,
   `IdRecepcion` int NOT NULL,
@@ -519,24 +342,12 @@ CREATE TABLE `devolucionproveedor` (
   CONSTRAINT `devolucionproveedor_ibfk_2` FOREIGN KEY (`IdLote`) REFERENCES `lote` (`IdLote`),
   CONSTRAINT `devolucionproveedor_ibfk_3` FOREIGN KEY (`IdUsuario`) REFERENCES `usuario` (`IdUsuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `devolucionproveedor`
---
-
-LOCK TABLES `devolucionproveedor` WRITE;
-/*!40000 ALTER TABLE `devolucionproveedor` DISABLE KEYS */;
-/*!40000 ALTER TABLE `devolucionproveedor` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `inventario`
 --
 
 DROP TABLE IF EXISTS `inventario`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `inventario` (
   `IdInventario` int NOT NULL AUTO_INCREMENT,
   `IdVariante` int NOT NULL,
@@ -550,24 +361,12 @@ CREATE TABLE `inventario` (
   CONSTRAINT `inventario_ibfk_1` FOREIGN KEY (`IdVariante`) REFERENCES `varianteproducto` (`IdVariante`),
   CONSTRAINT `inventario_ibfk_2` FOREIGN KEY (`IdBodega`) REFERENCES `bodega` (`IdBodega`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `inventario`
---
-
-LOCK TABLES `inventario` WRITE;
-/*!40000 ALTER TABLE `inventario` DISABLE KEYS */;
-/*!40000 ALTER TABLE `inventario` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `laboratorio`
 --
 
 DROP TABLE IF EXISTS `laboratorio`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `laboratorio` (
   `IdLaboratorio` int NOT NULL AUTO_INCREMENT,
   `Rut` varchar(12) NOT NULL,
@@ -582,27 +381,16 @@ CREATE TABLE `laboratorio` (
   PRIMARY KEY (`IdLaboratorio`),
   UNIQUE KEY `Rut` (`Rut`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `laboratorio`
---
-
-LOCK TABLES `laboratorio` WRITE;
-/*!40000 ALTER TABLE `laboratorio` DISABLE KEYS */;
-/*!40000 ALTER TABLE `laboratorio` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `lote`
 --
 
 DROP TABLE IF EXISTS `lote`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `lote` (
   `IdLote` int NOT NULL AUTO_INCREMENT,
   `IdVariante` int NOT NULL,
+  `IdBodega` int DEFAULT NULL,
   `NumeroLote` varchar(50) NOT NULL,
   `FechaIngreso` date DEFAULT NULL,
   `FechaVencimiento` date DEFAULT NULL,
@@ -612,27 +400,16 @@ CREATE TABLE `lote` (
   `Estado` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`IdLote`),
   KEY `IdVariante` (`IdVariante`),
+  KEY `IdBodega` (`IdBodega`),
   CONSTRAINT `lote_ibfk_1` FOREIGN KEY (`IdVariante`) REFERENCES `varianteproducto` (`IdVariante`),
   CONSTRAINT `lote_chk_1` CHECK ((`Estado` in (_utf8mb4'Disponible',_utf8mb4'Cuarentena',_utf8mb4'Vencido',_utf8mb4'Agotado')))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `lote`
---
-
-LOCK TABLES `lote` WRITE;
-/*!40000 ALTER TABLE `lote` DISABLE KEYS */;
-/*!40000 ALTER TABLE `lote` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `marca`
 --
 
 DROP TABLE IF EXISTS `marca`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `marca` (
   `IdMarca` int NOT NULL AUTO_INCREMENT,
   `Nombre` varchar(100) NOT NULL,
@@ -640,24 +417,12 @@ CREATE TABLE `marca` (
   `Activo` tinyint(1) DEFAULT '1',
   PRIMARY KEY (`IdMarca`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `marca`
---
-
-LOCK TABLES `marca` WRITE;
-/*!40000 ALTER TABLE `marca` DISABLE KEYS */;
-/*!40000 ALTER TABLE `marca` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `merma`
 --
 
 DROP TABLE IF EXISTS `merma`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `merma` (
   `IdMerma` int NOT NULL AUTO_INCREMENT,
   `IdLote` int NOT NULL,
@@ -673,27 +438,16 @@ CREATE TABLE `merma` (
   CONSTRAINT `merma_ibfk_1` FOREIGN KEY (`IdLote`) REFERENCES `lote` (`IdLote`),
   CONSTRAINT `merma_ibfk_2` FOREIGN KEY (`IdUsuario`) REFERENCES `usuario` (`IdUsuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `merma`
---
-
-LOCK TABLES `merma` WRITE;
-/*!40000 ALTER TABLE `merma` DISABLE KEYS */;
-/*!40000 ALTER TABLE `merma` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `movimientoinventario`
 --
 
 DROP TABLE IF EXISTS `movimientoinventario`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `movimientoinventario` (
   `IdMovimiento` int NOT NULL AUTO_INCREMENT,
-  `IdLote` int NOT NULL,
+  `IdLote` int DEFAULT NULL,
+  `IdBodega` int DEFAULT NULL,
   `IdTipoMovimiento` int NOT NULL,
   `IdUsuario` int NOT NULL,
   `FechaMovimiento` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -702,32 +456,23 @@ CREATE TABLE `movimientoinventario` (
   `StockPosterior` int DEFAULT NULL,
   `Referencia` varchar(100) DEFAULT NULL,
   `Observacion` varchar(255) DEFAULT NULL,
+  `Origen` varchar(20) DEFAULT NULL,
+  `IdDetalleOrigen` int DEFAULT NULL,
   PRIMARY KEY (`IdMovimiento`),
   KEY `IdLote` (`IdLote`),
+  KEY `IdBodega` (`IdBodega`),
   KEY `IdTipoMovimiento` (`IdTipoMovimiento`),
   KEY `IdUsuario` (`IdUsuario`),
   CONSTRAINT `movimientoinventario_ibfk_1` FOREIGN KEY (`IdLote`) REFERENCES `lote` (`IdLote`),
   CONSTRAINT `movimientoinventario_ibfk_2` FOREIGN KEY (`IdTipoMovimiento`) REFERENCES `tipomovimiento` (`IdTipoMovimiento`),
   CONSTRAINT `movimientoinventario_ibfk_3` FOREIGN KEY (`IdUsuario`) REFERENCES `usuario` (`IdUsuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `movimientoinventario`
---
-
-LOCK TABLES `movimientoinventario` WRITE;
-/*!40000 ALTER TABLE `movimientoinventario` DISABLE KEYS */;
-/*!40000 ALTER TABLE `movimientoinventario` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `ordencompra`
 --
 
 DROP TABLE IF EXISTS `ordencompra`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ordencompra` (
   `IdOC` int NOT NULL AUTO_INCREMENT,
   `NumeroOC` varchar(20) NOT NULL,
@@ -750,24 +495,12 @@ CREATE TABLE `ordencompra` (
   CONSTRAINT `ordencompra_ibfk_3` FOREIGN KEY (`IdUsuario`) REFERENCES `usuario` (`IdUsuario`),
   CONSTRAINT `ordencompra_chk_1` CHECK ((`Estado` in (_utf8mb4'Borrador',_utf8mb4'Emitida',_utf8mb4'Parcial',_utf8mb4'Recibida',_utf8mb4'Anulada')))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `ordencompra`
---
-
-LOCK TABLES `ordencompra` WRITE;
-/*!40000 ALTER TABLE `ordencompra` DISABLE KEYS */;
-/*!40000 ALTER TABLE `ordencompra` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `pagoproveedor`
 --
 
 DROP TABLE IF EXISTS `pagoproveedor`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `pagoproveedor` (
   `IdPagoProveedor` int NOT NULL AUTO_INCREMENT,
   `IdCuentaPagar` int NOT NULL,
@@ -783,24 +516,12 @@ CREATE TABLE `pagoproveedor` (
   CONSTRAINT `pagoproveedor_ibfk_2` FOREIGN KEY (`IdAsiento`) REFERENCES `asientocontable` (`IdAsiento`),
   CONSTRAINT `pagoproveedor_ibfk_3` FOREIGN KEY (`IdUsuario`) REFERENCES `usuario` (`IdUsuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `pagoproveedor`
---
-
-LOCK TABLES `pagoproveedor` WRITE;
-/*!40000 ALTER TABLE `pagoproveedor` DISABLE KEYS */;
-/*!40000 ALTER TABLE `pagoproveedor` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `periodocontable`
 --
 
 DROP TABLE IF EXISTS `periodocontable`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `periodocontable` (
   `IdPeriodo` int NOT NULL AUTO_INCREMENT,
   `Nombre` varchar(50) NOT NULL,
@@ -809,24 +530,12 @@ CREATE TABLE `periodocontable` (
   `Estado` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`IdPeriodo`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `periodocontable`
---
-
-LOCK TABLES `periodocontable` WRITE;
-/*!40000 ALTER TABLE `periodocontable` DISABLE KEYS */;
-/*!40000 ALTER TABLE `periodocontable` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `producto`
 --
 
 DROP TABLE IF EXISTS `producto`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `producto` (
   `IdProducto` int NOT NULL AUTO_INCREMENT,
   `IdCategoria` int DEFAULT NULL,
@@ -842,24 +551,12 @@ CREATE TABLE `producto` (
   CONSTRAINT `producto_ibfk_1` FOREIGN KEY (`IdCategoria`) REFERENCES `categoria` (`IdCategoria`),
   CONSTRAINT `producto_ibfk_2` FOREIGN KEY (`IdMarca`) REFERENCES `marca` (`IdMarca`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `producto`
---
-
-LOCK TABLES `producto` WRITE;
-/*!40000 ALTER TABLE `producto` DISABLE KEYS */;
-/*!40000 ALTER TABLE `producto` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `recepcioncompra`
 --
 
 DROP TABLE IF EXISTS `recepcioncompra`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `recepcioncompra` (
   `IdRecepcion` int NOT NULL AUTO_INCREMENT,
   `IdOC` int NOT NULL,
@@ -873,48 +570,23 @@ CREATE TABLE `recepcioncompra` (
   CONSTRAINT `recepcioncompra_ibfk_1` FOREIGN KEY (`IdOC`) REFERENCES `ordencompra` (`IdOC`),
   CONSTRAINT `recepcioncompra_ibfk_2` FOREIGN KEY (`IdUsuario`) REFERENCES `usuario` (`IdUsuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `recepcioncompra`
---
-
-LOCK TABLES `recepcioncompra` WRITE;
-/*!40000 ALTER TABLE `recepcioncompra` DISABLE KEYS */;
-/*!40000 ALTER TABLE `recepcioncompra` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `rol`
 --
 
 DROP TABLE IF EXISTS `rol`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `rol` (
   `IdRol` int NOT NULL AUTO_INCREMENT,
   `Nombre` varchar(50) NOT NULL,
   PRIMARY KEY (`IdRol`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `rol`
---
-
-LOCK TABLES `rol` WRITE;
-/*!40000 ALTER TABLE `rol` DISABLE KEYS */;
-INSERT INTO `rol` VALUES (1,'Administrador'),(2,'Vendedor'),(3,'Comprador'),(4,'Bodeguero'),(5,'Contador');
-/*!40000 ALTER TABLE `rol` ENABLE KEYS */;
-UNLOCK TABLES;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Table structure for table `tipomovimiento`
 --
 
 DROP TABLE IF EXISTS `tipomovimiento`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tipomovimiento` (
   `IdTipoMovimiento` int NOT NULL AUTO_INCREMENT,
   `Nombre` varchar(100) NOT NULL,
@@ -922,24 +594,12 @@ CREATE TABLE `tipomovimiento` (
   `Descripcion` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`IdTipoMovimiento`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `tipomovimiento`
---
-
-LOCK TABLES `tipomovimiento` WRITE;
-/*!40000 ALTER TABLE `tipomovimiento` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tipomovimiento` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `usuario`
 --
 
 DROP TABLE IF EXISTS `usuario`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `usuario` (
   `IdUsuario` int NOT NULL AUTO_INCREMENT,
   `IdRol` int DEFAULT NULL,
@@ -952,26 +612,13 @@ CREATE TABLE `usuario` (
   UNIQUE KEY `Correo` (`Correo`),
   KEY `IdRol` (`IdRol`),
   CONSTRAINT `usuario_ibfk_1` FOREIGN KEY (`IdRol`) REFERENCES `rol` (`IdRol`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `usuario`
---
-
-LOCK TABLES `usuario` WRITE;
-/*!40000 ALTER TABLE `usuario` DISABLE KEYS */;
-INSERT INTO `usuario` VALUES (1,1,'Camilo Admin','admin@dermo.cl','1234','Administrador',1),(2,2,'Raul Martinez','raul1@dermo.cl','1234','Vendedor',1),(3,3,'Javiera Rail (Compras)','comprador@dermo.cl','1234','Comprador',1),(4,4,'Bodeguero Central','bodega@dermo.cl','1234','Bodeguero',1),(5,5,'Contador General','contador@dermo.cl','1234','Contador',1);
-/*!40000 ALTER TABLE `usuario` ENABLE KEYS */;
-UNLOCK TABLES;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Table structure for table `varianteproducto`
 --
 
 DROP TABLE IF EXISTS `varianteproducto`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `varianteproducto` (
   `IdVariante` int NOT NULL AUTO_INCREMENT,
   `IdProducto` int NOT NULL,
@@ -989,32 +636,27 @@ CREATE TABLE `varianteproducto` (
   KEY `IdProducto` (`IdProducto`),
   CONSTRAINT `varianteproducto_ibfk_1` FOREIGN KEY (`IdProducto`) REFERENCES `producto` (`IdProducto`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `varianteproducto`
---
-
-LOCK TABLES `varianteproducto` WRITE;
-/*!40000 ALTER TABLE `varianteproducto` DISABLE KEYS */;
-/*!40000 ALTER TABLE `varianteproducto` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `venta`
 --
 
 DROP TABLE IF EXISTS `venta`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `venta` (
   `IdVenta` int NOT NULL AUTO_INCREMENT,
   `TipoDocumento` varchar(50) NOT NULL,
+  `Folio` varchar(50) DEFAULT NULL,
   `Fecha` date NOT NULL,
+  `Neto` decimal(18,2) NOT NULL DEFAULT '0.00',
+  `Iva` decimal(18,2) NOT NULL DEFAULT '0.00',
+  `Descuento` decimal(18,2) NOT NULL DEFAULT '0.00',
   `Total` decimal(18,2) DEFAULT '0.00',
+  `FormaPago` varchar(50) NOT NULL DEFAULT 'Contado',
+  `Estado` varchar(30) NOT NULL DEFAULT 'Emitida',
   `IdCliente` int NOT NULL,
   `IdCotizacion` int DEFAULT NULL,
   `IdUsuario` int NOT NULL,
+  `IdVentaOrigen` int DEFAULT NULL,
   PRIMARY KEY (`IdVenta`),
   KEY `IdCliente` (`IdCliente`),
   KEY `IdCotizacion` (`IdCotizacion`),
@@ -1023,24 +665,12 @@ CREATE TABLE `venta` (
   CONSTRAINT `venta_ibfk_2` FOREIGN KEY (`IdCotizacion`) REFERENCES `cotizacion` (`IdCotizacion`),
   CONSTRAINT `venta_ibfk_3` FOREIGN KEY (`IdUsuario`) REFERENCES `usuario` (`IdUsuario`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `venta`
---
-
-LOCK TABLES `venta` WRITE;
-/*!40000 ALTER TABLE `venta` DISABLE KEYS */;
-/*!40000 ALTER TABLE `venta` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `ventadetalle`
 --
 
 DROP TABLE IF EXISTS `ventadetalle`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ventadetalle` (
   `IdVentaDetalle` int NOT NULL AUTO_INCREMENT,
   `IdVenta` int NOT NULL,
@@ -1054,207 +684,406 @@ CREATE TABLE `ventadetalle` (
   CONSTRAINT `ventadetalle_ibfk_1` FOREIGN KEY (`IdVenta`) REFERENCES `venta` (`IdVenta`),
   CONSTRAINT `ventadetalle_ibfk_2` FOREIGN KEY (`IdVariante`) REFERENCES `varianteproducto` (`IdVariante`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `ventadetalle`
---
-
-LOCK TABLES `ventadetalle` WRITE;
-/*!40000 ALTER TABLE `ventadetalle` DISABLE KEYS */;
-/*!40000 ALTER TABLE `ventadetalle` ENABLE KEYS */;
-UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
-
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
--- Dump completed on 2026-10-03 20:34:53
 
 -- =========================================================================
 -- TABLA: configuracionglobal (Parámetros dinámicos de IVA y Firmas)
 -- =========================================================================
-DROP TABLE IF EXISTS configuracionglobal;
-CREATE TABLE configuracionglobal (
-  IdConfiguracion int NOT NULL AUTO_INCREMENT,
-  Clave varchar(50) NOT NULL UNIQUE,
-  Valor varchar(255) NOT NULL,
-  Descripcion varchar(255) DEFAULT NULL,
-  FechaModificacion datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (IdConfiguracion)
+DROP TABLE IF EXISTS `configuracionglobal`;
+CREATE TABLE `configuracionglobal` (
+  `IdConfiguracion` int NOT NULL AUTO_INCREMENT,
+  `Clave` varchar(50) NOT NULL UNIQUE,
+  `Valor` varchar(255) NOT NULL,
+  `Descripcion` varchar(255) DEFAULT NULL,
+  `FechaModificacion` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`IdConfiguracion`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO configuracionglobal (Clave, Valor, Descripcion) VALUES 
+INSERT INTO `configuracionglobal` (`Clave`, `Valor`, `Descripcion`) VALUES 
 ('TasaIva', '0.19', 'Tasa general de IVA en Chile (RF-COM-04)'),
 ('NombreJefeCompras', 'Javiera Rail Astudillo', 'Firma oficial Jefatura de Compras'),
 ('NombreJefeVentas', 'Camilo Rodríguez Saldaña', 'Firma oficial Jefatura de Ventas'),
 ('NombreJefeInventario', 'Katherine Sanhueza Hernández', 'Firma oficial Jefatura de Bodega'),
 ('NombreContador', 'Contador General', 'Firma oficial Contabilidad y Comprobantes de Pago')
-ON DUPLICATE KEY UPDATE Valor = VALUES(Valor);
+ON DUPLICATE KEY UPDATE `Valor` = VALUES(`Valor`);
 
 -- =========================================================================
 -- SEED DATA: Roles del sistema (RBAC)
 -- =========================================================================
-INSERT INTO rol (IdRol, Nombre) VALUES 
+INSERT INTO `rol` (`IdRol`, `Nombre`) VALUES 
 (1, 'Administrador'),
 (2, 'Vendedor'),
 (3, 'Comprador'),
 (4, 'Bodeguero'),
 (5, 'Contador')
-ON DUPLICATE KEY UPDATE Nombre = VALUES(Nombre);
+ON DUPLICATE KEY UPDATE `Nombre` = VALUES(`Nombre`);
 
 -- =========================================================================
 -- SEED DATA: Usuarios con acceso a cada módulo (Password: 1234)
 -- =========================================================================
-INSERT INTO usuario (IdUsuario, IdRol, Nombre, Correo, Password, Rol, Activo) VALUES 
+INSERT INTO `usuario` (`IdUsuario`, `IdRol`, `Nombre`, `Correo`, `Password`, `Rol`, `Activo`) VALUES 
 (1, 1, 'Camilo Admin', 'admin@dermo.cl', '1234', 'Administrador', 1),
 (2, 2, 'Raul Martinez', 'raul1@dermo.cl', '1234', 'Vendedor', 1),
 (3, 3, 'Javiera Rail (Compras)', 'comprador@dermo.cl', '1234', 'Comprador', 1),
 (4, 4, 'Bodeguero Central', 'bodega@dermo.cl', '1234', 'Bodeguero', 1),
-(5, 5, 'Contador General', 'contador@dermo.cl', '1234', 'Contador', 1)
-ON DUPLICATE KEY UPDATE Password = VALUES(Password), Activo = VALUES(Activo);
+(5, 5, 'Contador General', 'contador@dermo.cl', '1234', 'Contador', 1),
+(6, 2, 'Valentina Rojas (Ventas)', 'vrojas@dermo.cl', '1234', 'Vendedor', 1)
+ON DUPLICATE KEY UPDATE `Password` = VALUES(`Password`), `Activo` = VALUES(`Activo`);
+
+-- =========================================================================
+-- SEED DATA: Bodegas de Almacenamiento y Despacho
+-- =========================================================================
+INSERT INTO `bodega` (`IdBodega`, `Nombre`, `Ubicacion`, `Activo`) VALUES
+(1, 'Bodega Central Santiago', 'Av. Américo Vespucio 1450, Quilicura, Santiago', 1),
+(2, 'Bodega Sucursal Providencia', 'Av. Providencia 2124, Local 4, Providencia, Santiago', 1),
+(3, 'Bodega Distribución Zona Sur', 'Av. Paicaví 1890, Concepción', 1)
+ON DUPLICATE KEY UPDATE `Nombre` = VALUES(`Nombre`), `Activo` = 1;
+
+-- =========================================================================
+-- SEED DATA: Tipos de Movimiento de Inventario
+-- =========================================================================
+INSERT INTO `tipomovimiento` (`IdTipoMovimiento`, `Nombre`, `Naturaleza`, `Descripcion`) VALUES
+(1, 'Entrada', 'Entrada', 'Recepción de compra'),
+(2, 'Salida', 'Salida', 'Salida por venta'),
+(3, 'Ajuste positivo', 'Entrada', 'Diferencia justificada de inventario'),
+(4, 'Ajuste negativo', 'Salida', 'Pérdida, daño o vencimiento justificado')
+ON DUPLICATE KEY UPDATE `Naturaleza` = VALUES(`Naturaleza`), `Descripcion` = VALUES(`Descripcion`);
 
 -- =========================================================================
 -- SEED DATA: Laboratorios y Proveedores
 -- =========================================================================
-INSERT INTO laboratorio (IdLaboratorio, Rut, RazonSocial, Marca, Pais, Contacto, Email, Telefono, DiasPago, Activo) VALUES 
+INSERT INTO `laboratorio` (`IdLaboratorio`, `Rut`, `RazonSocial`, `Marca`, `Pais`, `Contacto`, `Email`, `Telefono`, `DiasPago`, `Activo`) VALUES 
 (1, '77.234.567-9', 'ISDIN Chile S.A.', 'ISDIN', 'Chile', 'Carlos Pérez', 'contacto@isdin.cl', '+56911223344', 30, 1),
-(2, '76.111.222-5', 'L''Oréal Chile S.A.', 'L''Oréal Paris / CeraVe', 'Chile', 'María López', 'contacto@loreal.cl', '+56922334455', 60, 1),
-(3, '78.444.555-K', 'La Roche-Posay Chile', 'La Roche-Posay', 'Chile', 'Ana Gómez', 'contacto@laroche.cl', '+56933445566', 45, 1),
-(4, '79.888.999-1', 'Eucerin Beiersdorf S.A.', 'Eucerin', 'Chile', 'Felipe Soto', 'contacto@eucerin.cl', '+56944556677', 30, 1)
-ON DUPLICATE KEY UPDATE Activo = 1;
+(2, '76.111.222-5', 'L''Oréal Chile S.A.', 'L''Oréal / CeraVe / Vichy / SkinCeuticals', 'Chile', 'María López', 'contacto@loreal.cl', '+56922334455', 60, 1),
+(3, '78.444.555-K', 'La Roche-Posay Chile', 'La Roche-Posay', 'Francia', 'Ana Gómez', 'contacto@laroche.cl', '+56933445566', 45, 1),
+(4, '79.888.999-1', 'Eucerin Beiersdorf S.A.', 'Eucerin', 'Alemania', 'Felipe Soto', 'contacto@eucerin.cl', '+56944556677', 30, 1),
+(5, '76.555.444-3', 'Pierre Fabre Dermo-Cosmétique Chile', 'Avène', 'Francia', 'Lucía Mardones', 'compras@pierrefabre.cl', '+56955667788', 45, 1),
+(6, '77.999.111-2', 'NAOS Bioderma Chile SpA', 'Bioderma', 'Francia', 'Martín Arriagada', 'logistica@bioderma.cl', '+56966778899', 30, 1)
+ON DUPLICATE KEY UPDATE `Activo` = 1;
+
+-- =========================================================================
+-- SEED DATA: Marcas de Dermocosmética
+-- =========================================================================
+INSERT INTO `marca` (`IdMarca`, `Nombre`, `Descripcion`, `Activo`) VALUES
+(1, 'ISDIN', 'Fotoprotección y dermatología clínica española', 1),
+(2, 'La Roche-Posay', 'Dermocosmética francesa para pieles sensibles', 1),
+(3, 'CeraVe', 'Cuidado dermatológico desarrollado con ceramidas esenciales', 1),
+(4, 'Eucerin', 'Ciencia dermatológica alemana para el cuidado clínico de la piel', 1),
+(5, 'Avène', 'Dermocosmética con agua termal calmante para pieles intolerantes', 1),
+(6, 'Vichy', 'Cosmecéutica mineral fortalecedora y antiedad clínica', 1),
+(7, 'Bioderma', 'Ecobiología al servicio de la dermatología clínica', 1),
+(8, 'SkinCeuticals', 'Cosmecéutica avanzada de alta potencia antioxidante', 1)
+ON DUPLICATE KEY UPDATE `Nombre` = VALUES(`Nombre`), `Activo` = 1;
 
 -- =========================================================================
 -- SEED DATA: Categorías de Cosmecéutica
 -- =========================================================================
-INSERT INTO categoria (IdCategoria, Nombre, Descripcion, Activo) VALUES 
+INSERT INTO `categoria` (`IdCategoria`, `Nombre`, `Descripcion`, `Activo`) VALUES 
 (1, 'Protección Solar', 'Fotoprotectores solares faciales y corporales dermatológicos', 1),
-(2, 'Cuidado Facial', 'Sérums, hidratantes y tratamientos anti-edad', 1),
-(3, 'Limpieza Dermo', 'Geles limpiadores dermatológicos y aguas micelares', 1)
-ON DUPLICATE KEY UPDATE Activo = 1;
+(2, 'Cuidado Facial y Sérums', 'Sérums concentrados, hidratantes y tratamientos anti-edad', 1),
+(3, 'Limpieza Dermo', 'Geles limpiadores dermatológicos, espumas y aguas micelares', 1),
+(4, 'Tratamientos Clínicos y Acné', 'Cremas reparadoras, despigmentantes y control seborreico', 1),
+(5, 'Hidratación Corporal', 'Lociones, bálsamos emolientes y reparación de barrera cutánea', 1)
+ON DUPLICATE KEY UPDATE `Activo` = 1;
 
 -- =========================================================================
--- SEED DATA: Productos e Insumos
+-- SEED DATA: Productos Dermocosméticos
 -- =========================================================================
-INSERT INTO producto (IdProducto, IdCategoria, Nombre, Descripcion, Activo) VALUES 
-(1, 1, 'Fusion Water SPF 50', 'Fotoprotector solar facial textura ultraligera', 1),
-(2, 2, 'Sérum Hyalu B5', 'Sérum anti-arrugas reparador con ácido hialurónico', 1),
-(3, 3, 'Gel Limpiador Espumoso', 'Limpiador dermatológico para piel normal a grasa', 1),
-(4, 2, 'Cicalfate+ Crema', 'Crema reparadora y protectora calmante', 1)
-ON DUPLICATE KEY UPDATE Activo = 1;
+INSERT INTO `producto` (`IdProducto`, `IdCategoria`, `IdMarca`, `Nombre`, `Descripcion`, `StockMinimo`, `PuntoReOrden`, `Activo`) VALUES 
+(1, 1, 1, 'Fusion Water Magic SPF 50', 'Fotoprotector solar facial ultraligero de absorción inmediata', 15, 25, 1),
+(2, 2, 2, 'Sérum Hyalu B5 Concentrado', 'Sérum anti-arrugas reparador y rellenador con ácido hialurónico puro y vitamina B5', 10, 20, 1),
+(3, 3, 3, 'Gel Limpiador Espumoso', 'Limpiador dermatológico con 3 ceramidas esenciales y niacinamida para piel normal a grasa', 20, 35, 1),
+(4, 4, 5, 'Cicalfate+ Crema Reparadora', 'Crema reparadora y protectora calmante para pieles irritadas o post-procedimiento', 12, 20, 1),
+(5, 1, 2, 'Anthelios UVMune 400 Fluido Invisible SPF 50+', 'Fotoprotector facial de amplio espectro contra rayos UVA ultra-largos', 15, 30, 1),
+(6, 4, 4, 'Anti-Pigment Dual Sérum', 'Sérum despigmentante clínico con Thiamidol patentado y ácido hialurónico', 10, 18, 1),
+(7, 2, 6, 'Minéral 89 Booster Hidratante', 'Concentrado fortificante y rellenador diario con 89% agua volcánica mineralizante', 15, 25, 1),
+(8, 3, 7, 'Sensibio H2O Agua Micelar', 'Agua micelar dermatológica limpiadora y desmaquillante para piel sensible', 20, 35, 1),
+(9, 5, 3, 'Crema Hidratante Piel Seca a Muy Seca', 'Crema rica restauradora de la barrera cutánea con tecnología MVE y ceramidas', 15, 25, 1),
+(10, 4, 2, 'Effaclar Duo+M Tratamiento Anti-Imperfecciones', 'Corrector triple acción para piel grasa con tendencia acneica', 12, 22, 1),
+(11, 1, 4, 'Sun Face Oil Control Gel-Crema Toque Seco FPS 50+', 'Protector solar facial matificante anti-brillo por 12 horas', 15, 25, 1),
+(12, 2, 8, 'C E Ferulic Sérum Antioxidante', 'Sérum antioxidante de alta potencia con 15% Vitamina C pura, Vitamina E y Ácido Ferúlico', 5, 10, 1)
+ON DUPLICATE KEY UPDATE `Nombre` = VALUES(`Nombre`), `IdMarca` = VALUES(`IdMarca`), `Activo` = 1;
 
 -- =========================================================================
--- SEED DATA: Variantes de Producto con Costo Promedio y SKU
+-- SEED DATA: Variantes de Producto con Precios Chilenos (CLP)
 -- =========================================================================
-INSERT INTO varianteproducto (IdVariante, IdProducto, Sku, NombreVariante, Presentacion, CostoPromedio, PrecioVenta, StockTotal, Activo) VALUES 
-(1, 1, 'ISD-FW-50ML', 'Frasco 50ml', 'Frasco 50ml', 15900.00, 22990.00, 20, 1),
-(2, 2, 'LRP-HB5-30ML', 'Gotero 30ml', 'Gotero 30ml', 24500.00, 34990.00, 0, 1),
-(3, 3, 'CER-GEL-236ML', 'Dispensador 236ml', 'Dispensador 236ml', 7400.00, 12990.00, 10, 1),
-(4, 4, 'AVE-CIC-40ML', 'Tubo 40ml', 'Tubo 40ml', 11200.00, 16490.00, 0, 1)
-ON DUPLICATE KEY UPDATE CostoPromedio = VALUES(CostoPromedio);
+INSERT INTO `varianteproducto` (`IdVariante`, `IdProducto`, `Sku`, `NombreVariante`, `AtributoValor`, `Presentacion`, `Color`, `CostoPromedio`, `PrecioVenta`, `StockTotal`, `Activo`) VALUES 
+(1, 1, 'ISD-FW-50ML', 'Frasco 50ml', 'SPF 50 · Sin Color', 'Frasco 50ml', 'Incoloro', 15900.00, 23990.00, 65, 1),
+(2, 2, 'LRP-HB5-30ML', 'Gotero 30ml', 'Ácido Hialurónico + Vit B5', 'Gotero 30ml', 'Traslúcido', 24500.00, 36990.00, 40, 1),
+(3, 3, 'CER-GEL-236ML', 'Dispensador 236ml', 'Piel Normal a Grasa', 'Dispensador 236ml', 'Neutro', 8900.00, 14990.00, 70, 1),
+(4, 4, 'AVE-CIC-40ML', 'Tubo 40ml', 'Cobre-Zinc + C+-Restore', 'Tubo 40ml', 'Blanco', 10500.00, 16990.00, 45, 1),
+(5, 5, 'LRP-ANT-50ML', 'Frasco 50ml', 'SPF 50+ Fluido Invisible', 'Frasco 50ml', 'Invisible', 16200.00, 24990.00, 50, 1),
+(6, 6, 'EUC-APG-30ML', 'Dispensador Dual 30ml', 'Thiamidol + Ác. Hialurónico', 'Dispensador 30ml', 'Blanco/Rosa', 25900.00, 38990.00, 35, 1),
+(7, 7, 'VIC-M89-50ML', 'Frasco Dosificador 50ml', '89% Agua Volcánica + Hialurónico', 'Frasco 50ml', 'Transparente', 20500.00, 31990.00, 45, 1),
+(8, 8, 'BIO-SEN-500ML', 'Botella 500ml', 'Piel Sensible / Reactiva', 'Botella 500ml', 'Incoloro', 12400.00, 19490.00, 60, 1),
+(9, 9, 'CER-CRE-454G', 'Pote 454g', '3 Ceramidas Esenciales', 'Pote 454g', 'Blanco', 13800.00, 21990.00, 55, 1),
+(10, 10, 'LRP-EFF-40ML', 'Tubo 40ml', 'Phylobioma + Niacinamida', 'Tubo 40ml', 'Blanco', 15600.00, 23490.00, 40, 1),
+(11, 11, 'EUC-OIL-50ML', 'Frasco 50ml', 'L-Carnitina Toque Seco FPS 50+', 'Frasco 50ml', 'Sin Color', 14900.00, 22490.00, 50, 1),
+(12, 12, 'SKC-CEF-30ML', 'Gotero 30ml', '15% L-Ácido Ascórbico + Ferúlico', 'Gotero 30ml', 'Ámbar', 92000.00, 139990.00, 20, 1)
+ON DUPLICATE KEY UPDATE 
+  `NombreVariante` = VALUES(`NombreVariante`),
+  `CostoPromedio` = VALUES(`CostoPromedio`),
+  `PrecioVenta` = VALUES(`PrecioVenta`),
+  `StockTotal` = VALUES(`StockTotal`),
+  `Activo` = 1;
 
 -- =========================================================================
--- SEED DATA: Órdenes de Compra de Prueba
+-- SEED DATA: Inventario por Bodega (Stock disponible para ventas)
 -- =========================================================================
-INSERT INTO ordencompra (IdOC, NumeroOC, IdLaboratorio, IdCotizacion, Fecha, FechaEsperada, Estado, Neto, Iva, Total, IdUsuario) VALUES 
-(1, 'OC-2026-0001', 2, NULL, '2026-10-15', '2026-10-30', 'Recibida', 392000.00, 74480.00, 466480.00, 3),
-(2, 'OC-2026-0002', 1, NULL, '2026-10-20', '2026-11-05', 'Emitida', 298000.00, 56620.00, 354620.00, 3)
-ON DUPLICATE KEY UPDATE Estado = VALUES(Estado);
+INSERT INTO `inventario` (`IdInventario`, `IdVariante`, `IdBodega`, `StockActual`, `StockReservado`, `FechaActualizada`) VALUES
+-- Bodega Central Santiago (IdBodega = 1)
+(1, 1, 1, 45, 0, NOW()),
+(2, 2, 1, 25, 0, NOW()),
+(3, 3, 1, 50, 0, NOW()),
+(4, 4, 1, 30, 0, NOW()),
+(5, 5, 1, 35, 0, NOW()),
+(6, 6, 1, 25, 0, NOW()),
+(7, 7, 1, 30, 0, NOW()),
+(8, 8, 1, 40, 0, NOW()),
+(9, 9, 1, 35, 0, NOW()),
+(10, 10, 1, 25, 0, NOW()),
+(11, 11, 1, 35, 0, NOW()),
+(12, 12, 1, 12, 0, NOW()),
+-- Bodega Sucursal Providencia (IdBodega = 2)
+(13, 1, 2, 20, 0, NOW()),
+(14, 2, 2, 15, 0, NOW()),
+(15, 3, 2, 20, 0, NOW()),
+(16, 4, 2, 15, 0, NOW()),
+(17, 5, 2, 15, 0, NOW()),
+(18, 6, 2, 10, 0, NOW()),
+(19, 7, 2, 15, 0, NOW()),
+(20, 8, 2, 20, 0, NOW()),
+(21, 9, 2, 20, 0, NOW()),
+(22, 10, 2, 15, 0, NOW()),
+(23, 11, 2, 15, 0, NOW()),
+(24, 12, 2, 8, 0, NOW())
+ON DUPLICATE KEY UPDATE `StockActual` = VALUES(`StockActual`), `StockReservado` = VALUES(`StockReservado`), `FechaActualizada` = NOW();
 
 -- =========================================================================
--- SEED DATA: Detalle de Órdenes de Compra
+-- SEED DATA: Lotes en Bodega con Vencimientos Vigentes (Criterio FEFO)
 -- =========================================================================
-INSERT INTO detalleordencompra (IdDetalleOC, IdOC, IdVariante, CantidadPedida, CantidadRecibida, CostoUnitario) VALUES 
+INSERT INTO `lote` (`IdLote`, `IdVariante`, `IdBodega`, `NumeroLote`, `FechaIngreso`, `FechaVencimiento`, `CostoUnitario`, `CantidadInicial`, `CantidadDisponible`, `Estado`) VALUES 
+-- Lotes en Bodega Central Santiago (IdBodega = 1)
+(1, 1, 1, 'LOT-ISD-2026A', DATE_SUB(CURDATE(), INTERVAL 40 DAY), DATE_ADD(CURDATE(), INTERVAL 14 MONTH), 15900.00, 30, 20, 'Disponible'),
+(2, 1, 1, 'LOT-ISD-2026B', DATE_SUB(CURDATE(), INTERVAL 10 DAY), DATE_ADD(CURDATE(), INTERVAL 22 MONTH), 15900.00, 25, 25, 'Disponible'),
+(3, 2, 1, 'LOT-LRP-HB5-01', DATE_SUB(CURDATE(), INTERVAL 35 DAY), DATE_ADD(CURDATE(), INTERVAL 16 MONTH), 24500.00, 30, 25, 'Disponible'),
+(4, 3, 1, 'LOT-CER-2026A', DATE_SUB(CURDATE(), INTERVAL 45 DAY), DATE_ADD(CURDATE(), INTERVAL 18 MONTH), 8900.00, 60, 50, 'Disponible'),
+(5, 4, 1, 'LOT-AVE-CIC-01', DATE_SUB(CURDATE(), INTERVAL 30 DAY), DATE_ADD(CURDATE(), INTERVAL 15 MONTH), 10500.00, 35, 30, 'Disponible'),
+(6, 5, 1, 'LOT-LRP-ANT-01', DATE_SUB(CURDATE(), INTERVAL 25 DAY), DATE_ADD(CURDATE(), INTERVAL 19 MONTH), 16200.00, 40, 35, 'Disponible'),
+(7, 6, 1, 'LOT-EUC-APG-01', DATE_SUB(CURDATE(), INTERVAL 20 DAY), DATE_ADD(CURDATE(), INTERVAL 17 MONTH), 25900.00, 30, 25, 'Disponible'),
+(8, 7, 1, 'LOT-VIC-M89-01', DATE_SUB(CURDATE(), INTERVAL 28 DAY), DATE_ADD(CURDATE(), INTERVAL 20 MONTH), 20500.00, 35, 30, 'Disponible'),
+(9, 8, 1, 'LOT-BIO-SEN-01', DATE_SUB(CURDATE(), INTERVAL 22 DAY), DATE_ADD(CURDATE(), INTERVAL 24 MONTH), 12400.00, 45, 40, 'Disponible'),
+(10, 9, 1, 'LOT-CER-CRE-01', DATE_SUB(CURDATE(), INTERVAL 18 DAY), DATE_ADD(CURDATE(), INTERVAL 21 MONTH), 13800.00, 40, 35, 'Disponible'),
+(11, 10, 1, 'LOT-LRP-EFF-01', DATE_SUB(CURDATE(), INTERVAL 15 DAY), DATE_ADD(CURDATE(), INTERVAL 16 MONTH), 15600.00, 30, 25, 'Disponible'),
+(12, 11, 1, 'LOT-EUC-OIL-01', DATE_SUB(CURDATE(), INTERVAL 12 DAY), DATE_ADD(CURDATE(), INTERVAL 18 MONTH), 14900.00, 40, 35, 'Disponible'),
+(13, 12, 1, 'LOT-SKC-CEF-01', DATE_SUB(CURDATE(), INTERVAL 10 DAY), DATE_ADD(CURDATE(), INTERVAL 12 MONTH), 92000.00, 15, 12, 'Disponible'),
+-- Lotes en Bodega Sucursal Providencia (IdBodega = 2)
+(14, 1, 2, 'LOT-ISD-PRV-01', DATE_SUB(CURDATE(), INTERVAL 20 DAY), DATE_ADD(CURDATE(), INTERVAL 18 MONTH), 15900.00, 20, 20, 'Disponible'),
+(15, 2, 2, 'LOT-LRP-PRV-02', DATE_SUB(CURDATE(), INTERVAL 20 DAY), DATE_ADD(CURDATE(), INTERVAL 18 MONTH), 24500.00, 15, 15, 'Disponible'),
+(16, 3, 2, 'LOT-CER-PRV-03', DATE_SUB(CURDATE(), INTERVAL 20 DAY), DATE_ADD(CURDATE(), INTERVAL 20 MONTH), 8900.00, 20, 20, 'Disponible'),
+(17, 4, 2, 'LOT-AVE-PRV-04', DATE_SUB(CURDATE(), INTERVAL 15 DAY), DATE_ADD(CURDATE(), INTERVAL 17 MONTH), 10500.00, 15, 15, 'Disponible'),
+(18, 5, 2, 'LOT-LRP-PRV-05', DATE_SUB(CURDATE(), INTERVAL 15 DAY), DATE_ADD(CURDATE(), INTERVAL 19 MONTH), 16200.00, 15, 15, 'Disponible'),
+(19, 6, 2, 'LOT-EUC-PRV-06', DATE_SUB(CURDATE(), INTERVAL 15 DAY), DATE_ADD(CURDATE(), INTERVAL 16 MONTH), 25900.00, 10, 10, 'Disponible'),
+(20, 7, 2, 'LOT-VIC-PRV-07', DATE_SUB(CURDATE(), INTERVAL 12 DAY), DATE_ADD(CURDATE(), INTERVAL 21 MONTH), 20500.00, 15, 15, 'Disponible'),
+(21, 8, 2, 'LOT-BIO-PRV-08', DATE_SUB(CURDATE(), INTERVAL 12 DAY), DATE_ADD(CURDATE(), INTERVAL 22 MONTH), 12400.00, 20, 20, 'Disponible'),
+(22, 9, 2, 'LOT-CER-PRV-09', DATE_SUB(CURDATE(), INTERVAL 10 DAY), DATE_ADD(CURDATE(), INTERVAL 20 MONTH), 13800.00, 20, 20, 'Disponible'),
+(23, 10, 2, 'LOT-LRP-PRV-10', DATE_SUB(CURDATE(), INTERVAL 10 DAY), DATE_ADD(CURDATE(), INTERVAL 18 MONTH), 15600.00, 15, 15, 'Disponible'),
+(24, 11, 2, 'LOT-EUC-PRV-11', DATE_SUB(CURDATE(), INTERVAL 8 DAY), DATE_ADD(CURDATE(), INTERVAL 19 MONTH), 14900.00, 15, 15, 'Disponible'),
+(25, 12, 2, 'LOT-SKC-PRV-12', DATE_SUB(CURDATE(), INTERVAL 8 DAY), DATE_ADD(CURDATE(), INTERVAL 14 MONTH), 92000.00, 8, 8, 'Disponible')
+ON DUPLICATE KEY UPDATE `IdBodega` = VALUES(`IdBodega`), `CantidadDisponible` = VALUES(`CantidadDisponible`), `FechaVencimiento` = VALUES(`FechaVencimiento`), `Estado` = VALUES(`Estado`);
+
+-- =========================================================================
+-- SEED DATA: Órdenes de Compra y Recepciones de Prueba
+-- =========================================================================
+INSERT INTO `ordencompra` (`IdOC`, `NumeroOC`, `IdLaboratorio`, `IdCotizacion`, `Fecha`, `FechaEsperada`, `Estado`, `Neto`, `Iva`, `Total`, `IdUsuario`) VALUES 
+(1, 'OC-2026-0001', 2, NULL, DATE_SUB(CURDATE(), INTERVAL 45 DAY), DATE_SUB(CURDATE(), INTERVAL 30 DAY), 'Recibida', 407000.00, 77330.00, 484330.00, 3),
+(2, 'OC-2026-0002', 1, NULL, DATE_SUB(CURDATE(), INTERVAL 15 DAY), DATE_ADD(CURDATE(), INTERVAL 10 DAY), 'Emitida', 361000.00, 68590.00, 429590.00, 3)
+ON DUPLICATE KEY UPDATE `Estado` = VALUES(`Estado`);
+
+INSERT INTO `detalleordencompra` (`IdDetalleOC`, `IdOC`, `IdVariante`, `CantidadPedida`, `CantidadRecibida`, `CostoUnitario`) VALUES 
 (1, 1, 1, 20, 20, 15900.00),
-(2, 1, 3, 10, 10, 7400.00),
+(2, 1, 3, 10, 10, 8900.00),
 (3, 2, 1, 15, 0, 15900.00),
-(4, 2, 2, 5, 0, 11900.00)
-ON DUPLICATE KEY UPDATE CantidadRecibida = VALUES(CantidadRecibida);
+(4, 2, 2, 5, 0, 24500.00)
+ON DUPLICATE KEY UPDATE `CantidadRecibida` = VALUES(`CantidadRecibida`);
+
+INSERT INTO `recepcioncompra` (`IdRecepcion`, `IdOC`, `GuiaDespacho`, `FechaRecepcion`, `Estado`, `IdUsuario`) VALUES 
+(1, 1, 'GD-884920', DATE_SUB(CURDATE(), INTERVAL 32 DAY), 'Aprobada', 4)
+ON DUPLICATE KEY UPDATE `Estado` = VALUES(`Estado`);
+
+INSERT INTO `detallerecepcion` (`IdDetalleRec`, `IdRecepcion`, `IdDetalleOC`, `IdVariante`, `NumeroLote`, `FechaVencimiento`, `Cantidad`, `CostoUnitario`) VALUES 
+(1, 1, 1, 1, 'LOT-ISD-2026A', DATE_ADD(CURDATE(), INTERVAL 14 MONTH), 20, 15900.00),
+(2, 1, 2, 3, 'LOT-CER-2026A', DATE_ADD(CURDATE(), INTERVAL 18 MONTH), 10, 8900.00)
+ON DUPLICATE KEY UPDATE `Cantidad` = VALUES(`Cantidad`);
 
 -- =========================================================================
--- SEED DATA: Recepciones de Mercadería
+-- SEED DATA: Cartera de Clientes Chilenos (Módulo de Ventas RF-VEN-01 y RF-VEN-07)
 -- =========================================================================
-INSERT INTO recepcioncompra (IdRecepcion, IdOC, GuiaDespacho, FechaRecepcion, Estado, IdUsuario) VALUES 
-(1, 1, 'GD-884920', '2026-10-28', 'Aprobada', 4)
-ON DUPLICATE KEY UPDATE Estado = VALUES(Estado);
+INSERT INTO `cliente` (`IdCliente`, `Rut`, `Nombre`, `RazonSocial`, `Categoria`, `Giro`, `Direccion`, `Contacto`, `Correo`, `Telefono`, `LimiteCredito`, `DiasCredito`, `Activo`) VALUES
+(1, '76.543.210-K', 'Clínica Estética DermoSalud SpA', 'Clínica Estética DermoSalud SpA', 'Clinica', 'Servicios Médicos y Dermatología Clínica', 'Av. Providencia 2345, Of. 801, Providencia, Santiago', 'Dra. Andrea Valenzuela', 'contacto@dermosalud.cl', '+56 9 8765 4321', 3500000.00, 30, 1),
+(2, '77.890.123-4', 'Farmacias Dermocare Chile Ltda.', 'Farmacias Dermocare Chile Ltda.', 'Farmacia', 'Comercio Minorista de Productos Farmacéuticos y Dermocosméticos', 'Av. Apoquindo 4501, Local 12, Las Condes, Santiago', 'Roberto Fuenzalida', 'adquisiciones@dermocare.cl', '+56 9 7654 3210', 5000000.00, 45, 1),
+(3, '76.998.877-6', 'Distribuidora Belleza & Salud Sur S.A.', 'Distribuidora Belleza & Salud Sur S.A.', 'Mayorista', 'Distribución Mayorista de Insumos Cosmecéuticos', 'Av. Bernardo O''Higgins 1120, Concepción', 'Marcela Riquelme', 'compras@bellezasur.cl', '+56 9 6543 2109', 8000000.00, 60, 1),
+(4, '78.112.233-9', 'Centro Dermatológico SkinClinic Vitacura', 'Centro Dermatológico SkinClinic Vitacura SpA', 'Clinica', 'Clínica Estética Integral y Procedimientos Láser', 'Av. Nueva Costanera 3900, Of. 402, Vitacura, Santiago', 'Dr. Sebastián Morales', 'smorales@skinclinic.cl', '+56 9 5432 1098', 4200000.00, 30, 1),
+(5, '15.432.876-5', 'Camila Ignacia Fernández Rojas', 'Camila Ignacia Fernández Rojas', 'Profesional', 'Cosmetóloga y Esteticista Clínica Independiente', 'Av. Libertad 840, Of. 304, Viña del Mar', 'Camila Fernández', 'camila.cosmetologia@gmail.com', '+56 9 4321 0987', 1200000.00, 30, 1),
+(6, '76.334.455-2', 'Botica Natural & Dermo Boutique SpA', 'Botica Natural & Dermo Boutique SpA', 'Farmacia', 'Venta Especializada de Productos Dermocosméticos', 'Av. Pedro de Valdivia 1780, Ñuñoa, Santiago', 'Francisca Lagos', 'contacto@dermoboutique.cl', '+56 9 3210 9876', 2500000.00, 30, 1),
+(7, '18.765.432-1', 'Valentina Paz Soto Mardones', 'Valentina Paz Soto Mardones', 'Particular', 'Consumidor Final / Cliente Frecuente', 'Los Militares 5620, Depto. 1102, Las Condes, Santiago', 'Valentina Soto', 'valesoto.m@gmail.com', '+56 9 2109 8765', 0.00, 0, 1),
+(8, '79.221.334-8', 'Estética Avanzada Las Condes Ltda.', 'Estética Avanzada Las Condes Ltda.', 'Clinica', 'Tratamientos Faciales y Corporales', 'Av. Presidente Kennedy 7100, Of. 505, Las Condes, Santiago', 'Paulina Echeverría', 'admin@esteticalascondes.cl', '+56 9 9123 4567', 1500000.00, 30, 0)
+ON DUPLICATE KEY UPDATE
+  `Nombre` = VALUES(`Nombre`),
+  `RazonSocial` = VALUES(`RazonSocial`),
+  `Categoria` = VALUES(`Categoria`),
+  `Giro` = VALUES(`Giro`),
+  `Direccion` = VALUES(`Direccion`),
+  `Contacto` = VALUES(`Contacto`),
+  `Correo` = VALUES(`Correo`),
+  `Telefono` = VALUES(`Telefono`),
+  `LimiteCredito` = VALUES(`LimiteCredito`),
+  `DiasCredito` = VALUES(`DiasCredito`),
+  `Activo` = VALUES(`Activo`);
 
 -- =========================================================================
--- SEED DATA: Detalle de Recepción
+-- SEED DATA: Cotizaciones y Presupuestos de Ventas (RF-VEN-02)
 -- =========================================================================
-INSERT INTO detallerecepcion (IdDetalleRec, IdRecepcion, IdDetalleOC, IdVariante, NumeroLote, FechaVencimiento, Cantidad, CostoUnitario) VALUES 
-(1, 1, 1, 1, 'LOT-ISD-2026A', '2028-10-28', 20, 15900.00),
-(2, 1, 2, 3, 'LOT-CER-2026B', '2028-11-15', 10, 7400.00)
-ON DUPLICATE KEY UPDATE Cantidad = VALUES(Cantidad);
+INSERT INTO `cotizacion` (`IdCotizacion`, `FechaEmision`, `FechaVencimiento`, `Estado`, `Total`, `IdCliente`, `IdUsuario`) VALUES
+(1, DATE_SUB(CURDATE(), INTERVAL 25 DAY), DATE_SUB(CURDATE(), INTERVAL 10 DAY), 'Aceptado', 311870.00, 1, 2),
+(2, DATE_SUB(CURDATE(), INTERVAL 18 DAY), DATE_SUB(CURDATE(), INTERVAL 3 DAY), 'Aceptado', 534780.00, 2, 2),
+(3, DATE_SUB(CURDATE(), INTERVAL 5 DAY), DATE_ADD(CURDATE(), INTERVAL 15 DAY), 'Vigente', 258890.00, 4, 2),
+(4, DATE_SUB(CURDATE(), INTERVAL 2 DAY), DATE_ADD(CURDATE(), INTERVAL 20 DAY), 'Vigente', 494830.00, 3, 1),
+(5, DATE_SUB(CURDATE(), INTERVAL 35 DAY), DATE_SUB(CURDATE(), INTERVAL 20 DAY), 'Vencido', 159930.00, 5, 6),
+(6, DATE_SUB(CURDATE(), INTERVAL 12 DAY), DATE_ADD(CURDATE(), INTERVAL 3 DAY), 'Rechazado', 279980.00, 6, 6)
+ON DUPLICATE KEY UPDATE `Estado` = VALUES(`Estado`), `FechaVencimiento` = VALUES(`FechaVencimiento`), `Total` = VALUES(`Total`);
+
+INSERT INTO `cotizaciondetalle` (`IdCotizacionDetalle`, `IdCotizacion`, `IdVariante`, `Cantidad`, `PrecioUnitario`) VALUES
+-- Cotización 1 (Clínica Estética DermoSalud SpA - Aceptada)
+(1, 1, 1, 8, 23990.00),
+(2, 1, 3, 8, 14990.00),
+-- Cotización 2 (Farmacias Dermocare Chile Ltda. - Aceptada)
+(3, 2, 2, 10, 36990.00),
+(4, 2, 4, 5, 16990.00),
+(5, 2, 7, 2, 31990.00),
+(6, 2, 3, 1, 15950.00),
+-- Cotización 3 (Centro Dermatológico SkinClinic Vitacura - Vigente, lista para convertir a venta)
+(7, 3, 5, 6, 24990.00),
+(8, 3, 6, 2, 38990.00),
+(9, 3, 7, 1, 30970.00),
+-- Cotización 4 (Distribuidora Belleza & Salud Sur S.A. - Vigente, lista para convertir a venta)
+(10, 4, 1, 10, 23990.00),
+(11, 4, 8, 8, 19490.00),
+(12, 4, 9, 4, 21990.00),
+(13, 4, 4, 1, 11050.00),
+-- Cotización 5 (Camila Fernández - Vencida)
+(14, 5, 10, 4, 23490.00),
+(15, 5, 9, 3, 21990.00),
+-- Cotización 6 (Botica Natural & Dermo Boutique - Rechazada)
+(16, 6, 12, 2, 139990.00)
+ON DUPLICATE KEY UPDATE `Cantidad` = VALUES(`Cantidad`), `PrecioUnitario` = VALUES(`PrecioUnitario`);
 
 -- =========================================================================
--- SEED DATA: Lotes en Bodega (FEFO)
+-- SEED DATA: Ventas Históricas y del Mes Actual (Boletas, Facturas y Nota de Crédito)
 -- =========================================================================
-INSERT INTO lote (IdLote, IdVariante, NumeroLote, FechaIngreso, FechaVencimiento, CostoUnitario, CantidadInicial, CantidadDisponible, Estado) VALUES 
-(1, 1, 'LOT-ISD-2026A', '2026-10-28', '2028-10-28', 15900.00, 20, 20, 'Disponible'),
-(2, 3, 'LOT-CER-2026B', '2026-10-28', '2028-11-15', 7400.00, 10, 10, 'Disponible')
-ON DUPLICATE KEY UPDATE CantidadDisponible = VALUES(CantidadDisponible);
+INSERT INTO `venta` (`IdVenta`, `TipoDocumento`, `Folio`, `Fecha`, `Neto`, `Iva`, `Descuento`, `Total`, `FormaPago`, `Estado`, `IdCliente`, `IdCotizacion`, `IdUsuario`, `IdVentaOrigen`) VALUES
+-- Ventas de meses anteriores para el gráfico de tendencia de 6 meses
+(1, 'Factura', 'FAC-001001', DATE_SUB(CURDATE(), INTERVAL 5 MONTH), 241933.00, 45967.00, 0.00, 287900.00, 'Contado', 'Emitida', 1, NULL, 2, NULL),
+(2, 'Factura', 'FAC-001002', DATE_SUB(CURDATE(), INTERVAL 4 MONTH), 352840.00, 67040.00, 0.00, 419880.00, 'Credito', 'Emitida', 2, NULL, 2, NULL),
+(3, 'Factura', 'FAC-001003', DATE_SUB(CURDATE(), INTERVAL 3 MONTH), 478824.00, 90976.00, 10000.00, 569800.00, 'Credito', 'Emitida', 3, NULL, 1, NULL),
+(4, 'Boleta',  'BOL-001001', DATE_SUB(CURDATE(), INTERVAL 2 MONTH), 184790.00, 35110.00, 0.00, 219900.00, 'Contado', 'Emitida', 5, NULL, 6, NULL),
+(5, 'Factura', 'FAC-001004', DATE_SUB(CURDATE(), INTERVAL 1 MONTH), 411639.00, 78211.00, 5000.00, 489850.00, 'Credito', 'Emitida', 4, NULL, 2, NULL),
+-- Ventas del mes en curso
+(6, 'Factura', 'FAC-001005', DATE_SUB(CURDATE(), INTERVAL 8 DAY), 262076.00, 49794.00, 0.00, 311870.00, 'Credito', 'Emitida', 1, 1, 2, NULL),
+(7, 'Factura', 'FAC-001006', DATE_SUB(CURDATE(), INTERVAL 5 DAY), 449395.00, 85385.00, 0.00, 534780.00, 'Credito', 'Emitida', 2, 2, 2, NULL),
+(8, 'Boleta',  'BOL-001002', DATE_SUB(CURDATE(), INTERVAL 3 DAY), 119286.00, 22664.00, 0.00, 141950.00, 'Contado', 'Emitida', 7, NULL, 6, NULL),
+(9, 'Factura', 'FAC-001007', DATE_SUB(CURDATE(), INTERVAL 1 DAY), 386504.00, 73436.00, 0.00, 459940.00, 'Contado', 'Emitida', 6, NULL, 1, NULL),
+-- Nota de Crédito de prueba asociada a la Venta #6
+(10, 'Nota de Credito', 'NC-005001', CURDATE(), 37798.00, 7182.00, 0.00, 44980.00, 'Devolucion', 'Emitida', 1, NULL, 2, 6)
+ON DUPLICATE KEY UPDATE
+  `Folio` = VALUES(`Folio`),
+  `Fecha` = VALUES(`Fecha`),
+  `Neto` = VALUES(`Neto`),
+  `Iva` = VALUES(`Iva`),
+  `Total` = VALUES(`Total`),
+  `FormaPago` = VALUES(`FormaPago`),
+  `Estado` = VALUES(`Estado`);
 
+INSERT INTO `ventadetalle` (`IdVentaDetalle`, `IdVenta`, `IdVariante`, `Cantidad`, `PrecioUnitario`, `Subtotal`) VALUES
+-- Venta 1
+(1, 1, 1, 10, 23990.00, 239900.00),
+(2, 1, 3, 3, 16000.00, 48000.00),
+-- Venta 2
+(3, 2, 2, 8, 36990.00, 295920.00),
+(4, 2, 5, 5, 24792.00, 123960.00),
+-- Venta 3
+(5, 3, 6, 10, 38990.00, 389900.00),
+(6, 3, 8, 10, 18990.00, 189900.00),
+-- Venta 4
+(7, 4, 9, 10, 21990.00, 219900.00),
+-- Venta 5
+(8, 5, 12, 2, 139990.00, 279980.00),
+(9, 5, 7, 5, 31990.00, 159950.00),
+(10, 5, 5, 2, 27460.00, 54920.00),
+-- Venta 6 (Factura FAC-001005)
+(11, 6, 1, 8, 23990.00, 191920.00),
+(12, 6, 3, 8, 14993.75, 119950.00),
+-- Venta 7 (Factura FAC-001006)
+(13, 7, 2, 10, 36990.00, 369900.00),
+(14, 7, 4, 5, 16990.00, 84950.00),
+(15, 7, 7, 2, 39965.00, 79930.00),
+-- Venta 8 (Boleta BOL-001002)
+(16, 8, 11, 3, 22490.00, 67470.00),
+(17, 8, 10, 2, 23490.00, 46980.00),
+(18, 8, 4, 1, 27500.00, 27500.00),
+-- Venta 9 (Factura FAC-001007)
+(19, 9, 12, 2, 139990.00, 279980.00),
+(20, 9, 6, 4, 38990.00, 155960.00),
+(21, 9, 1, 1, 24000.00, 24000.00),
+-- Venta 10 (Nota de Crédito NC-005001 sobre Venta 6)
+(22, 10, 3, 3, 14993.33, 44980.00)
+ON DUPLICATE KEY UPDATE `Cantidad` = VALUES(`Cantidad`), `PrecioUnitario` = VALUES(`PrecioUnitario`), `Subtotal` = VALUES(`Subtotal`);
 
 -- =========================================================================
--- EXTENSIONES Y MIGRACIONES: Inventario, Ventas, Contabilidad y Cuentas por Pagar
+-- SEED DATA: Cuentas por Cobrar de Clientes (RF-VEN-06 y RF-VEN-07)
 -- =========================================================================
+INSERT INTO `cuentascobrar` (`IdCuenta`, `IdVenta`, `FechaVence`, `MontoPendiente`, `EstadoPago`, `IdUsuario`) VALUES
+(1, 2, DATE_SUB(CURDATE(), INTERVAL 60 DAY), 0.00, 'Pagado', 2),
+(2, 3, DATE_SUB(CURDATE(), INTERVAL 30 DAY), 0.00, 'Pagado', 1),
+(3, 5, DATE_ADD(CURDATE(), INTERVAL 10 DAY), 489850.00, 'Pendiente', 2),
+(4, 6, DATE_ADD(CURDATE(), INTERVAL 22 DAY), 266890.00, 'Pendiente', 2),
+(5, 7, DATE_ADD(CURDATE(), INTERVAL 40 DAY), 534780.00, 'Pendiente', 2)
+ON DUPLICATE KEY UPDATE `MontoPendiente` = VALUES(`MontoPendiente`), `EstadoPago` = VALUES(`EstadoPago`);
 
--- 1. Inventario y Bodega (001_inventario.sql)
-ALTER TABLE lote ADD COLUMN IF NOT EXISTS IdBodega INT NULL;
-ALTER TABLE movimientoinventario ADD COLUMN IF NOT EXISTS IdBodega INT NULL;
-ALTER TABLE movimientoinventario ADD COLUMN IF NOT EXISTS Origen VARCHAR(20) NULL;
-ALTER TABLE movimientoinventario ADD COLUMN IF NOT EXISTS IdDetalleOrigen INT NULL;
+-- =========================================================================
+-- SEED DATA: Gestión y Seguimiento de Despachos (RF-VEN-08)
+-- =========================================================================
+INSERT INTO `despacho` (`IdDespacho`, `IdVenta`, `Estado`, `FechaEstimada`, `FechaEntrega`, `Tipo`, `Observaciones`, `IdUsuario`) VALUES
+(1, 5, 'Entregado', DATE_SUB(CURDATE(), INTERVAL 25 DAY), DATE_SUB(CURDATE(), INTERVAL 26 DAY), 'Reparto Propio', 'Entregado conforme en recepción de clínica Vitacura', 4),
+(2, 6, 'Entregado', DATE_SUB(CURDATE(), INTERVAL 6 DAY), DATE_SUB(CURDATE(), INTERVAL 6 DAY), 'Chilexpress', 'Recibido por Dra. Andrea Valenzuela (OT #994821)', 4),
+(3, 7, 'En Ruta', DATE_ADD(CURDATE(), INTERVAL 1 DAY), NULL, 'Starken', 'Despacho prioritario refrigerado a sucursal Las Condes', 2),
+(4, 8, 'En Preparacion', DATE_ADD(CURDATE(), INTERVAL 2 DAY), NULL, 'Blue Express', 'Embalaje reforzado para frascos de vidrio', 4),
+(5, 9, 'Pendiente', DATE_ADD(CURDATE(), INTERVAL 3 DAY), NULL, 'Reparto Propio', 'Coordinar entrega horario mañana en Ñuñoa', 1)
+ON DUPLICATE KEY UPDATE `Estado` = VALUES(`Estado`), `FechaEstimada` = VALUES(`FechaEstimada`), `FechaEntrega` = VALUES(`FechaEntrega`);
 
-INSERT INTO tipomovimiento (Nombre, Naturaleza, Descripcion)
-SELECT 'Entrada', 'Entrada', 'Recepción de compra' FROM DUAL
-WHERE NOT EXISTS (SELECT 1 FROM tipomovimiento WHERE Nombre = 'Entrada');
+-- =========================================================================
+-- SEED DATA: Período Contable Abierto y Plan de Cuentas Integral
+-- =========================================================================
+INSERT INTO `periodocontable` (`IdPeriodo`, `Nombre`, `FechaInicio`, `FechaFin`, `Estado`) VALUES
+(1, 'Año Comercial Vigente', DATE_SUB(CURDATE(), INTERVAL 1 YEAR), DATE_ADD(CURDATE(), INTERVAL 1 YEAR), 'Abierto')
+ON DUPLICATE KEY UPDATE `FechaInicio` = VALUES(`FechaInicio`), `FechaFin` = VALUES(`FechaFin`), `Estado` = 'Abierto';
 
-INSERT INTO tipomovimiento (Nombre, Naturaleza, Descripcion)
-SELECT 'Salida', 'Salida', 'Salida por venta' FROM DUAL
-WHERE NOT EXISTS (SELECT 1 FROM tipomovimiento WHERE Nombre = 'Salida');
+INSERT INTO `cuentacontable` (`IdCuentaContable`, `Codigo`, `Nombre`, `Tipo`, `IdCuentaPadre`, `Nivel`, `Imputable`) VALUES
+(1, '1101', 'Caja y Bancos', 'Activo', NULL, 1, 1),
+(2, '1103', 'Clientes por Cobrar', 'Activo', NULL, 1, 1),
+(3, '1105', 'Existencias e Inventario', 'Activo', NULL, 1, 1),
+(4, '1109', 'IVA Crédito Fiscal', 'Activo', NULL, 1, 1),
+(5, '2101', 'Proveedores por Pagar', 'Pasivo', NULL, 1, 1),
+(6, '2108', 'IVA Débito Fiscal', 'Pasivo', NULL, 1, 1),
+(7, '4101', 'Ingresos por Ventas', 'Resultado Ganancia', NULL, 1, 1),
+(8, '5101', 'Costo de Ventas', 'Resultado Pérdida', NULL, 1, 1)
+ON DUPLICATE KEY UPDATE `Nombre` = VALUES(`Nombre`), `Tipo` = VALUES(`Tipo`), `Imputable` = 1;
 
-INSERT INTO tipomovimiento (Nombre, Naturaleza, Descripcion)
-SELECT 'Ajuste positivo', 'Entrada', 'Diferencia justificada de inventario' FROM DUAL
-WHERE NOT EXISTS (SELECT 1 FROM tipomovimiento WHERE Nombre = 'Ajuste positivo');
-
-INSERT INTO tipomovimiento (Nombre, Naturaleza, Descripcion)
-SELECT 'Ajuste negativo', 'Salida', 'Pérdida, daño o vencimiento justificado' FROM DUAL
-WHERE NOT EXISTS (SELECT 1 FROM tipomovimiento WHERE Nombre = 'Ajuste negativo');
-
--- 2. Ventas y Notas de Crédito (003_ventas.sql)
-ALTER TABLE venta ADD COLUMN IF NOT EXISTS IdVentaOrigen INT NULL;
-
--- 3. Contabilidad Integral (004_contabilidad_mysql.sql)
-ALTER TABLE cuentacontable ADD COLUMN IF NOT EXISTS IdCuentaPadre INT NULL;
-ALTER TABLE cuentacontable ADD COLUMN IF NOT EXISTS Nivel INT NOT NULL DEFAULT 1;
-ALTER TABLE cuentacontable ADD COLUMN IF NOT EXISTS Imputable BOOLEAN NOT NULL DEFAULT TRUE;
-
-ALTER TABLE asientocontable ADD COLUMN IF NOT EXISTS IdAsientoRevertido INT NULL;
-ALTER TABLE asientocontable ADD COLUMN IF NOT EXISTS FechaRegistro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;
-ALTER TABLE asientocontable ADD COLUMN IF NOT EXISTS Origen VARCHAR(20) NULL;
-ALTER TABLE asientocontable ADD COLUMN IF NOT EXISTS IdOrigen INT NULL;
-
--- 4. Período Contable y Plan de Cuentas Base (005_cuentas_por_pagar_sp.sql)
-INSERT INTO periodocontable (Nombre, FechaInicio, FechaFin, Estado)
-SELECT 'Año Comercial 2026', '2026-01-01', '2026-12-31', 'Abierto'
-FROM DUAL
-WHERE NOT EXISTS (SELECT 1 FROM periodocontable WHERE Estado = 'Abierto');
-
-INSERT IGNORE INTO cuentacontable (Codigo, Nombre, Tipo, IdCuentaPadre, Nivel, Imputable) VALUES
-('1101', 'Caja y Bancos', 'Activo', NULL, 1, 1),
-('1105', 'Existencias e Inventario', 'Activo', NULL, 1, 1),
-('1109', 'IVA Crédito Fiscal', 'Activo', NULL, 1, 1),
-('2101', 'Proveedores por Pagar', 'Pasivo', NULL, 1, 1);
-
--- 5. Stored Procedure: Cuentas por Pagar y Asiento Contable Automático (RF-COM-08 / RF-CON-05)
-DROP PROCEDURE IF EXISTS usp_CrearCuentaPorPagar;
+-- =========================================================================
+-- STORED PROCEDURE: Cuentas por Pagar y Asiento Contable Automático (RF-COM-08 / RF-CON-05)
+-- =========================================================================
+DROP PROCEDURE IF EXISTS `usp_CrearCuentaPorPagar`;
 DELIMITER $$
-CREATE PROCEDURE usp_CrearCuentaPorPagar(IN p_IdRecepcion INT, IN p_IdUsuario INT)
+CREATE PROCEDURE `usp_CrearCuentaPorPagar`(IN p_IdRecepcion INT, IN p_IdUsuario INT)
 BEGIN
     DECLARE v_IdLaboratorio INT;
     DECLARE v_NumeroOC VARCHAR(20);
@@ -1340,48 +1169,11 @@ BEGIN
 END $$
 DELIMITER ;
 
--- 6. Sincronizar cuenta por pagar y asiento contable de la recepción de prueba existente
 CALL usp_CrearCuentaPorPagar(1, 5);
+
 -- =========================================================================
--- MIGRACIÃ“N 006: Requerimientos Funcionales del MÃ³dulo de Ventas (RF-VEN-01 al RF-VEN-10)
--- Dermo ERP - CosmecÃ©utica y DermocosmÃ©tica
+-- STORED PROCEDURE: Descuento de Inventario por FEFO en Ventas (RF-VEN-05)
 -- =========================================================================
-
--- 1. RF-VEN-01 y RF-VEN-07: AmpliaciÃ³n de la tabla Cliente (Giro, DirecciÃ³n, Contacto, LÃ­mites de CrÃ©dito, Activo)
-ALTER TABLE `cliente` ADD COLUMN IF NOT EXISTS `RazonSocial` VARCHAR(150) NULL;
-ALTER TABLE `cliente` ADD COLUMN IF NOT EXISTS `Giro` VARCHAR(150) NULL;
-ALTER TABLE `cliente` ADD COLUMN IF NOT EXISTS `Direccion` VARCHAR(200) NULL;
-ALTER TABLE `cliente` ADD COLUMN IF NOT EXISTS `Contacto` VARCHAR(100) NULL;
-ALTER TABLE `cliente` ADD COLUMN IF NOT EXISTS `LimiteCredito` DECIMAL(18,2) NOT NULL DEFAULT 0.00;
-ALTER TABLE `cliente` ADD COLUMN IF NOT EXISTS `DiasCredito` INT NOT NULL DEFAULT 0;
-ALTER TABLE `cliente` ADD COLUMN IF NOT EXISTS `Activo` TINYINT(1) NOT NULL DEFAULT 1;
-
--- Actualizar RazonSocial con el Nombre existente si estÃ¡ vacÃ­a
-UPDATE `cliente` SET `RazonSocial` = `Nombre` WHERE `RazonSocial` IS NULL OR `RazonSocial` = '';
-
--- 2. RF-VEN-02: PerÃ­odo de Validez para Cotizaciones / Presupuestos
-ALTER TABLE `cotizacion` ADD COLUMN IF NOT EXISTS `FechaVencimiento` DATE NULL;
-
--- 3. RF-VEN-03: Folio, Descuento, Neto, IVA y Forma de Pago en Venta
-ALTER TABLE `venta` ADD COLUMN IF NOT EXISTS `Folio` VARCHAR(50) NULL;
-ALTER TABLE `venta` ADD COLUMN IF NOT EXISTS `Neto` DECIMAL(18,2) NOT NULL DEFAULT 0.00;
-ALTER TABLE `venta` ADD COLUMN IF NOT EXISTS `Iva` DECIMAL(18,2) NOT NULL DEFAULT 0.00;
-ALTER TABLE `venta` ADD COLUMN IF NOT EXISTS `Descuento` DECIMAL(18,2) NOT NULL DEFAULT 0.00;
-ALTER TABLE `venta` ADD COLUMN IF NOT EXISTS `FormaPago` VARCHAR(50) NOT NULL DEFAULT 'Contado';
-ALTER TABLE `venta` ADD COLUMN IF NOT EXISTS `IdVentaOrigen` INT NULL;
-
--- 4. RF-VEN-08: GestiÃ³n de Despachos y Registro de Entregas
-ALTER TABLE `despacho` ADD COLUMN IF NOT EXISTS `FechaEntrega` DATE NULL;
-ALTER TABLE `despacho` ADD COLUMN IF NOT EXISTS `Observaciones` VARCHAR(255) NULL;
-
--- 5. RF-VEN-06: Plan de Cuentas Contable para Ventas (cuentacontable)
-INSERT IGNORE INTO `cuentacontable` (`Codigo`, `Nombre`, `Tipo`, `IdCuentaPadre`, `Nivel`, `Imputable`) VALUES
-('1103', 'Clientes por Cobrar', 'Activo', NULL, 1, 1),
-('2108', 'IVA DÃ©bito Fiscal', 'Pasivo', NULL, 1, 1),
-('4101', 'Ingresos por Ventas', 'Resultado Ganancia', NULL, 1, 1),
-('5101', 'Costo de Ventas', 'Resultado PÃ©rdida', NULL, 1, 1);
-
--- 6. RF-VEN-05: Procedimiento Almacenado de Descuento de Inventario por FEFO
 DROP PROCEDURE IF EXISTS `usp_DescontarInventarioFEFO`;
 DELIMITER $$
 CREATE PROCEDURE `usp_DescontarInventarioFEFO`(
@@ -1404,7 +1196,7 @@ BEGIN
     DECLARE v_DetalleId INT;
     DECLARE v_FinCursor INT DEFAULT 0;
 
-    -- Cursor ordenado segÃºn FEFO (Fecha de Vencimiento mÃ¡s prÃ³xima primero)
+    -- Cursor ordenado según FEFO (Fecha de Vencimiento más próxima primero)
     DECLARE curLotes CURSOR FOR
         SELECT IdLote, CantidadDisponible, CostoUnitario
         FROM lote
@@ -1461,7 +1253,7 @@ BEGIN
         INSERT INTO movimientoinventario
             (IdLote, IdBodega, IdTipoMovimiento, IdUsuario, Cantidad, StockAnterior, StockPosterior, Referencia, Observacion, Origen, IdDetalleOrigen)
         SELECT v_IdLote, p_IdBodega, IdTipoMovimiento, p_IdUsuario, v_Tomar, v_StockBodega, (v_StockBodega - v_Tomar),
-               CONCAT('Venta #', p_IdVenta), 'Descuento automÃ¡tico FEFO (RF-VEN-05)', 'Salida', v_DetalleId
+               CONCAT('Venta #', p_IdVenta), 'Descuento automático FEFO (RF-VEN-05)', 'Salida', v_DetalleId
         FROM tipomovimiento
         WHERE Nombre = 'Salida'
         LIMIT 1;
@@ -1488,3 +1280,12 @@ BEGIN
 
 END $$
 DELIMITER ;
+
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
