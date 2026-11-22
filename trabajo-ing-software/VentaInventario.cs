@@ -45,11 +45,22 @@ namespace trabajo_ing_software
                     AgregarColumnaSiFalta(con, "venta", "Iva", "DECIMAL(18,2) NOT NULL DEFAULT 0.00");
                     AgregarColumnaSiFalta(con, "venta", "Descuento", "DECIMAL(18,2) NOT NULL DEFAULT 0.00");
                     AgregarColumnaSiFalta(con, "venta", "FormaPago", "VARCHAR(50) NOT NULL DEFAULT 'Contado'");
+                    AgregarColumnaSiFalta(con, "venta", "Estado", "VARCHAR(30) NOT NULL DEFAULT 'Emitida'");
                     AgregarColumnaSiFalta(con, "venta", "IdVentaOrigen", "INT NULL");
 
                     // 4. Despachos y entregas (RF-VEN-08)
                     AgregarColumnaSiFalta(con, "despacho", "FechaEntrega", "DATE NULL");
                     AgregarColumnaSiFalta(con, "despacho", "Observaciones", "VARCHAR(255) NULL");
+
+                    // Permitir IdLote NULL en movimientoinventario para devoluciones generales
+                    try
+                    {
+                        using (var cmdMod = new MySqlCommand("ALTER TABLE `movimientoinventario` MODIFY COLUMN `IdLote` INT NULL", con))
+                        {
+                            cmdMod.ExecuteNonQuery();
+                        }
+                    }
+                    catch { }
 
                     // 5. Plan de cuentas para ventas (RF-VEN-06)
                     try

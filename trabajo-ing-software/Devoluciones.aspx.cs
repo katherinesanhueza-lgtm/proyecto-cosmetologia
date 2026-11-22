@@ -114,12 +114,18 @@ namespace trabajo_ing_software
                         sda.Fill(dtItems);
                         gvItemsVenta.DataSource = dtItems;
                         gvItemsVenta.DataBind();
+                        AplicarModoDevolucion();
                     }
                 }
             }
         }
 
         protected void ddlTipoDevolucion_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            AplicarModoDevolucion();
+        }
+
+        private void AplicarModoDevolucion()
         {
             bool esTotal = ddlTipoDevolucion.SelectedValue == "Total";
             foreach (GridViewRow row in gvItemsVenta.Rows)
@@ -242,34 +248,88 @@ namespace trabajo_ing_software
 
                         if (reingresarStock && bodegaReingreso > 0)
                         {
-                            // Incrementar existencias en la bodega elegida
-                            using (var cmdInv = VentaInventario.Comando(con, tr,
-                                @"UPDATE inventario 
-                                  SET StockActual = StockActual + @p0, FechaActualizada = NOW() 
-                                  WHERE IdVariante = @p1 AND IdBodega = @p2",
-                                item.Item2, item.Item1, bodegaReingreso))
+                            // Obtener stock anterior e incrementar existencias en la bodega elegida
+                            int stockAnt = 0;
+                            int idInvExistente = 0;
+                            using (var cmdSelInv = VentaInventario.Comando(con, tr,
+                                "SELECT IdInventario, COALESCE(StockActual, 0) FROM inventario WHERE IdVariante = @p0 AND IdBodega = @p1 FOR UPDATE",
+                                item.Item1, bodegaReingreso))
+                            using (var rdrInv = cmdSelInv.ExecuteReader())
                             {
-                                cmdInv.ExecuteNonQuery();
+                                if (rdrInv.Read())
+                                {
+                                    idInvExistente = rdrInv.GetInt32(0);
+                                    stockAnt = rdrInv.GetInt32(1);
+                                }
+                            }
+
+                            if (idInvExistente > 0)
+                            {
+                                using (var cmdInv = VentaInventario.Comando(con, tr,
+                                    "UPDATE inventario SET StockActual = StockActual + @p0, FechaActualizada = NOW() WHERE IdInventario = @p1",
+                                    item.Item2, idInvExistente))
+                                {
+                                    cmdInv.ExecuteNonQuery();
+                                }
+                            }
+                            else
+                            {
+                                using (var cmdInv = VentaInventario.Comando(con, tr,
+                                    "INSERT INTO inventario (IdVariante, IdBodega, StockActual, StockReservado, FechaActualizada) VALUES (@p0, @p1, @p2, 0, NOW())",
+                                    item.Item1, bodegaReingreso, item.Item2))
+                                {
+                                    cmdInv.ExecuteNonQuery();
+                                }
+                            }
+
+                            // Incrementar cantidad disponible en el lote de esa variante y bodega (si existe)
+                            int? idLoteReingreso = null;
+                            using (var cmdSelLote = VentaInventario.Comando(con, tr,
+                                @"SELECT IdLote FROM lote 
+                                  WHERE IdVariante = @p0 AND (IdBodega = @p1 OR IdBodega IS NULL) 
+                                  ORDER BY (IdBodega = @p1) DESC, FechaVencimiento DESC, IdLote DESC LIMIT 1",
+                                item.Item1, bodegaReingreso))
+                            {
+                                var valLote = cmdSelLote.ExecuteScalar();
+                                if (valLote != null && valLote != DBNull.Value)
+                                    idLoteReingreso = Convert.ToInt32(valLote);
+                            }
+
+                            if (idLoteReingreso.HasValue)
+                            {
+                                using (var cmdUpdLote = VentaInventario.Comando(con, tr,
+                                    @"UPDATE lote 
+                                      SET CantidadDisponible = COALESCE(CantidadDisponible, 0) + @p0,
+                                          IdBodega = COALESCE(IdBodega, @p1),
+                                          Estado = IF(Estado = 'Agotado', 'Disponible', Estado)
+                                      WHERE IdLote = @p2",
+                                    item.Item2, bodegaReingreso, idLoteReingreso.Value))
+                                {
+                                    cmdUpdLote.ExecuteNonQuery();
+                                }
                             }
 
                             // Incrementar stock total en variante
                             using (var cmdVar = VentaInventario.Comando(con, tr,
                                 @"UPDATE varianteproducto 
-                                  SET StockTotal = StockTotal + @p0 
-                                  WHERE IdVariante = @p1", item.Item2, item.Item1))
+                                  SET StockTotal = (SELECT COALESCE(SUM(StockActual), 0) FROM inventario WHERE IdVariante = @p0)
+                                  WHERE IdVariante = @p0", item.Item1))
                             {
                                 cmdVar.ExecuteNonQuery();
                             }
 
                             // Registrar movimiento de inventario de entrada por devolución
-                            using (var cmdMov = VentaInventario.Comando(con, tr,
-                                @"INSERT INTO movimientoinventario 
-                                  (IdBodega, IdTipoMovimiento, IdUsuario, Cantidad, StockAnterior, StockPosterior, Referencia, Observacion, Origen, IdDetalleOrigen) 
-                                  SELECT @p0, IdTipoMovimiento, @p1, @p2, 0, @p2, @p3, @p4, 'Devolucion', @p5
-                                  FROM tipomovimiento WHERE Nombre IN ('Entrada', 'Ajuste positivo') LIMIT 1",
-                                bodegaReingreso, UsuarioVenta, item.Item2, folioNC, txtMotivo.Text.Trim(), idNotaCredito))
+                            if (idLoteReingreso.HasValue)
                             {
-                                cmdMov.ExecuteNonQuery();
+                                using (var cmdMov = VentaInventario.Comando(con, tr,
+                                    @"INSERT INTO movimientoinventario 
+                                      (IdLote, IdBodega, IdTipoMovimiento, IdUsuario, Cantidad, StockAnterior, StockPosterior, Referencia, Observacion, Origen, IdDetalleOrigen) 
+                                      SELECT @p0, @p1, IdTipoMovimiento, @p2, @p3, @p4, @p5, @p6, @p7, 'Devolucion', @p8
+                                      FROM tipomovimiento WHERE Nombre IN ('Entrada', 'Ajuste positivo') LIMIT 1",
+                                    idLoteReingreso.Value, bodegaReingreso, UsuarioVenta, item.Item2, stockAnt, stockAnt + item.Item2, folioNC, txtMotivo.Text.Trim(), idNotaCredito))
+                                {
+                                    cmdMov.ExecuteNonQuery();
+                                }
                             }
                         }
                     }

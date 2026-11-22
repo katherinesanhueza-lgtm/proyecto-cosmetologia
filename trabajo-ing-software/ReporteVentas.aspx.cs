@@ -14,10 +14,74 @@ namespace trabajo_ing_software
         {
             if (!IsPostBack)
             {
-                txtFechaDesde.Text = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).ToString("yyyy-MM-dd");
-                txtFechaHasta.Text = DateTime.Today.ToString("yyyy-MM-dd");
+                InicializarFechasPorDefecto();
                 CargarFiltroClientes();
+
+                string tipoParam = Request.QueryString["tipo"];
+                if (!string.IsNullOrEmpty(tipoParam) && ddlTipoReporte.Items.FindByValue(tipoParam) != null)
+                {
+                    ddlTipoReporte.SelectedValue = tipoParam;
+                }
+
+                string docParam = Request.QueryString["doc"];
+                if (!string.IsNullOrEmpty(docParam) && ddlFiltroDocumento.Items.FindByValue(docParam) != null)
+                {
+                    ddlFiltroDocumento.SelectedValue = docParam;
+                }
+
+                AlternarPaneles();
                 GenerarReporteActivo();
+            }
+        }
+
+        private void InicializarFechasPorDefecto()
+        {
+            DateTime inicioMesSeis = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(-5);
+            txtFechaDesde.Text = inicioMesSeis.ToString("yyyy-MM-dd");
+            txtFechaHasta.Text = DateTime.Today.ToString("yyyy-MM-dd");
+        }
+
+        public string ObtenerUrlRetorno()
+        {
+            string origen = (Request.QueryString["origen"] ?? "").ToLowerInvariant();
+            switch (origen)
+            {
+                case "pos": return "Ventas.aspx?vista=pos";
+                case "clientes": return "Clientes.aspx";
+                case "cotizaciones": return "Cotizaciones.aspx";
+                case "despachos": return "Despachos.aspx";
+                case "devoluciones": return "Devoluciones.aspx";
+                default:
+                    switch (ddlTipoReporte.SelectedValue)
+                    {
+                        case "2": return "Despachos.aspx";
+                        case "3": return "Clientes.aspx";
+                        case "4": return "Devoluciones.aspx";
+                        case "5": return "Cotizaciones.aspx";
+                        default: return "Ventas.aspx?vista=pos";
+                    }
+            }
+        }
+
+        public string ObtenerTextoRetorno()
+        {
+            string origen = (Request.QueryString["origen"] ?? "").ToLowerInvariant();
+            switch (origen)
+            {
+                case "pos": return "Volver a Punto de Venta";
+                case "clientes": return "Volver a Clientes";
+                case "cotizaciones": return "Volver a Cotizaciones";
+                case "despachos": return "Volver a Despachos";
+                case "devoluciones": return "Volver a Devoluciones";
+                default:
+                    switch (ddlTipoReporte.SelectedValue)
+                    {
+                        case "2": return "Volver a Despachos";
+                        case "3": return "Volver a Clientes";
+                        case "4": return "Volver a Devoluciones";
+                        case "5": return "Volver a Cotizaciones";
+                        default: return "Volver a Punto de Venta";
+                    }
             }
         }
 
@@ -48,6 +112,14 @@ namespace trabajo_ing_software
             GenerarReporteActivo();
         }
 
+        protected void btnLimpiar_Click(object sender, EventArgs e)
+        {
+            InicializarFechasPorDefecto();
+            if (ddlFiltroCliente.Items.Count > 0) ddlFiltroCliente.SelectedIndex = 0;
+            if (ddlFiltroDocumento.Items.Count > 0) ddlFiltroDocumento.SelectedIndex = 0;
+            GenerarReporteActivo();
+        }
+
         private void AlternarPaneles()
         {
             pnlReporte1.Visible = ddlTipoReporte.SelectedValue == "1";
@@ -58,11 +130,46 @@ namespace trabajo_ing_software
 
             switch (ddlTipoReporte.SelectedValue)
             {
-                case "1": lblTituloReporte.InnerText = "1. Historial General de Comprobantes de Venta"; break;
-                case "2": lblTituloReporte.InnerText = "2. Ventas y Rentabilidad Comercial por Producto"; break;
-                case "3": lblTituloReporte.InnerText = "3. Comportamiento y Créditos por Cliente"; break;
-                case "4": lblTituloReporte.InnerText = "4. Rendimiento Comercial por Vendedor"; break;
-                case "5": lblTituloReporte.InnerText = "5. Presupuestos y Tasa de Conversión a Venta"; break;
+                case "1":
+                    Page.Title = "Reporte de documentos de venta";
+                    lblBadgeReporte.Text = "REPORTE ANALÍTICO N° 1 - VENTAS";
+                    lblTituloPagina.Text = "Estado de Documentos de Venta";
+                    lblSubtituloPagina.Text = "Monitoreo analítico de boletas, facturas y notas de crédito emitidas, con liquidación de IVA Débito Fiscal.";
+                    lblTituloReporte.InnerText = "INFORME GERENCIAL: ESTADO E HISTORIAL DE COMPROBANTES DE VENTA";
+                    lblResumenEtiqueta.Text = "Total Facturado Período:";
+                    break;
+                case "2":
+                    Page.Title = "Reporte de salidas y productos";
+                    lblBadgeReporte.Text = "REPORTE ANALÍTICO N° 2 - VENTAS Y LOGÍSTICA";
+                    lblTituloPagina.Text = "Consolidado de Salidas y Rentabilidad por Producto";
+                    lblSubtituloPagina.Text = "Auditoría de salidas de insumos por SKU bajo rotación FEFO, ingresos brutos, costo estimado y margen comercial.";
+                    lblTituloReporte.InnerText = "INFORME CONSOLIDADO DE SALIDAS A CLIENTES Y RENTABILIDAD POR SKU";
+                    lblResumenEtiqueta.Text = "Total Ingresos por Productos:";
+                    break;
+                case "3":
+                    Page.Title = "Evaluación de clientes";
+                    lblBadgeReporte.Text = "REPORTE ANALÍTICO N° 3 - VENTAS";
+                    lblTituloPagina.Text = "Reporte: Evaluación Comercial de Clientes";
+                    lblSubtituloPagina.Text = "Análisis de comportamiento de compra, utilización de línea de crédito autorizada y saldos pendientes en cuentas por cobrar.";
+                    lblTituloReporte.InnerText = "INFORME ANALÍTICO: EVALUACIÓN DE CARTERA DE CLIENTES Y CRÉDITOS";
+                    lblResumenEtiqueta.Text = "Total Comprado Cartera:";
+                    break;
+                case "4":
+                    Page.Title = "Rendimiento por vendedor y NC";
+                    lblBadgeReporte.Text = "REPORTE ANALÍTICO N° 4 - VENTAS";
+                    lblTituloPagina.Text = "Análisis de Ventas por Ejecutivo y Devoluciones";
+                    lblSubtituloPagina.Text = "Consolidado de facturación, ticket promedio, participación comercial y notas de crédito asociadas por vendedor.";
+                    lblTituloReporte.InnerText = "INFORME GERENCIAL: RENDIMIENTO POR EJECUTIVO Y NOTAS DE CRÉDITO";
+                    lblResumenEtiqueta.Text = "Facturación Consolidada Período:";
+                    break;
+                case "5":
+                    Page.Title = "Reporte de cotizaciones";
+                    lblBadgeReporte.Text = "REPORTE ANALÍTICO N° 5 - VENTAS";
+                    lblTituloPagina.Text = "Historial de Presupuestos y Tasa de Conversión";
+                    lblSubtituloPagina.Text = "Evaluación de cotizaciones comerciales emitidas, control de plazos de validez y efectividad de cierre en ventas.";
+                    lblTituloReporte.InnerText = "INFORME ANALÍTICO: HISTORIAL DE PRESUPUESTOS Y TASA DE CONVERSIÓN";
+                    lblResumenEtiqueta.Text = "Total Presupuestado Período:";
+                    break;
             }
         }
 
@@ -76,8 +183,6 @@ namespace trabajo_ing_software
 
             lblPeriodoTexto.Text = $"{desde:dd/MM/yyyy} al {hasta:dd/MM/yyyy}";
 
-            CargarKPIs(desde, hasta);
-
             switch (ddlTipoReporte.SelectedValue)
             {
                 case "1": CargarReporte1(desde, hasta); break;
@@ -86,45 +191,6 @@ namespace trabajo_ing_software
                 case "4": CargarReporte4(desde, hasta); break;
                 case "5": CargarReporte5(desde, hasta); break;
                 default: CargarReporte1(desde, hasta); break;
-            }
-        }
-
-        private void CargarKPIs(DateTime desde, DateTime hasta)
-        {
-            using (MySqlConnection con = new MySqlConnection(connectionString))
-            {
-                string query = @"SELECT COUNT(IdVenta) AS Cantidad, 
-                                        IFNULL(SUM(Total), 0) AS Ingresos,
-                                        IFNULL(SUM(Neto), 0) AS Neto,
-                                        IFNULL(SUM(Iva), 0) AS Iva
-                                 FROM venta 
-                                 WHERE TipoDocumento <> 'Nota de Credito'
-                                   AND Fecha BETWEEN @Desde AND @Hasta";
-
-                using (MySqlCommand cmd = new MySqlCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@Desde", desde.Date);
-                    cmd.Parameters.AddWithValue("@Hasta", hasta.Date);
-                    con.Open();
-                    using (MySqlDataReader reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            int cant = Convert.ToInt32(reader["Cantidad"]);
-                            decimal ingresos = Convert.ToDecimal(reader["Ingresos"]);
-                            decimal neto = Convert.ToDecimal(reader["Neto"]);
-                            decimal iva = Convert.ToDecimal(reader["Iva"]);
-
-                            lblTotalTransacciones.Text = cant.ToString("N0");
-                            Label1.Text = "$" + ingresos.ToString("N0");
-                            lblIngresosTotales.Text = Label1.Text;
-                            lblCantidadVentas.Text = cant.ToString();
-
-                            lblNetoTotal.Text = "$" + (neto > 0 ? neto : Math.Round(ingresos / 1.19m, 2)).ToString("N0");
-                            lblIvaTotal.Text = "$" + (iva > 0 ? iva : ingresos - Math.Round(ingresos / 1.19m, 2)).ToString("N0");
-                        }
-                    }
-                }
             }
         }
 
@@ -154,6 +220,7 @@ namespace trabajo_ing_software
                               WHERE v.Fecha BETWEEN @Desde AND @Hasta {filtroExtra}
                               ORDER BY v.IdVenta DESC";
 
+            DataTable dt = new DataTable();
             using (MySqlConnection con = new MySqlConnection(connectionString))
             using (MySqlCommand cmd = new MySqlCommand(query, con))
             {
@@ -166,19 +233,52 @@ namespace trabajo_ing_software
 
                 using (MySqlDataAdapter sda = new MySqlDataAdapter(cmd))
                 {
-                    DataTable dt = new DataTable();
                     sda.Fill(dt);
                     gvReporteVentas.DataSource = dt;
                     gvReporteVentas.DataBind();
-                    return dt;
                 }
             }
+
+            decimal totalFacturado = 0, totalNeto = 0, totalIva = 0;
+            foreach (DataRow row in dt.Rows)
+            {
+                totalFacturado += Convert.ToDecimal(row["Total"]);
+                totalNeto += Convert.ToDecimal(row["Neto"]);
+                totalIva += Convert.ToDecimal(row["Iva"]);
+            }
+
+            lblKpi1Titulo.Text = "Total Documentos";
+            lblTotalTransacciones.Text = dt.Rows.Count.ToString("N0");
+            lblKpi1Sub.Text = "En el período seleccionado";
+
+            lblKpi2Titulo.Text = "Total Neto Ventas";
+            lblNetoTotal.Text = "$" + totalNeto.ToString("N0");
+            lblKpi2Sub.Text = "Base imponible sin IVA";
+
+            lblKpi3Titulo.Text = "IVA Débito Fiscal (19%)";
+            lblIvaTotal.Text = "$" + totalIva.ToString("N0");
+            lblKpi3Sub.Text = "Impuesto fiscal devengado";
+
+            lblKpi4Titulo.Text = "Total Facturado (c/ IVA)";
+            Label1.Text = "$" + totalFacturado.ToString("N0");
+            lblKpi4Sub.Text = "Ingresos brutos del período";
+
+            lblResumenTotal.Text = "$" + totalFacturado.ToString("N0");
+            return dt;
         }
 
-        // Reporte 2: Ventas y Rentabilidad por Producto
+        // Reporte 2: Ventas, Salidas y Rentabilidad por Producto
         private DataTable CargarReporte2(DateTime desde, DateTime hasta)
         {
-            string query = @"SELECT p.Nombre AS Producto, 
+            string filtroExtra = "";
+            if (!string.IsNullOrEmpty(ddlFiltroCliente.SelectedValue))
+                filtroExtra += " AND vt.IdCliente = @IdCliente";
+            if (ddlFiltroDocumento.SelectedValue != "Todos")
+                filtroExtra += " AND vt.TipoDocumento = @TipoDoc";
+            else
+                filtroExtra += " AND vt.TipoDocumento <> 'Nota de Credito'";
+
+            string query = $@"SELECT p.Nombre AS Producto, 
                                     v.Sku,
                                     SUM(vd.Cantidad) AS UnidadesVendidas, 
                                     ROUND(AVG(vd.PrecioUnitario), 0) AS PrecioPromedio,
@@ -189,120 +289,261 @@ namespace trabajo_ing_software
                              INNER JOIN varianteproducto v ON vd.IdVariante = v.IdVariante
                              INNER JOIN producto p ON v.IdProducto = p.IdProducto
                              INNER JOIN venta vt ON vd.IdVenta = vt.IdVenta
-                             WHERE vt.TipoDocumento <> 'Nota de Credito'
-                               AND vt.Fecha BETWEEN @Desde AND @Hasta
+                             WHERE vt.Fecha BETWEEN @Desde AND @Hasta {filtroExtra}
                              GROUP BY p.IdProducto, p.Nombre, v.IdVariante, v.Sku
                              ORDER BY UnidadesVendidas DESC";
 
+            DataTable dt = new DataTable();
             using (MySqlConnection con = new MySqlConnection(connectionString))
             using (MySqlCommand cmd = new MySqlCommand(query, con))
             {
                 cmd.Parameters.AddWithValue("@Desde", desde.Date);
                 cmd.Parameters.AddWithValue("@Hasta", hasta.Date);
+                if (!string.IsNullOrEmpty(ddlFiltroCliente.SelectedValue))
+                    cmd.Parameters.AddWithValue("@IdCliente", ddlFiltroCliente.SelectedValue);
+                if (ddlFiltroDocumento.SelectedValue != "Todos")
+                    cmd.Parameters.AddWithValue("@TipoDoc", ddlFiltroDocumento.SelectedValue);
+
                 using (MySqlDataAdapter sda = new MySqlDataAdapter(cmd))
                 {
-                    DataTable dt = new DataTable();
                     sda.Fill(dt);
                     gvTopProductos.DataSource = dt;
                     gvTopProductos.DataBind();
-                    return dt;
                 }
             }
+
+            int totalUnidades = 0;
+            decimal totalIngreso = 0, totalCosto = 0, totalMargen = 0;
+            foreach (DataRow row in dt.Rows)
+            {
+                totalUnidades += Convert.ToInt32(row["UnidadesVendidas"]);
+                totalIngreso += Convert.ToDecimal(row["IngresoTotal"]);
+                totalCosto += Convert.ToDecimal(row["CostoTotal"]);
+                totalMargen += Convert.ToDecimal(row["MargenBruto"]);
+            }
+
+            lblKpi1Titulo.Text = "SKUs Movilizados";
+            lblTotalTransacciones.Text = dt.Rows.Count.ToString("N0");
+            lblKpi1Sub.Text = "Insumos con salida efectiva";
+
+            lblKpi2Titulo.Text = "Unidades Despachadas";
+            lblNetoTotal.Text = totalUnidades.ToString("N0");
+            lblKpi2Sub.Text = "Productos físicos entregados";
+
+            lblKpi3Titulo.Text = "Costo Total Estimado";
+            lblIvaTotal.Text = "$" + totalCosto.ToString("N0");
+            lblKpi3Sub.Text = "Valorizado a costo promedio";
+
+            lblKpi4Titulo.Text = "Margen Comercial Bruto";
+            Label1.Text = "$" + totalMargen.ToString("N0");
+            lblKpi4Sub.Text = "Rentabilidad directa del período";
+
+            lblResumenTotal.Text = "$" + totalIngreso.ToString("N0");
+            return dt;
         }
 
         // Reporte 3: Comportamiento y Créditos por Cliente
         private DataTable CargarReporte3(DateTime desde, DateTime hasta)
         {
-            string query = @"SELECT c.Nombre AS Cliente, 
+            string filtroExtra = "";
+            if (!string.IsNullOrEmpty(ddlFiltroCliente.SelectedValue))
+                filtroExtra += " AND c.IdCliente = @IdCliente";
+
+            string query = $@"SELECT c.Nombre AS Cliente, 
                                     c.Rut,
                                     COALESCE(c.Categoria, 'General') AS Categoria,
                                     COUNT(v.IdVenta) AS Compras, 
-                                    SUM(v.Total) AS TotalGastado,
+                                    COALESCE(SUM(v.Total), 0) AS TotalGastado,
                                     (SELECT COALESCE(SUM(cc.MontoPendiente), 0) FROM cuentascobrar cc JOIN venta vt ON cc.IdVenta = vt.IdVenta WHERE vt.IdCliente = c.IdCliente AND cc.EstadoPago <> 'Pagado') AS DeudaPendiente,
                                     COALESCE(c.LimiteCredito, 0) AS LimiteCredito
-                             FROM venta v 
-                             INNER JOIN cliente c ON v.IdCliente = c.IdCliente 
-                             WHERE v.TipoDocumento <> 'Nota de Credito'
+                             FROM cliente c
+                             LEFT JOIN venta v ON v.IdCliente = c.IdCliente
+                               AND v.TipoDocumento <> 'Nota de Credito'
                                AND v.Fecha BETWEEN @Desde AND @Hasta
+                             WHERE COALESCE(c.Activo, 1) = 1 {filtroExtra}
                              GROUP BY c.IdCliente, c.Nombre, c.Rut, c.Categoria, c.LimiteCredito
                              ORDER BY TotalGastado DESC";
 
+            DataTable dt = new DataTable();
             using (MySqlConnection con = new MySqlConnection(connectionString))
             using (MySqlCommand cmd = new MySqlCommand(query, con))
             {
                 cmd.Parameters.AddWithValue("@Desde", desde.Date);
                 cmd.Parameters.AddWithValue("@Hasta", hasta.Date);
+                if (!string.IsNullOrEmpty(ddlFiltroCliente.SelectedValue))
+                    cmd.Parameters.AddWithValue("@IdCliente", ddlFiltroCliente.SelectedValue);
+
                 using (MySqlDataAdapter sda = new MySqlDataAdapter(cmd))
                 {
-                    DataTable dt = new DataTable();
                     sda.Fill(dt);
                     gvTopClientes.DataSource = dt;
                     gvTopClientes.DataBind();
-                    return dt;
                 }
             }
+
+            decimal totalGastado = 0, totalDeuda = 0, totalLimite = 0;
+            foreach (DataRow row in dt.Rows)
+            {
+                totalGastado += Convert.ToDecimal(row["TotalGastado"]);
+                totalDeuda += Convert.ToDecimal(row["DeudaPendiente"]);
+                totalLimite += Convert.ToDecimal(row["LimiteCredito"]);
+            }
+
+            lblKpi1Titulo.Text = "Clientes Activos";
+            lblTotalTransacciones.Text = dt.Rows.Count.ToString("N0");
+            lblKpi1Sub.Text = "En cartera comercial homologada";
+
+            lblKpi2Titulo.Text = "Total Facturado Cartera";
+            lblNetoTotal.Text = "$" + totalGastado.ToString("N0");
+            lblKpi2Sub.Text = "Compras en el período";
+
+            lblKpi3Titulo.Text = "Deuda CxC Vigente";
+            lblIvaTotal.Text = "$" + totalDeuda.ToString("N0");
+            lblKpi3Sub.Text = "Saldo pendiente por cobrar";
+
+            lblKpi4Titulo.Text = "Crédito Autorizado";
+            Label1.Text = "$" + totalLimite.ToString("N0");
+            lblKpi4Sub.Text = "Líneas aprobadas en cartera";
+
+            lblResumenTotal.Text = "$" + totalGastado.ToString("N0");
+            return dt;
         }
 
-        // Reporte 4: Rendimiento Comercial por Vendedor
+        // Reporte 4: Rendimiento Comercial por Vendedor y Notas de Crédito
         private DataTable CargarReporte4(DateTime desde, DateTime hasta)
         {
-            string query = @"SELECT u.Nombre AS Vendedor,
+            string filtroCliente = !string.IsNullOrEmpty(ddlFiltroCliente.SelectedValue) ? " AND v.IdCliente = @IdCliente" : "";
+
+            string query = $@"SELECT u.Nombre AS Vendedor,
                                     u.Rol,
-                                    COUNT(v.IdVenta) AS CantidadOperaciones,
-                                    SUM(v.Total) AS TotalVendido,
-                                    ROUND(AVG(v.Total), 0) AS TicketPromedio
+                                    COUNT(CASE WHEN v.TipoDocumento <> 'Nota de Credito' THEN 1 END) AS CantidadOperaciones,
+                                    COALESCE(SUM(CASE WHEN v.TipoDocumento <> 'Nota de Credito' THEN v.Total ELSE 0 END), 0) AS TotalVendido,
+                                    ROUND(COALESCE(AVG(CASE WHEN v.TipoDocumento <> 'Nota de Credito' THEN v.Total END), 0), 0) AS TicketPromedio,
+                                    COUNT(CASE WHEN v.TipoDocumento = 'Nota de Credito' THEN 1 END) AS TotalDevoluciones
                              FROM venta v
                              INNER JOIN usuario u ON v.IdUsuario = u.IdUsuario
-                             WHERE v.TipoDocumento <> 'Nota de Credito'
-                               AND v.Fecha BETWEEN @Desde AND @Hasta
+                             WHERE v.Fecha BETWEEN @Desde AND @Hasta {filtroCliente}
                              GROUP BY u.IdUsuario, u.Nombre, u.Rol
                              ORDER BY TotalVendido DESC";
 
+            DataTable dt = new DataTable();
             using (MySqlConnection con = new MySqlConnection(connectionString))
             using (MySqlCommand cmd = new MySqlCommand(query, con))
             {
                 cmd.Parameters.AddWithValue("@Desde", desde.Date);
                 cmd.Parameters.AddWithValue("@Hasta", hasta.Date);
+                if (!string.IsNullOrEmpty(ddlFiltroCliente.SelectedValue))
+                    cmd.Parameters.AddWithValue("@IdCliente", ddlFiltroCliente.SelectedValue);
+
                 using (MySqlDataAdapter sda = new MySqlDataAdapter(cmd))
                 {
-                    DataTable dt = new DataTable();
                     sda.Fill(dt);
-                    gvVendedores.DataSource = dt;
-                    gvVendedores.DataBind();
-                    return dt;
                 }
             }
+
+            dt.Columns.Add("ParticipacionPct", typeof(decimal));
+            decimal sumaTotal = 0;
+            int totalOps = 0, totalNC = 0;
+            foreach (DataRow r in dt.Rows)
+            {
+                sumaTotal += Convert.ToDecimal(r["TotalVendido"]);
+                totalOps += Convert.ToInt32(r["CantidadOperaciones"]);
+                totalNC += Convert.ToInt32(r["TotalDevoluciones"]);
+            }
+            foreach (DataRow r in dt.Rows)
+            {
+                decimal vendido = Convert.ToDecimal(r["TotalVendido"]);
+                r["ParticipacionPct"] = sumaTotal > 0 ? Math.Round(vendido / sumaTotal * 100m, 1) : 0m;
+            }
+
+            gvVendedores.DataSource = dt;
+            gvVendedores.DataBind();
+
+            decimal ticketGlobal = totalOps > 0 ? Math.Round(sumaTotal / totalOps, 0) : 0;
+
+            lblKpi1Titulo.Text = "Ejecutivos con Ventas";
+            lblTotalTransacciones.Text = dt.Rows.Count.ToString("N0");
+            lblKpi1Sub.Text = "Vendedores activos en período";
+
+            lblKpi2Titulo.Text = "Operaciones Emitidas";
+            lblNetoTotal.Text = totalOps.ToString("N0");
+            lblKpi2Sub.Text = "Boletas y facturas válidas";
+
+            lblKpi3Titulo.Text = "Ticket Promedio Global";
+            lblIvaTotal.Text = "$" + ticketGlobal.ToString("N0");
+            lblKpi3Sub.Text = "Promedio por venta cerrada";
+
+            lblKpi4Titulo.Text = "Devoluciones (N.C.)";
+            Label1.Text = totalNC.ToString("N0") + " N.C.";
+            lblKpi4Sub.Text = "Notas de crédito registradas";
+
+            lblResumenTotal.Text = "$" + sumaTotal.ToString("N0");
+            return dt;
         }
 
         // Reporte 5: Presupuestos y Tasa de Conversión
         private DataTable CargarReporte5(DateTime desde, DateTime hasta)
         {
-            string query = @"SELECT c.IdCotizacion,
+            string filtroCliente = !string.IsNullOrEmpty(ddlFiltroCliente.SelectedValue) ? " AND c.IdCliente = @IdCliente" : "";
+
+            string query = $@"SELECT c.IdCotizacion,
                                     cl.Nombre AS Cliente,
                                     c.FechaEmision,
                                     c.FechaVencimiento,
                                     c.Estado,
                                     c.Total,
-                                    IF(EXISTS(SELECT 1 FROM venta v WHERE v.IdCotizacion = c.IdCotizacion), 'Concretada en Venta', 'Sin Venta') AS VentaConcretada
+                                    IF(c.Estado = 'Aceptado' OR EXISTS(SELECT 1 FROM venta v WHERE v.IdCotizacion = c.IdCotizacion), 'Concretada en Venta', 'En Seguimiento') AS VentaConcretada
                              FROM cotizacion c
                              INNER JOIN cliente cl ON c.IdCliente = cl.IdCliente
-                             WHERE c.FechaEmision BETWEEN @Desde AND @Hasta
+                             WHERE c.FechaEmision BETWEEN @Desde AND @Hasta {filtroCliente}
                              ORDER BY c.IdCotizacion DESC";
 
+            DataTable dt = new DataTable();
             using (MySqlConnection con = new MySqlConnection(connectionString))
             using (MySqlCommand cmd = new MySqlCommand(query, con))
             {
                 cmd.Parameters.AddWithValue("@Desde", desde.Date);
                 cmd.Parameters.AddWithValue("@Hasta", hasta.Date);
+                if (!string.IsNullOrEmpty(ddlFiltroCliente.SelectedValue))
+                    cmd.Parameters.AddWithValue("@IdCliente", ddlFiltroCliente.SelectedValue);
+
                 using (MySqlDataAdapter sda = new MySqlDataAdapter(cmd))
                 {
-                    DataTable dt = new DataTable();
                     sda.Fill(dt);
                     gvCotizacionesReporte.DataSource = dt;
                     gvCotizacionesReporte.DataBind();
-                    return dt;
                 }
             }
+
+            int totalCot = dt.Rows.Count;
+            int aceptadas = 0;
+            decimal montoTotal = 0;
+            foreach (DataRow row in dt.Rows)
+            {
+                montoTotal += Convert.ToDecimal(row["Total"]);
+                if (row["VentaConcretada"].ToString().Contains("Concretada"))
+                    aceptadas++;
+            }
+            decimal tasa = totalCot > 0 ? Math.Round((decimal)aceptadas / totalCot * 100m, 1) : 0m;
+
+            lblKpi1Titulo.Text = "Total Presupuestos";
+            lblTotalTransacciones.Text = totalCot.ToString("N0");
+            lblKpi1Sub.Text = "Emitidos en el período";
+
+            lblKpi2Titulo.Text = "Aceptadas / Convertidas";
+            lblNetoTotal.Text = aceptadas.ToString("N0");
+            lblKpi2Sub.Text = "Concretadas en venta";
+
+            lblKpi3Titulo.Text = "Tasa de Conversión";
+            lblIvaTotal.Text = tasa.ToString("0.0") + "%";
+            lblKpi3Sub.Text = "Efectividad comercial";
+
+            lblKpi4Titulo.Text = "Monto Total Cotizado";
+            Label1.Text = "$" + montoTotal.ToString("N0");
+            lblKpi4Sub.Text = "Valor bruto presupuestado";
+
+            lblResumenTotal.Text = "$" + montoTotal.ToString("N0");
+            return dt;
         }
 
         protected void btnExportarExcel_Click(object sender, EventArgs e)
@@ -324,11 +565,11 @@ namespace trabajo_ing_software
                     break;
                 case "3":
                     dtExportar = CargarReporte3(desde, hasta);
-                    nombreArchivo = "Ventas_Credito_Clientes";
+                    nombreArchivo = "Evaluacion_Clientes_Creditos";
                     break;
                 case "4":
                     dtExportar = CargarReporte4(desde, hasta);
-                    nombreArchivo = "Rendimiento_Vendedores";
+                    nombreArchivo = "Rendimiento_Vendedores_Devoluciones";
                     break;
                 case "5":
                     dtExportar = CargarReporte5(desde, hasta);
@@ -336,7 +577,7 @@ namespace trabajo_ing_software
                     break;
                 default:
                     dtExportar = CargarReporte1(desde, hasta);
-                    nombreArchivo = "Historial_Ventas_Comprobantes";
+                    nombreArchivo = "Estado_Documentos_Ventas";
                     break;
             }
 

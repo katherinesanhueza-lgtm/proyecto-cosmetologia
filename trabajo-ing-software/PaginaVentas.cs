@@ -20,7 +20,7 @@ namespace trabajo_ing_software
             string pagina = System.IO.Path.GetFileNameWithoutExtension(AppRelativeVirtualPath);
             bool permitido = EsRol(rol, "Administrador") || EsRol(rol, "Vendedor")
                 || (pagina == "Despachos" && EsRol(rol, "Bodeguero"))
-                || (pagina == "ReporteVentas" && EsRol(rol, "Contador"));
+                || (pagina == "ReporteVentas" && (EsRol(rol, "Contador") || EsRol(rol, "Bodeguero")));
             if (!permitido) throw new HttpException(403, "Tu perfil no tiene acceso a esta pantalla de Ventas.");
             UsuarioVenta = usuario;
             ViewStateUserKey = Session.SessionID;

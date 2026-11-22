@@ -16,11 +16,23 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
     <div class="dashboard compras-resumen">
         
-        <header class="dashboard-header">
-            <div>
-                <p class="dashboard-etiqueta">Módulo de ventas · Gestión comercial</p>
-                <h1>Mantenedor de Clientes</h1>
-                <p class="dashboard-descripcion">Administración de cartera de clientes, giro comercial, condiciones y límites de crédito.</p>
+        <div style="margin-bottom: 22px;">
+            <span class="pill-badge" style="font-size: 10px; padding: 4px 12px; margin-bottom: 8px;">
+                M&Oacute;DULO DE VENTAS &amp; COMERCIAL &bull; CARTERA DE CLIENTES
+            </span>
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 15px;">
+                <div>
+                    <h1>Mantenedor de Clientes</h1>
+                    <p class="text-muted" style="margin: 0; max-width: 750px; line-height: 1.5;">
+                        Administraci&oacute;n de cartera de clientes, giro comercial, condiciones de pago y l&iacute;mites de cr&eacute;dito autorizados.
+                    </p>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <a href="ReporteVentas.aspx?tipo=3&amp;origen=clientes" class="btn btn-outline-secondary">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        Reporte de Evaluaci&oacute;n
+                    </a>
+                </div>
             </div>
             <!-- Controles antiguos ocultos para compatibilidad -->
             <div class="d-none">
@@ -28,7 +40,7 @@
                 <asp:Button ID="btnIrVentas" runat="server" OnClick="btnIrVentas_Click" />
                 <asp:Button ID="btnLogout" runat="server" OnClick="btnLogout_Click" />
             </div>
-        </header>
+        </div>
 
         <!-- TARJETA 1: FORMULARIO DE CLIENTE -->
         <section class="card-dermocosmetica" style="margin-bottom: 24px;">

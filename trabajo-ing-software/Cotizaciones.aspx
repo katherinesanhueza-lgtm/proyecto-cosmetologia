@@ -19,13 +19,19 @@
 <asp:Content ID="Contenido" ContentPlaceHolderID="MainContent" runat="server">
     <div class="dashboard compras-resumen">
         
-        <header class="dashboard-header">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
             <div>
-                <p class="dashboard-etiqueta">Módulo de ventas · Gestión comercial</p>
+                <span class="pill-badge" style="font-size: 10px; padding: 4px 12px; margin-bottom: 8px;">M&Oacute;DULO DE VENTAS - GESTI&Oacute;N COMERCIAL</span>
                 <h1>Presupuestos y Cotizaciones</h1>
-                <p class="dashboard-descripcion">Generación de presupuestos con períodos de validez y conversión directa a ventas.</p>
+                <p class="text-muted" style="margin-top: 4px;">Generaci&oacute;n de presupuestos con per&iacute;odos de validez y conversi&oacute;n directa a ventas.</p>
             </div>
-        </header>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <a href="ReporteVentas.aspx?tipo=5&amp;origen=cotizaciones" class="btn btn-outline-secondary">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    Reporte Tasa Conversi&oacute;n
+                </a>
+            </div>
+        </div>
 
         <!-- TARJETA 1: FORMULARIO DE COTIZACIÓN -->
         <section class="card-dermocosmetica" style="margin-bottom: 24px;">

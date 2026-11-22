@@ -28,7 +28,7 @@
         <asp:Panel ID="pnlResumenVentas" runat="server">
             <header class="dashboard-header">
                 <div>
-                    <p class="dashboard-etiqueta">Módulo de ventas</p>
+                    <p class="dashboard-etiqueta">MÓDULO DE VENTAS &amp; FACTURACIÓN &bull; RESUMEN EJECUTIVO</p>
                     <h1>Resumen de Ventas</h1>
                     <p class="dashboard-descripcion">Seguimiento de facturación comercial, documentos emitidos, despachos y cartera de clientes.</p>
                 </div>
@@ -97,13 +97,19 @@
 
         <!-- PANTALLA 2: PUNTO DE VENTA (SEPARADA) -->
         <asp:Panel ID="pnlPuntoVenta" runat="server" Visible="false">
-            <header class="dashboard-header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; flex-wrap: wrap; gap: 14px;">
                 <div>
-                    <p class="dashboard-etiqueta">Módulo de ventas · Emisión de documentos</p>
-                    <h1>Punto de Venta</h1>
-                    <p class="dashboard-descripcion">Emisión de facturas y boletas, verificación de stock en tiempo real, validación de crédito y salida FEFO.</p>
+                    <span class="pill-badge" style="font-size: 10px; padding: 4px 12px; margin-bottom: 8px;">M&Oacute;DULO DE VENTAS - FACTURACI&Oacute;N</span>
+                    <h1>Punto de Venta (POS)</h1>
+                    <p class="text-muted" style="margin-top: 4px;">Emisi&oacute;n de facturas y boletas, verificaci&oacute;n de stock en tiempo real, validaci&oacute;n de cr&eacute;dito y salida FEFO.</p>
                 </div>
-            </header>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <a href="ReporteVentas.aspx?tipo=1&amp;origen=pos" class="btn btn-outline-secondary">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        Reporte Anal&iacute;tico
+                    </a>
+                </div>
+            </div>
 
             <asp:Panel ID="pnlCotizacionInfo" runat="server" Visible="false" CssClass="alert alert-info d-flex justify-content-between align-items-center mb-4">
                 <div>

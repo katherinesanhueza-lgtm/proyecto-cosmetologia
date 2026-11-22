@@ -27,7 +27,7 @@ namespace trabajo_ing_software
 
             if (IsPostBack) return;
 
-            CargarLista(ddlClientes, "SELECT IdCliente AS Id, Nombre FROM cliente ORDER BY Nombre", "Selecciona un cliente");
+            CargarLista(ddlClientes, "SELECT IdCliente AS Id, Nombre FROM cliente WHERE COALESCE(Activo, 1) = 1 ORDER BY Nombre", "Selecciona un cliente");
             CargarLista(ddlBodega, "SELECT IdBodega AS Id, Nombre FROM bodega WHERE Activo=1 ORDER BY Nombre", "Selecciona una bodega");
             CargarProductos();
             InicializarCarrito();
@@ -51,9 +51,9 @@ namespace trabajo_ing_software
                 var cultura = new CultureInfo("es-CL");
                 var dtResumen = VentaInventario.Consultar(@"
                     SELECT 
-                        COALESCE((SELECT SUM(Total) FROM venta WHERE COALESCE(Estado,'Emitida') <> 'Anulada'), 0) AS TotalVentas,
-                        COALESCE((SELECT COUNT(*) FROM venta WHERE COALESCE(Estado,'Emitida') <> 'Anulada'), 0) AS CantVentas,
-                        COALESCE((SELECT COUNT(*) FROM despacho WHERE COALESCE(Estado,'Pendiente') <> 'Entregado'), 0) AS PorDespachar,
+                        COALESCE((SELECT SUM(Total) FROM venta WHERE COALESCE(Estado,'Emitida') <> 'Anulada' AND TipoDocumento <> 'Nota de Credito'), 0) AS TotalVentas,
+                        COALESCE((SELECT COUNT(*) FROM venta WHERE COALESCE(Estado,'Emitida') <> 'Anulada' AND TipoDocumento <> 'Nota de Credito'), 0) AS CantVentas,
+                        COALESCE((SELECT COUNT(*) FROM despacho WHERE COALESCE(Estado,'Pendiente') NOT IN ('Entregado', 'Cancelado')), 0) AS PorDespachar,
                         COALESCE((SELECT COUNT(*) FROM cliente WHERE COALESCE(Activo,1) = 1), 0) AS ClientesActivos");
 
                 if (dtResumen.Rows.Count > 0)
@@ -72,7 +72,7 @@ namespace trabajo_ing_software
                 var datosMeses = VentaInventario.Consultar(@"
                     SELECT EXTRACT(YEAR_MONTH FROM Fecha) AS Mes, COALESCE(SUM(Total), 0) AS Total
                     FROM venta
-                    WHERE Fecha >= @p0 AND Fecha < @p1 AND COALESCE(Estado,'Emitida') <> 'Anulada'
+                    WHERE Fecha >= @p0 AND Fecha < @p1 AND COALESCE(Estado,'Emitida') <> 'Anulada' AND TipoDocumento <> 'Nota de Credito'
                     GROUP BY EXTRACT(YEAR_MONTH FROM Fecha)", primero, mes.AddMonths(1));
                 var totales = datosMeses.AsEnumerable().ToDictionary(
                     fila => Convert.ToInt32(fila["Mes"]),
@@ -131,7 +131,7 @@ namespace trabajo_ing_software
         private void CargarProductos()
         {
             CargarLista(ddlProductos, @"SELECT v.IdVariante AS Id,
-                CONCAT(p.Nombre, ' · ', v.NombreVariante, ' (SKU: ', v.Sku, ') · $', v.PrecioVenta) AS Nombre
+                CONCAT(p.Nombre, ' · ', v.NombreVariante, ' (SKU: ', v.Sku, ') · $', FORMAT(v.PrecioVenta, 0, 'de_DE')) AS Nombre
                 FROM varianteproducto v JOIN producto p ON p.IdProducto=v.IdProducto
                 WHERE v.Activo=1 AND p.Activo=1 AND v.PrecioVenta>0 ORDER BY p.Nombre, v.Sku", "Selecciona un SKU / Producto");
         }
