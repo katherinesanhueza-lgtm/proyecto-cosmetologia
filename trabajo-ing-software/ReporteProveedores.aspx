@@ -64,34 +64,110 @@
         .badge-excelente {
             background-color: #E8F8F0;
             color: #27AE60;
-            padding: 4px 12px;
+            padding: 4px 11px;
             border-radius: 12px;
-            font-size: 12px;
+            font-size: 11.5px;
             font-weight: 600;
             display: inline-block;
+            white-space: nowrap;
         }
         .badge-aceptable {
             background-color: #FEF9E7;
-            color: #D4AC0D;
-            padding: 4px 12px;
+            color: #B7950B;
+            padding: 4px 11px;
             border-radius: 12px;
-            font-size: 12px;
+            font-size: 11.5px;
             font-weight: 600;
             display: inline-block;
+            white-space: nowrap;
         }
         .badge-critico {
             background-color: #FDEDEC;
             color: #C0392B;
-            padding: 4px 12px;
+            padding: 4px 11px;
             border-radius: 12px;
-            font-size: 12px;
+            font-size: 11.5px;
             font-weight: 600;
             display: inline-block;
+            white-space: nowrap;
         }
-        .table-dermo-container .table th,
+        .table-dermo-container .table th {
+            padding: 12px 10px;
+            font-size: 11px;
+            letter-spacing: 0.45px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            vertical-align: middle;
+        }
         .table-dermo-container .table td {
-            padding: 10px 8px;
+            padding: 11px 10px;
             font-size: 12.5px;
+            vertical-align: middle;
+        }
+        .col-center {
+            text-align: center !important;
+            white-space: nowrap;
+        }
+        .col-left {
+            text-align: left !important;
+        }
+        .prov-filter-card {
+            background: var(--color-blanco);
+            border: 1px solid var(--color-primario);
+            border-radius: 16px;
+            padding: 16px 20px !important;
+            margin-bottom: 22px;
+            box-shadow: 0 3px 12px rgba(50, 38, 27, 0.04);
+        }
+        .prov-filter-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px 16px;
+            align-items: end;
+        }
+        .prov-filter-grid .form-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #514435;
+            margin-bottom: 5px;
+        }
+        .prov-search-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .prov-search-wrap svg {
+            position: absolute;
+            left: 12px;
+            color: var(--color-texto-suave);
+            pointer-events: none;
+        }
+        .prov-search-wrap .form-control {
+            padding-left: 36px;
+        }
+        .prov-filter-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            align-items: center;
+        }
+        .prov-filter-actions .btn {
+            height: 38px;
+            width: 100%;
+            justify-content: center;
+        }
+        @media (max-width: 960px) {
+            .prov-filter-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .prov-filter-actions {
+                grid-column: 1 / -1;
+            }
+        }
+        @media (max-width: 600px) {
+            .prov-filter-grid {
+                grid-template-columns: 1fr;
+            }
         }
         @media print {
             .no-print {
@@ -161,25 +237,28 @@
             </div>
 
             <!-- Filtros BI de Proveedores -->
-            <div class="card-dermocosmetica no-print" style="margin-bottom: 20px; padding: 16px 20px;">
-                <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
-                    <div style="flex: 0 1 155px;">
+            <div class="prov-filter-card no-print">
+                <div class="prov-filter-grid">
+                    <div>
                         <label class="form-label">Fecha Desde</label>
                         <asp:TextBox ID="txtFechaDesde" runat="server" TextMode="Date" CssClass="form-control"></asp:TextBox>
                     </div>
-                    <div style="flex: 0 1 155px;">
+                    <div>
                         <label class="form-label">Fecha Hasta</label>
                         <asp:TextBox ID="txtFechaHasta" runat="server" TextMode="Date" CssClass="form-control"></asp:TextBox>
                     </div>
-                    <div style="flex: 1 1 200px;">
+                    <div>
                         <label class="form-label">Buscar Laboratorio / Marca</label>
-                        <asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control" placeholder="Ej: ISDIN, L'Or&eacute;al, CeraVe..."></asp:TextBox>
+                        <div class="prov-search-wrap">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            <asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control" placeholder="Ej: ISDIN, L'Or&eacute;al, CeraVe..."></asp:TextBox>
+                        </div>
                     </div>
-                    <div style="flex: 0 1 170px;">
+                    <div>
                         <label class="form-label">Pa&iacute;s</label>
                         <asp:DropDownList ID="ddlFiltroPais" runat="server" CssClass="form-select"></asp:DropDownList>
                     </div>
-                    <div style="flex: 0 1 175px;">
+                    <div>
                         <label class="form-label">Calificaci&oacute;n</label>
                         <asp:DropDownList ID="ddlFiltroCalificacion" runat="server" CssClass="form-select">
                             <asp:ListItem Value="" Text="Todas las Calificaciones"></asp:ListItem>
@@ -188,9 +267,9 @@
                             <asp:ListItem Value="Cr&#237;tico" Text="Cr&#237;tico"></asp:ListItem>
                         </asp:DropDownList>
                     </div>
-                    <div style="display: flex; gap: 8px;">
+                    <div class="prov-filter-actions">
                         <asp:Button ID="btnFiltrar" runat="server" Text="Filtrar" CssClass="btn btn-primary" OnClick="btnFiltrar_Click" />
-                        <asp:Button ID="btnLimpiar" runat="server" Text="Limpiar" CssClass="btn btn-outline-secondary" OnClick="btnLimpiar_Click" />
+                        <asp:Button ID="btnLimpiar" runat="server" Text="Limpiar filtros" CssClass="btn btn-outline-secondary" OnClick="btnLimpiar_Click" />
                     </div>
                 </div>
             </div>
@@ -225,32 +304,34 @@
                 <asp:GridView ID="gvReporte" runat="server" AutoGenerateColumns="False" 
                     CssClass="table table-hover align-middle" GridLines="None" EmptyDataText="No hay datos de compras u &oacute;rdenes registradas para evaluar.">
                     <Columns>
-                        <asp:BoundField DataField="RazonSocial" HeaderText="LABORATORIO" />
-                        <asp:BoundField DataField="Marca" HeaderText="MARCA" />
-                        <asp:BoundField DataField="Pais" HeaderText="PA&Iacute;S" HtmlEncode="false" />
-                        <asp:BoundField DataField="DiasPago" HeaderText="PLAZO CR&Eacute;DITO" HtmlEncode="false" />
-                        <asp:BoundField DataField="TotalOC" HeaderText="&Oacute;RDENES" HtmlEncode="false" />
-                        <asp:BoundField DataField="TotalRecepciones" HeaderText="RECEPCIONES" HtmlEncode="false" />
+                        <asp:BoundField DataField="RazonSocial" HeaderText="Laboratorio" HeaderStyle-CssClass="col-left" ItemStyle-CssClass="col-left fw-semibold" />
+                        <asp:BoundField DataField="Marca" HeaderText="Marca" HeaderStyle-CssClass="col-left" ItemStyle-CssClass="col-left" />
+                        <asp:BoundField DataField="Pais" HeaderText="Pa&iacute;s" HtmlEncode="false" HeaderStyle-CssClass="col-center" ItemStyle-CssClass="col-center" />
+                        <asp:TemplateField HeaderText="Plazo" HeaderStyle-CssClass="col-center" ItemStyle-CssClass="col-center">
+                            <ItemTemplate><%# Eval("DiasPago") %> d&iacute;as</ItemTemplate>
+                        </asp:TemplateField>
+                        <asp:BoundField DataField="TotalOC" HeaderText="&Oacute;rdenes" HtmlEncode="false" HeaderStyle-CssClass="col-center" ItemStyle-CssClass="col-center" />
+                        <asp:BoundField DataField="TotalRecepciones" HeaderText="Recep." HtmlEncode="false" HeaderStyle-CssClass="col-center" ItemStyle-CssClass="col-center" />
                         
-                        <asp:TemplateField HeaderText="LEAD TIME PROMEDIO (BI)">
+                        <asp:TemplateField HeaderText="Lead Time" HeaderStyle-CssClass="col-center" ItemStyle-CssClass="col-center">
                             <ItemTemplate>
                                 <%# FormatLeadTime(Eval("LeadTimePromedioDias"), Eval("TotalRecepciones")) %>
                             </ItemTemplate>
                         </asp:TemplateField>
 
-                        <asp:TemplateField HeaderText="TASA DEFECTOS (BI)">
+                        <asp:TemplateField HeaderText="Defectos" HeaderStyle-CssClass="col-center" ItemStyle-CssClass="col-center">
                             <ItemTemplate>
                                 <%# FormatTasaDefectos(Eval("TasaDefectosPorcentaje"), Eval("TotalDevoluciones"), Eval("TotalRecepciones")) %>
                             </ItemTemplate>
                         </asp:TemplateField>
 
-                        <asp:TemplateField HeaderText="% CUMPLIMIENTO">
+                        <asp:TemplateField HeaderText="Cumplimiento" HeaderStyle-CssClass="col-center" ItemStyle-CssClass="col-center">
                             <ItemTemplate>
                                 <strong><%# Eval("PorcentajeCumplimiento") %>%</strong>
                             </ItemTemplate>
                         </asp:TemplateField>
 
-                        <asp:TemplateField HeaderText="CALIFICACI&Oacute;N">
+                        <asp:TemplateField HeaderText="Calificaci&oacute;n" HeaderStyle-CssClass="col-center" ItemStyle-CssClass="col-center">
                             <ItemTemplate>
                                 <span class='<%# GetClaseCalificacion(Eval("Calificacion").ToString()) %>'>
                                     <%# Eval("Calificacion") %>

@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Text;
 using System.Xml;
 
@@ -9,45 +10,226 @@ namespace trabajo_ing_software
 {
     internal static class ContabilidadExportacion
     {
-        private const string ExcelNs = "urn:schemas-microsoft-com:office:spreadsheet";
+        internal const string ExcelMimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+        internal static void DescargarExcel(System.Web.HttpResponse response, DataTable datos, string nombre)
+        {
+            response.Clear();
+            response.ContentType = ExcelMimeType;
+            response.ContentEncoding = Encoding.UTF8;
+            response.AddHeader("Content-Disposition", "attachment; filename=" + nombre + ".xlsx");
+            response.BinaryWrite(Excel(datos));
+            response.Flush();
+            response.SuppressContent = true;
+            if (System.Web.HttpContext.Current != null)
+                System.Web.HttpContext.Current.ApplicationInstance.CompleteRequest();
+        }
 
         internal static byte[] Excel(DataTable tabla)
         {
             using (var salida = new MemoryStream())
             {
-                using (var xml = XmlWriter.Create(salida, new XmlWriterSettings { Encoding = new UTF8Encoding(false) }))
+                using (var zip = new ZipArchive(salida, ZipArchiveMode.Create, true))
                 {
-                    xml.WriteProcessingInstruction("mso-application", "progid=\"Excel.Sheet\"");
-                    xml.WriteStartElement("Workbook", ExcelNs);
-                    xml.WriteStartElement("Worksheet", ExcelNs);
-                    xml.WriteAttributeString("ss", "Name", ExcelNs, "Contabilidad");
-                    xml.WriteStartElement("Table", ExcelNs);
-                    xml.WriteStartElement("Row", ExcelNs);
-                    foreach (DataColumn columna in tabla.Columns) Celda(xml, columna.ColumnName);
-                    xml.WriteEndElement();
-                    foreach (DataRow fila in tabla.Rows)
-                    {
-                        xml.WriteStartElement("Row", ExcelNs);
-                        foreach (object valor in fila.ItemArray) Celda(xml, valor);
-                        xml.WriteEndElement();
-                    }
-                    xml.WriteEndElement();
-                    xml.WriteEndElement();
-                    xml.WriteEndElement();
+                    AgregarEntradaZip(zip, "[Content_Types].xml",
+                        "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
+                        "<Types xmlns=\"http://schemas.openxmlformats.org/package/2006/content-types\">" +
+                        "<Default Extension=\"rels\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\"/>" +
+                        "<Default Extension=\"xml\" ContentType=\"application/xml\"/>" +
+                        "<Override PartName=\"/xl/workbook.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml\"/>" +
+                        "<Override PartName=\"/xl/worksheets/sheet1.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>" +
+                        "<Override PartName=\"/xl/styles.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml\"/>" +
+                        "</Types>");
+
+                    AgregarEntradaZip(zip, "_rels/.rels",
+                        "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
+                        "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">" +
+                        "<Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument\" Target=\"xl/workbook.xml\"/>" +
+                        "</Relationships>");
+
+                    AgregarEntradaZip(zip, "xl/workbook.xml",
+                        "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
+                        "<workbook xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\">" +
+                        "<sheets><sheet name=\"Reporte\" sheetId=\"1\" r:id=\"rId1\"/></sheets>" +
+                        "</workbook>");
+
+                    AgregarEntradaZip(zip, "xl/_rels/workbook.xml.rels",
+                        "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
+                        "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">" +
+                        "<Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"worksheets/sheet1.xml\"/>" +
+                        "<Relationship Id=\"rId2\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles\" Target=\"styles.xml\"/>" +
+                        "</Relationships>");
+
+                    AgregarEntradaZip(zip, "xl/styles.xml",
+                        "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>" +
+                        "<styleSheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\">" +
+                        "<fonts count=\"2\">" +
+                        "<font><sz val=\"11\"/><name val=\"Calibri\"/></font>" +
+                        "<font><b/><sz val=\"11\"/><color rgb=\"FF24211E\"/><name val=\"Calibri\"/></font>" +
+                        "</fonts>" +
+                        "<fills count=\"3\">" +
+                        "<fill><patternFill patternType=\"none\"/></fill>" +
+                        "<fill><patternFill patternType=\"gray125\"/></fill>" +
+                        "<fill><patternFill patternType=\"solid\"><fgColor rgb=\"FFF4EFEA\"/><bgColor indexed=\"64\"/></patternFill></fill>" +
+                        "</fills>" +
+                        "<borders count=\"2\">" +
+                        "<border><left/><right/><top/><bottom/><diagonal/></border>" +
+                        "<border><left/><right/><top/><bottom style=\"thin\"><color rgb=\"FFD5C7B6\"/></bottom><diagonal/></border>" +
+                        "</borders>" +
+                        "<cellStyleXfs count=\"1\"><xf numFmtId=\"0\" fontId=\"0\" fillId=\"0\" borderId=\"0\"/></cellStyleXfs>" +
+                        "<cellXfs count=\"2\">" +
+                        "<xf numFmtId=\"0\" fontId=\"0\" fillId=\"0\" borderId=\"0\" xfId=\"0\"/>" +
+                        "<xf numFmtId=\"0\" fontId=\"1\" fillId=\"2\" borderId=\"1\" xfId=\"0\" applyFont=\"1\" applyFill=\"1\" applyBorder=\"1\"/>" +
+                        "</cellXfs>" +
+                        "</styleSheet>");
+
+                    AgregarEntradaZip(zip, "xl/worksheets/sheet1.xml", ConstruirHojaXml(tabla));
                 }
                 return salida.ToArray();
             }
         }
 
-        private static void Celda(XmlWriter xml, object valor)
+        private static void AgregarEntradaZip(ZipArchive zip, string ruta, string contenido)
         {
-            bool numerico = valor is decimal || valor is int || valor is long;
-            xml.WriteStartElement("Cell", ExcelNs);
-            xml.WriteStartElement("Data", ExcelNs);
-            xml.WriteAttributeString("ss", "Type", ExcelNs, numerico ? "Number" : "String");
-            xml.WriteString(Convert.ToString(valor, CultureInfo.InvariantCulture));
-            xml.WriteEndElement();
-            xml.WriteEndElement();
+            var entrada = zip.CreateEntry(ruta, CompressionLevel.Optimal);
+            using (var writer = new StreamWriter(entrada.Open(), new UTF8Encoding(false)))
+            {
+                writer.Write(contenido);
+            }
+        }
+
+        private static string ConstruirHojaXml(DataTable tabla)
+        {
+            int colCount = tabla.Columns.Count;
+            int[] anchos = new int[colCount];
+            for (int c = 0; c < colCount; c++)
+                anchos[c] = Math.Max(12, Math.Min(42, tabla.Columns[c].ColumnName.Length + 4));
+
+            var culturaCl = new CultureInfo("es-CL");
+            var filasTexto = new string[tabla.Rows.Count, colCount];
+            var filasNum = new bool[tabla.Rows.Count, colCount];
+
+            for (int r = 0; r < tabla.Rows.Count; r++)
+            {
+                for (int c = 0; c < colCount; c++)
+                {
+                    object valor = tabla.Rows[r][c];
+                    bool esNulo = valor == null || valor == DBNull.Value;
+                    bool numerico = !esNulo && (valor is decimal || valor is int || valor is long || valor is double || valor is float || valor is short || valor is uint || valor is ulong);
+                    string texto;
+                    if (esNulo)
+                        texto = "";
+                    else if (valor is DateTime dt)
+                        texto = dt.TimeOfDay == TimeSpan.Zero ? dt.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : dt.ToString("dd/MM/yyyy HH:mm", CultureInfo.InvariantCulture);
+                    else if (numerico)
+                        texto = Convert.ToString(valor, CultureInfo.InvariantCulture);
+                    else
+                        texto = LimpiarTextoXml(Convert.ToString(valor, culturaCl));
+
+                    filasTexto[r, c] = texto;
+                    filasNum[r, c] = numerico;
+                    if (texto.Length + 3 > anchos[c])
+                        anchos[c] = Math.Min(45, texto.Length + 3);
+                }
+            }
+
+            var sb = new StringBuilder();
+            using (var xml = XmlWriter.Create(sb, new XmlWriterSettings { OmitXmlDeclaration = false, Encoding = new UTF8Encoding(false) }))
+            {
+                const string ns = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
+                xml.WriteStartDocument(true);
+                xml.WriteStartElement("worksheet", ns);
+
+                if (colCount > 0)
+                {
+                    xml.WriteStartElement("cols", ns);
+                    for (int c = 0; c < colCount; c++)
+                    {
+                        xml.WriteStartElement("col", ns);
+                        xml.WriteAttributeString("min", (c + 1).ToString(CultureInfo.InvariantCulture));
+                        xml.WriteAttributeString("max", (c + 1).ToString(CultureInfo.InvariantCulture));
+                        xml.WriteAttributeString("width", anchos[c].ToString(CultureInfo.InvariantCulture));
+                        xml.WriteAttributeString("customWidth", "1");
+                        xml.WriteEndElement();
+                    }
+                    xml.WriteEndElement();
+                }
+
+                xml.WriteStartElement("sheetData", ns);
+
+                // Fila 1: encabezados con estilo negrita y fondo crema
+                xml.WriteStartElement("row", ns);
+                xml.WriteAttributeString("r", "1");
+                for (int c = 0; c < colCount; c++)
+                {
+                    xml.WriteStartElement("c", ns);
+                    xml.WriteAttributeString("r", LetraColumna(c) + "1");
+                    xml.WriteAttributeString("t", "inlineStr");
+                    xml.WriteAttributeString("s", "1");
+                    xml.WriteStartElement("is", ns);
+                    xml.WriteElementString("t", ns, LimpiarTextoXml(tabla.Columns[c].ColumnName));
+                    xml.WriteEndElement();
+                    xml.WriteEndElement();
+                }
+                xml.WriteEndElement();
+
+                // Filas de datos
+                for (int r = 0; r < tabla.Rows.Count; r++)
+                {
+                    string numFila = (r + 2).ToString(CultureInfo.InvariantCulture);
+                    xml.WriteStartElement("row", ns);
+                    xml.WriteAttributeString("r", numFila);
+                    for (int c = 0; c < colCount; c++)
+                    {
+                        string texto = filasTexto[r, c];
+                        xml.WriteStartElement("c", ns);
+                        xml.WriteAttributeString("r", LetraColumna(c) + numFila);
+                        if (filasNum[r, c])
+                        {
+                            xml.WriteElementString("v", ns, texto);
+                        }
+                        else
+                        {
+                            xml.WriteAttributeString("t", "inlineStr");
+                            xml.WriteStartElement("is", ns);
+                            xml.WriteElementString("t", ns, texto);
+                            xml.WriteEndElement();
+                        }
+                        xml.WriteEndElement();
+                    }
+                    xml.WriteEndElement();
+                }
+
+                xml.WriteEndElement();
+                xml.WriteEndElement();
+                xml.WriteEndDocument();
+            }
+            return sb.ToString().Replace("encoding=\"utf-16\"", "encoding=\"UTF-8\"");
+        }
+
+        private static string LetraColumna(int indice)
+        {
+            string nombre = "";
+            int n = indice + 1;
+            while (n > 0)
+            {
+                int modulo = (n - 1) % 26;
+                nombre = Convert.ToChar('A' + modulo) + nombre;
+                n = (n - modulo) / 26;
+            }
+            return nombre;
+        }
+
+        private static string LimpiarTextoXml(string valor)
+        {
+            if (string.IsNullOrEmpty(valor)) return "";
+            var sb = new StringBuilder(valor.Length);
+            foreach (char ch in valor)
+            {
+                if (ch == '\t' || ch == '\n' || ch == '\r' || ch >= 0x20)
+                    sb.Append(ch);
+            }
+            return sb.ToString();
         }
 
         internal static byte[] Pdf(string titulo, DataTable tabla)

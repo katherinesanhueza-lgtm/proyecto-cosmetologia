@@ -9,7 +9,7 @@ using MySql.Data.MySqlClient;
 
 namespace trabajo_ing_software
 {
-    public partial class ReporteCotizaciones : Page
+    public partial class ReporteCotizaciones : PaginaCompras
     {
         private readonly string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null
             ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString
@@ -379,42 +379,46 @@ namespace trabajo_ing_software
             decimal varPromPct, mayorAlzaPct, costoPromClp;
             string skuMayorAlza;
 
-            DataTable dt = ConstruirTablaConVariaciones(out totalRegistros, out totalSkus, out varPromPct, out mayorAlzaPct, out skuMayorAlza, out costoPromClp);
+            DataTable raw = ConstruirTablaConVariaciones(out totalRegistros, out totalSkus, out varPromPct, out mayorAlzaPct, out skuMayorAlza, out costoPromClp);
+            DataTable limpio = new DataTable();
+            limpio.Columns.Add("Fecha", typeof(DateTime));
+            limpio.Columns.Add("SKU", typeof(string));
+            limpio.Columns.Add("Producto", typeof(string));
+            limpio.Columns.Add("Laboratorio", typeof(string));
+            limpio.Columns.Add("Origen", typeof(string));
+            limpio.Columns.Add("Documento", typeof(string));
+            limpio.Columns.Add("Estado", typeof(string));
+            limpio.Columns.Add("Moneda", typeof(string));
+            limpio.Columns.Add("Tipo de Cambio", typeof(decimal));
+            limpio.Columns.Add("Costo Origen", typeof(decimal));
+            limpio.Columns.Add("Costo Unitario (CLP)", typeof(decimal));
+            limpio.Columns.Add("CPP Actual (CLP)", typeof(decimal));
+            limpio.Columns.Add("Variación Histórica", typeof(string));
+            limpio.Columns.Add("Detalle Variación", typeof(string));
+            limpio.Columns.Add("Margen Estimado", typeof(string));
 
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine("Fecha;SKU;Producto;Laboratorio;Origen;Documento;Estado;Moneda;Tipo Cambio (CLP);Costo Origen;Costo Unitario (CLP);CPP Actual (CLP);Variación Histórica;Detalle Variación;Margen Est.");
-
-            foreach (DataRow dr in dt.Rows)
+            foreach (DataRow r in raw.Rows)
             {
-                sb.AppendLine(string.Format("{0:dd/MM/yyyy};{1};\"{2}\";\"{3}\";{4};{5};{6};{7};{8};{9};{10};{11};{12};\"{13}\";{14}",
-                    dr["Fecha"],
-                    dr["Sku"],
-                    dr["Producto"],
-                    dr["Laboratorio"],
-                    dr["TipoOperacion"],
-                    dr["Documento"],
-                    dr["EstadoDoc"],
-                    dr["Moneda"],
-                    dr["TipoCambio"],
-                    dr["CostoOrigen"],
-                    dr["CostoUnitarioCLP"],
-                    dr["CostoPromedioActual"],
-                    dr["VariacionTxt"],
-                    dr["VariacionDetalle"],
-                    dr["MargenTxt"]
-                ));
+                limpio.Rows.Add(
+                    Convert.ToDateTime(r["Fecha"]),
+                    Convert.ToString(r["Sku"]),
+                    Convert.ToString(r["Producto"]),
+                    Convert.ToString(r["Laboratorio"]),
+                    Convert.ToString(r["TipoOperacion"]),
+                    Convert.ToString(r["Documento"]),
+                    Convert.ToString(r["EstadoDoc"]),
+                    Convert.ToString(r["Moneda"]),
+                    Convert.ToDecimal(r["TipoCambio"]),
+                    Convert.ToDecimal(r["CostoOrigen"]),
+                    Convert.ToDecimal(r["CostoUnitarioCLP"]),
+                    Convert.ToDecimal(r["CostoPromedioActual"]),
+                    Convert.ToString(r["VariacionTxt"]),
+                    Convert.ToString(r["VariacionDetalle"]),
+                    Convert.ToString(r["MargenTxt"])
+                );
             }
 
-            Response.Clear();
-            Response.Buffer = true;
-            Response.AddHeader("content-disposition", "attachment;filename=Reporte_Variacion_Costos_Insumos.csv");
-            Response.Charset = "utf-8";
-            Response.ContentType = "text/csv";
-            Response.ContentEncoding = Encoding.UTF8;
-            Response.BinaryWrite(Encoding.UTF8.GetPreamble());
-            Response.Output.Write(sb.ToString());
-            Response.Flush();
-            Response.End();
+            ContabilidadExportacion.DescargarExcel(Response, limpio, "Reporte_Variacion_Costos_Insumos");
         }
 
         protected void btnLogout_Click(object sender, EventArgs e)

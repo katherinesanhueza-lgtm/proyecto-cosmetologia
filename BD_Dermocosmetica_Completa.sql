@@ -721,12 +721,12 @@ ON DUPLICATE KEY UPDATE `Nombre` = VALUES(`Nombre`);
 -- SEED DATA: Usuarios con acceso a cada módulo (Password: 1234)
 -- =========================================================================
 INSERT INTO `usuario` (`IdUsuario`, `IdRol`, `Nombre`, `Correo`, `Password`, `Rol`, `Activo`) VALUES 
-(1, 1, 'Camilo Admin', 'admin@dermo.cl', '1234', 'Administrador', 1),
-(2, 2, 'Raul Martinez', 'raul1@dermo.cl', '1234', 'Vendedor', 1),
-(3, 3, 'Javiera Rail (Compras)', 'comprador@dermo.cl', '1234', 'Comprador', 1),
-(4, 4, 'Bodeguero Central', 'bodega@dermo.cl', '1234', 'Bodeguero', 1),
-(5, 5, 'Contador General', 'contador@dermo.cl', '1234', 'Contador', 1),
-(6, 2, 'Valentina Rojas (Ventas)', 'vrojas@dermo.cl', '1234', 'Vendedor', 1)
+(1, 1, 'Camilo Admin', 'admin@dermo.cl', 'pbkdf2-sha256$/wE07cks+Km96gOC9KkvRQ==$IZr5L1cto1lEii0bzrDITiKU6QbP4gVO06EgiMY3vQk=', 'Administrador', 1),
+(2, 2, 'Raul Martinez', 'raul1@dermo.cl', 'pbkdf2-sha256$m40w3GGfZOktTOPW2xHu0Q==$ZEPAR+yWzyQHU2sLuyv3FNqG6WemL/CMqyv5OMxK4Ho=', 'Vendedor', 1),
+(3, 3, 'Javiera Rail (Compras)', 'comprador@dermo.cl', 'pbkdf2-sha256$Tt61cZwtF5gtCBCf3ad+lw==$zrAFYZN+B5/YFmzOOb0tUN97HPoKBsvbIvX7dr8JMhg=', 'Comprador', 1),
+(4, 4, 'Bodeguero Central', 'bodega@dermo.cl', 'pbkdf2-sha256$haKZ7+EoggjyQP/EEDN+9Q==$9MzXUlc9HHT4EGD82lF1Si7wghN4RXyxH1+ENr+o2tw=', 'Bodeguero', 1),
+(5, 5, 'Contador General', 'contador@dermo.cl', 'pbkdf2-sha256$eEUfVdUvojB3ckEWcfJLeQ==$Caj7X503qffbLOz9zSx+f08LtMW28BB/zVKiRd9R4Us=', 'Contador', 1),
+(6, 2, 'Valentina Rojas (Ventas)', 'vrojas@dermo.cl', 'pbkdf2-sha256$GQRFpDwKtZ9uQ9A15aGABQ==$P6x0CHQAdX5ZI43HH94OUZF73wnNiTqpRHZyrXdcCSg=', 'Vendedor', 1)
 ON DUPLICATE KEY UPDATE `Password` = VALUES(`Password`), `Activo` = VALUES(`Activo`);
 
 -- =========================================================================
@@ -1131,19 +1131,15 @@ BEGIN
         SELECT IdPeriodo INTO v_IdPeriodo
         FROM periodocontable
         WHERE Estado = 'Abierto' AND v_FechaRec BETWEEN FechaInicio AND FechaFin
-        ORDER BY FechaInicio DESC LIMIT 1;
+        ORDER BY FechaInicio DESC LIMIT 1 FOR UPDATE;
 
-        IF v_IdPeriodo IS NULL THEN
-            SELECT IdPeriodo INTO v_IdPeriodo
-            FROM periodocontable
-            WHERE Estado = 'Abierto'
-            ORDER BY FechaInicio DESC LIMIT 1;
-        END IF;
+        IF v_IdPeriodo IS NULL THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='No hay período abierto para esta recepción'; END IF;
 
         SELECT IdCuentaContable INTO v_CtaExistencias FROM cuentacontable WHERE Imputable = 1 AND Codigo = '1105' LIMIT 1;
         SELECT IdCuentaContable INTO v_CtaIva         FROM cuentacontable WHERE Imputable = 1 AND Codigo = '1109' LIMIT 1;
         SELECT IdCuentaContable INTO v_CtaProveedores FROM cuentacontable WHERE Imputable = 1 AND Codigo = '2101' LIMIT 1;
 
+        IF v_CtaExistencias IS NULL OR v_CtaProveedores IS NULL OR (v_Iva>0 AND v_CtaIva IS NULL) THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Falta una cuenta contable de compras'; END IF;
         IF v_IdPeriodo IS NOT NULL AND v_CtaExistencias IS NOT NULL AND v_CtaProveedores IS NOT NULL THEN
             INSERT INTO asientocontable (IdPeriodo, Fecha, Glosa, IdUsuario, Origen, IdOrigen)
             VALUES (

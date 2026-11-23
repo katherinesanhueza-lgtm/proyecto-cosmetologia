@@ -92,30 +92,6 @@
         .badge-cxp-pagada { background: #E8F8F0; color: #27AE60; }
         .badge-cxp-vencida { background: #FDEDEC; color: #C0392B; }
 
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(46, 46, 46, 0.5);
-            backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-
-        .modal-recibo-card {
-            background: var(--color-blanco);
-            border-radius: 20px;
-            width: 92%;
-            max-width: 760px;
-            max-height: 92vh;
-            overflow-y: auto;
-            box-shadow: 0 12px 45px rgba(0,0,0,0.18);
-            border: 1px solid var(--color-primario);
-            padding: 28px;
-        }
-
         .recibo-sheet {
             border: 1px solid var(--color-primario);
             border-radius: 14px;
@@ -188,12 +164,15 @@
         <!-- MENSAJE -->
         <asp:Label ID="lblMensaje" runat="server" Visible="false" style="display: block; padding: 14px 18px; border-radius: 14px; margin-bottom: 18px; font-weight: 500;"></asp:Label>
 
-        <!-- FORMULARIO DE PAGO (TOTAL / PARCIAL) -->
-        <asp:Panel ID="pnlFormPago" runat="server" Visible="false" style="margin-bottom: 24px;">
-            <section class="card-dermocosmetica">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-primario); padding-bottom: 12px; margin-bottom: 18px;">
-                    <h2 style="margin: 0; font-size: 20px;">Registrar Pago a Proveedor (Total o Parcial)</h2>
-                    <asp:Button ID="btnCerrarForm" runat="server" Text="Cerrar" CssClass="btn btn-outline-secondary btn-sm" OnClick="btnCancelarPago_Click" CausesValidation="false" />
+        <!-- MODAL FLOTANTE DE PAGO (TOTAL / PARCIAL) -->
+        <asp:Panel ID="pnlFormPago" runat="server" Visible="false" CssClass="modal-overlay">
+            <section class="modal-content-card modal-md-card">
+                <div class="modal-header-dermo">
+                    <div>
+                        <span class="pill-badge" style="font-size: 10px; padding: 3px 10px;">TESORER&Iacute;A Y PAGOS</span>
+                        <h2 style="font-size: 22px; margin: 6px 0 2px 0; font-family: 'Playfair Display', Georgia, serif; color: var(--color-texto);">Registrar Pago a Proveedor (Total o Parcial)</h2>
+                    </div>
+                    <asp:Button ID="btnCerrarForm" runat="server" Text="&#215;" CssClass="btn btn-outline-secondary btn-sm modal-close-x" OnClick="btnCancelarPago_Click" CausesValidation="false" ToolTip="Cerrar ventana" />
                 </div>
 
                 <div class="form-grid-2col" style="margin-bottom: 16px;">

@@ -7,7 +7,7 @@ using System.Web.UI.WebControls;
 
 namespace trabajo_ing_software
 {
-    public partial class Recepciones : System.Web.UI.Page
+    public partial class Recepciones : PaginaCompras
     {
         private string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=;";
 
@@ -22,7 +22,7 @@ namespace trabajo_ing_software
             // Control de acceso RBAC: Solo Administrador y Bodeguero
             string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
             if (!rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase) && 
-                !rolUsuario.Equals("Bodeguero", StringComparison.OrdinalIgnoreCase))
+                !rolUsuario.Equals("Comprador", StringComparison.OrdinalIgnoreCase) && !rolUsuario.Equals("Contador", StringComparison.OrdinalIgnoreCase))
             {
                 ConfiguracionGlobal.RedirigirSegunRol(Response, rolUsuario);
                 return;
@@ -51,7 +51,7 @@ namespace trabajo_ing_software
         #region Carga de Datos y Selectores
         private void CargarBodegas()
         {
-            using (var conexion = new MySqlConnection(connectionString))
+            using (var conexion = ConexionErp.Crear(connectionString))
             using (var adaptador = new MySqlDataAdapter("SELECT IdBodega, Nombre FROM bodega WHERE Activo=1 ORDER BY Nombre", conexion))
             {
                 var bodegas = new DataTable();
@@ -70,7 +70,7 @@ namespace trabajo_ing_software
             ddlFiltroLaboratorio.Items.Add(new ListItem("Todos los Laboratorios", ""));
 
             string query = "SELECT IdLaboratorio, RazonSocial FROM Laboratorio WHERE Activo = 1 ORDER BY RazonSocial ASC";
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
@@ -97,7 +97,7 @@ namespace trabajo_ing_software
                              WHERE oc.Estado IN ('Emitida', 'Parcial')
                              ORDER BY oc.IdOC DESC";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
@@ -124,7 +124,7 @@ namespace trabajo_ing_software
             else
             {
                 pnlInfoOC.Visible = false;
-                gvItemsRecepcion.DataSource = null;
+                gvItemsRecepcion.DataSource = new DataTable();
                 gvItemsRecepcion.DataBind();
             }
         }
@@ -137,7 +137,7 @@ namespace trabajo_ing_software
                                 INNER JOIN Laboratorio l ON oc.IdLaboratorio = l.IdLaboratorio
                                 WHERE oc.IdOC = @IdOC";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 using (MySqlCommand cmd = new MySqlCommand(queryCab, con))
                 {
@@ -171,7 +171,7 @@ namespace trabajo_ing_software
                                   INNER JOIN Producto p ON v.IdProducto = p.IdProducto
                                   WHERE doc.IdOC = @IdOC AND (doc.CantidadPedida - IFNULL(doc.CantidadRecibida, 0)) > 0";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 using (MySqlCommand cmd = new MySqlCommand(queryItems, con))
                 {
@@ -191,6 +191,7 @@ namespace trabajo_ing_software
         #region Registro de Recepción y Asignación de Lotes (Transaccional)
         protected void btnAprobarRecepcion_Click(object sender, EventArgs e)
         {
+            ExigirEscrituraCompras();
             if (!int.TryParse(ddlBodega.SelectedValue, out int idBodega) || idBodega <= 0)
             {
                 MostrarMensaje("Selecciona la bodega que recibirá los productos.", false);
@@ -270,7 +271,7 @@ namespace trabajo_ing_software
             int idUsuario = Convert.ToInt32(Session["IdUsuario"]);
 
             // EJECUCION TRANSACCIONAL ACID
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 con.Open();
                 using (MySqlTransaction trans = con.BeginTransaction())
@@ -416,7 +417,7 @@ namespace trabajo_ing_software
                     catch (Exception ex)
                     {
                         trans.Rollback();
-                        MostrarMensaje("Error al procesar el ingreso de mercadería: " + ex.Message, false);
+                        MostrarMensaje("Error al procesar el ingreso de mercadería: " + ConexionErp.MensajeError(ex), false);
                     }
                 }
             }
@@ -427,7 +428,7 @@ namespace trabajo_ing_software
             ddlOrdenCompra.SelectedIndex = 0;
             txtGuiaDespacho.Text = "";
             pnlInfoOC.Visible = false;
-            gvItemsRecepcion.DataSource = null;
+            gvItemsRecepcion.DataSource = new DataTable();
             gvItemsRecepcion.DataBind();
         }
         #endregion
@@ -457,7 +458,7 @@ namespace trabajo_ing_software
 
             query += " ORDER BY r.IdRecepcion DESC";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
@@ -486,7 +487,7 @@ namespace trabajo_ing_software
                                 IFNULL((SELECT SUM(Cantidad * CostoUnitario) FROM DetalleRecepcion), 0) AS Valorizado
                              FROM RecepcionCompra";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
@@ -522,7 +523,7 @@ namespace trabajo_ing_software
                                 INNER JOIN Laboratorio l ON oc.IdLaboratorio = l.IdLaboratorio
                                 WHERE r.IdRecepcion = @IdRec";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 using (MySqlCommand cmd = new MySqlCommand(queryCab, con))
                 {
@@ -550,7 +551,7 @@ namespace trabajo_ing_software
                                 INNER JOIN Producto p ON v.IdProducto = p.IdProducto
                                 WHERE dr.IdRecepcion = @IdRec";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 using (MySqlCommand cmd = new MySqlCommand(queryDet, con))
                 {
@@ -581,6 +582,12 @@ namespace trabajo_ing_software
             if (pnlFormularioRec.Visible)
             {
                 CargarOrdenesCompraPendientes();
+                if (string.IsNullOrEmpty(ddlOrdenCompra.SelectedValue))
+                {
+                    pnlInfoOC.Visible = false;
+                    gvItemsRecepcion.DataSource = new DataTable();
+                    gvItemsRecepcion.DataBind();
+                }
             }
         }
 

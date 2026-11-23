@@ -13,7 +13,7 @@ namespace trabajo_ing_software
 
         internal static MySqlConnection Abrir()
         {
-            var conexion = new MySqlConnection(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString);
+            var conexion = ConexionErp.Crear(ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString);
             conexion.Open();
             AsegurarEsquema(conexion);
             return conexion;
@@ -63,18 +63,7 @@ namespace trabajo_ing_software
                     catch { }
 
                     // 5. Plan de cuentas para ventas (RF-VEN-06)
-                    try
-                    {
-                        using (var cmd = new MySqlCommand(@"INSERT IGNORE INTO cuentacontable (Codigo, Nombre, Tipo, IdCuentaPadre, Nivel, Imputable) VALUES
-                            ('1103', 'Clientes por Cobrar', 'Activo', NULL, 1, 1),
-                            ('2108', 'IVA Débito Fiscal', 'Pasivo', NULL, 1, 1),
-                            ('4101', 'Ingresos por Ventas', 'Resultado Ganancia', NULL, 1, 1),
-                            ('5101', 'Costo de Ventas', 'Resultado Pérdida', NULL, 1, 1)", con))
-                        {
-                            cmd.ExecuteNonQuery();
-                        }
-                    }
-                    catch { }
+                    // El plan de cuentas se carga al instalar la base.
 
                     _esquemaVerificado = true;
                 }
@@ -147,6 +136,17 @@ namespace trabajo_ing_software
             formaPago = string.IsNullOrEmpty(formaPago) ? "Contado" : formaPago;
             bool esCredito = formaPago.Equals("credito", StringComparison.OrdinalIgnoreCase);
 
+            if (idCotizacion.HasValue)
+            {
+                using (var cmd = Comando(conexion, transaccion, @"SELECT Estado FROM cotizacion WHERE IdCotizacion=@p0
+                    AND IdCliente=@p1 AND (FechaVencimiento IS NULL OR FechaVencimiento>=CURDATE()) FOR UPDATE", idCotizacion.Value, cliente))
+                {
+                    string estado = Convert.ToString(cmd.ExecuteScalar());
+                    if (estado != "Vigente" && estado != "Aceptado") throw new InvalidOperationException("La cotización ya no está vigente para este cliente.");
+                }
+                using (var cmd = Comando(conexion, transaccion, "SELECT IdVenta FROM venta WHERE IdCotizacion=@p0 LIMIT 1 FOR UPDATE", idCotizacion.Value))
+                    if (cmd.ExecuteScalar()!=null) throw new InvalidOperationException("La cotización ya tiene una venta.");
+            }
             // 1. RF-VEN-01 y RF-VEN-07: Validación de Cliente y Límite de Crédito
             decimal limiteCredito = 0;
             int diasCredito = 0;
@@ -219,13 +219,7 @@ namespace trabajo_ing_software
 
             // 3. Generar Folio correlativo (RF-VEN-03)
             string prefijo = tipoDocumento.StartsWith("Factura", StringComparison.OrdinalIgnoreCase) ? "FAC" : "BOL";
-            string folio;
-            using (var cmdFolio = Comando(conexion, transaccion,
-                "SELECT COUNT(IdVenta) + 1001 FROM venta WHERE TipoDocumento = @p0", tipoDocumento))
-            {
-                long correlativo = Convert.ToInt64(cmdFolio.ExecuteScalar() ?? 1001);
-                folio = $"{prefijo}-{correlativo:D6}";
-            }
+            string folio = NuevoFolio(conexion, transaccion, tipoDocumento, prefijo, 1000);
 
             // 4. Insertar cabecera de la venta (RF-VEN-03)
             long ventaId;
@@ -245,16 +239,16 @@ namespace trabajo_ing_software
             decimal totalCostoVenta = 0;
             foreach (var articulo in carrito)
             {
-                totalCostoVenta += DescontarFEFO(conexion, transaccion, ventaId, usuario, bodega, articulo.Key, articulo.Value, precios[articulo.Key]);
+                DescontarFEFO(conexion, transaccion, ventaId, usuario, bodega, articulo.Key, articulo.Value, precios[articulo.Key]);
+                using (var cmd = Comando(conexion, transaccion, "SELECT CostoPromedio FROM varianteproducto WHERE IdVariante=@p0", articulo.Key))
+                    totalCostoVenta += Math.Round(Convert.ToDecimal(cmd.ExecuteScalar()) * articulo.Value, 2);
             }
 
             // 6. Integración Contable: Cuentas por Cobrar (RF-VEN-06)
             if (esCredito)
             {
                 DateTime fechaVenceCalculada = vence ?? DateTime.Today.AddDays(diasCredito > 0 ? diasCredito : 30);
-                using (var cmd = Comando(conexion, transaccion, @"INSERT INTO cuentascobrar
-                    (IdVenta, FechaVence, MontoPendiente, EstadoPago, IdUsuario)
-                    VALUES (@p0, @p1, @p2, 'Pendiente', @p3)", ventaId, fechaVenceCalculada.Date, totalFinal, usuario))
+                using (var cmd = Comando(conexion, transaccion, "CALL usp_CrearCuentaPorCobrar(@p0,@p1,@p2,@p3)", ventaId, fechaVenceCalculada.Date, totalFinal, usuario))
                 {
                     cmd.ExecuteNonQuery();
                 }
@@ -398,105 +392,31 @@ namespace trabajo_ing_software
             long ventaId, int usuario, int cliente, string folio, string tipoDoc, string formaPago,
             decimal total, decimal neto, decimal iva, decimal costoVenta)
         {
-            try
-            {
-                // Buscar período contable abierto
-                int? periodoId = null;
-                using (var cmd = Comando(conexion, tx,
-                    "SELECT IdPeriodo FROM periodocontable WHERE Estado = 'Abierto' AND CURDATE() BETWEEN FechaInicio AND FechaFin ORDER BY FechaInicio DESC LIMIT 1"))
-                {
-                    var val = cmd.ExecuteScalar();
-                    if (val != null && val != DBNull.Value) periodoId = Convert.ToInt32(val);
-                }
-
-                if (!periodoId.HasValue)
-                {
-                    using (var cmd = Comando(conexion, tx, "SELECT IdPeriodo FROM periodocontable WHERE Estado = 'Abierto' ORDER BY FechaInicio DESC LIMIT 1"))
-                    {
-                        var val = cmd.ExecuteScalar();
-                        if (val != null && val != DBNull.Value) periodoId = Convert.ToInt32(val);
-                    }
-                }
-
-                if (!periodoId.HasValue) return; // Si no hay períodos abiertos no se bloquea la venta comercial
-
-                // Cuentas Contables
-                int ctaCobro = ObtenerIdCuenta(conexion, tx, formaPago.Equals("credito", StringComparison.OrdinalIgnoreCase) ? "1103" : "1101");
-                int ctaVentas = ObtenerIdCuenta(conexion, tx, "4101");
-                int ctaIvaDebito = ObtenerIdCuenta(conexion, tx, "2108");
-                int ctaCostoVentas = ObtenerIdCuenta(conexion, tx, "5101");
-                int ctaExistencias = ObtenerIdCuenta(conexion, tx, "1105");
-
-                // Asiento 1: Ingreso por Venta e IVA Débito (RF-VEN-06)
-                if (ctaCobro > 0 && ctaVentas > 0)
-                {
-                    string glosa = $"Venta {tipoDoc} {folio} (Cliente #{cliente})";
-                    long idAsiento;
-                    using (var cmd = Comando(conexion, tx,
-                        @"INSERT INTO asientocontable (IdPeriodo, Fecha, Glosa, IdUsuario, Origen, IdOrigen) 
-                          VALUES (@p0, CURDATE(), @p1, @p2, 'Venta', @p3)", periodoId.Value, glosa, usuario, ventaId))
-                    {
-                        cmd.ExecuteNonQuery();
-                        idAsiento = cmd.LastInsertedId;
-                    }
-
-                    // Debe: Caja o Clientes por Cobrar (Total)
-                    using (var cmd = Comando(conexion, tx,
-                        "INSERT INTO detalleasiento (IdAsiento, IdCuentaContable, Debe, Haber) VALUES (@p0, @p1, @p2, 0)", idAsiento, ctaCobro, total))
-                        cmd.ExecuteNonQuery();
-
-                    // Haber: Ingresos por Venta (Neto)
-                    using (var cmd = Comando(conexion, tx,
-                        "INSERT INTO detalleasiento (IdAsiento, IdCuentaContable, Debe, Haber) VALUES (@p0, @p1, 0, @p2)", idAsiento, ctaVentas, neto))
-                        cmd.ExecuteNonQuery();
-
-                    // Haber: IVA Débito Fiscal (si aplica)
-                    if (iva > 0 && ctaIvaDebito > 0)
-                    {
-                        using (var cmd = Comando(conexion, tx,
-                            "INSERT INTO detalleasiento (IdAsiento, IdCuentaContable, Debe, Haber) VALUES (@p0, @p1, 0, @p2)", idAsiento, ctaIvaDebito, iva))
-                            cmd.ExecuteNonQuery();
-                    }
-                }
-
-                // Asiento 2: Reconocimiento del Costo de Ventas (RF-VEN-06)
-                if (costoVenta > 0 && ctaCostoVentas > 0 && ctaExistencias > 0)
-                {
-                    string glosaCosto = $"Costo de Ventas {folio} · Venta #{ventaId}";
-                    long idAsientoCosto;
-                    using (var cmd = Comando(conexion, tx,
-                        @"INSERT INTO asientocontable (IdPeriodo, Fecha, Glosa, IdUsuario, Origen, IdOrigen) 
-                          VALUES (@p0, CURDATE(), @p1, @p2, 'CostoVenta', @p3)", periodoId.Value, glosaCosto, usuario, ventaId))
-                    {
-                        cmd.ExecuteNonQuery();
-                        idAsientoCosto = cmd.LastInsertedId;
-                    }
-
-                    // Debe: Costo de Ventas
-                    using (var cmd = Comando(conexion, tx,
-                        "INSERT INTO detalleasiento (IdAsiento, IdCuentaContable, Debe, Haber) VALUES (@p0, @p1, @p2, 0)", idAsientoCosto, ctaCostoVentas, costoVenta))
-                        cmd.ExecuteNonQuery();
-
-                    // Haber: Existencias e Inventario
-                    using (var cmd = Comando(conexion, tx,
-                        "INSERT INTO detalleasiento (IdAsiento, IdCuentaContable, Debe, Haber) VALUES (@p0, @p1, 0, @p2)", idAsientoCosto, ctaExistencias, costoVenta))
-                        cmd.ExecuteNonQuery();
-                }
-            }
-            catch
-            {
-                // La integración contable no debe detener la transacción si falta parametrización
-            }
+            if (total > 0)
+                Contabilizar(conexion,tx,"Venta",ventaId,"Venta "+folio,usuario,
+                    new[] { formaPago.Equals("credito",StringComparison.OrdinalIgnoreCase)?"1103":"1101","4101","2108" },new[] { total,-neto,-iva });
+            if (costoVenta > 0)
+                Contabilizar(conexion,tx,"CostoVenta",ventaId,"Costo de venta "+folio,usuario,
+                    new[] {"5101","1105"},new[] {costoVenta,-costoVenta});
         }
 
-        private static int ObtenerIdCuenta(MySqlConnection con, MySqlTransaction tx, string codigo)
+        internal static void Contabilizar(MySqlConnection con,MySqlTransaction tx,string origen,long id,string glosa,int usuario,string[] cuentas,decimal[] importes)
         {
-            using (var cmd = Comando(con, tx, "SELECT IdCuentaContable FROM cuentacontable WHERE Codigo = @p0 AND Imputable = 1 LIMIT 1", codigo))
-            {
-                var val = cmd.ExecuteScalar();
-                if (val != null && val != DBNull.Value) return Convert.ToInt32(val);
-                return 0;
-            }
+            var lineas = new Newtonsoft.Json.Linq.JArray();
+            for(int i=0;i<cuentas.Length;i++)
+                lineas.Add(new Newtonsoft.Json.Linq.JObject { ["codigo"]=cuentas[i], ["monto"]=importes[i] });
+            using(var cmd=Comando(con,tx,"CALL usp_AsientoAutomatico(@p0,@p1,@p2,@p3,CURDATE(),@p4)",origen,id,glosa,usuario,lineas.ToString()))
+                cmd.ExecuteNonQuery();
         }
+
+        internal static string NuevoFolio(MySqlConnection con, MySqlTransaction tx, string tipo, string prefijo, int inicial)
+        {
+            using (var cmd = Comando(con, tx, @"INSERT INTO secuenciafolio(TipoDocumento,Ultimo) VALUES(@p0,@p1+1)
+                ON DUPLICATE KEY UPDATE Ultimo=GREATEST(Ultimo,@p1)+1", tipo, inicial))
+                cmd.ExecuteNonQuery();
+            using (var cmd = Comando(con, tx, "SELECT Ultimo FROM secuenciafolio WHERE TipoDocumento=@p0", tipo))
+                return prefijo + "-" + Convert.ToInt64(cmd.ExecuteScalar()).ToString("D6");
+        }
+
     }
 }

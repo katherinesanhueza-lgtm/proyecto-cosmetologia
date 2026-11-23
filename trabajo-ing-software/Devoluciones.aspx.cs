@@ -32,7 +32,7 @@ namespace trabajo_ing_software
 
         private void CargarVentasDisponibles()
         {
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 string query = @"SELECT IdVenta, 
                                  CONCAT(TipoDocumento, ' #', COALESCE(Folio, IdVenta), ' · Fecha: ', DATE_FORMAT(Fecha, '%d/%m/%Y'), ' · Total: $', FORMAT(Total, 0)) AS Descripcion
@@ -72,7 +72,7 @@ namespace trabajo_ing_software
 
         private void CargarDetalleVenta(int idVenta)
         {
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 string queryCab = @"SELECT c.IdCliente, c.Nombre, v.Total 
                                     FROM venta v 
@@ -95,11 +95,11 @@ namespace trabajo_ing_software
                 }
 
                 // Cargar ítems comprados en esa venta
-                string queryItems = @"SELECT vd.IdVariante, 
+                string queryItems = @"SELECT vd.IdVentaDetalle,vd.IdVariante, 
                                              CONCAT(p.Nombre, ' · ', v.NombreVariante, ' (SKU: ', v.Sku, ')') AS Producto,
-                                             vd.Cantidad AS CantidadOriginal, 
+                                             GREATEST(0,vd.Cantidad-COALESCE((SELECT SUM(dd.Cantidad) FROM devolucionlineaventa l JOIN ventadetalle dd ON dd.IdVentaDetalle=l.IdDetalleNC WHERE l.IdDetalleOriginal=vd.IdVentaDetalle),0)) AS CantidadOriginal, 
                                              vd.PrecioUnitario,
-                                             vd.Cantidad AS CantidadDevolver
+                                             GREATEST(0,vd.Cantidad-COALESCE((SELECT SUM(dd.Cantidad) FROM devolucionlineaventa l JOIN ventadetalle dd ON dd.IdVentaDetalle=l.IdDetalleNC WHERE l.IdDetalleOriginal=vd.IdVentaDetalle),0)) AS CantidadDevolver
                                       FROM ventadetalle vd
                                       INNER JOIN varianteproducto v ON vd.IdVariante = v.IdVariante
                                       INNER JOIN producto p ON v.IdProducto = p.IdProducto
@@ -155,6 +155,7 @@ namespace trabajo_ing_software
 
         protected void btnGuardarDevolucion_Click(object sender, EventArgs e)
         {
+            ExigirEscrituraVentas();
             if (ddlVentaOrigen.SelectedValue == "" || string.IsNullOrEmpty(txtCliente.Text))
             {
                 MostrarMensaje("Seleccione una venta válida primero.", false);
@@ -172,197 +173,38 @@ namespace trabajo_ing_software
             bool reingresarStock = chkReingresoInventario.Checked;
             int.TryParse(ddlBodegaReingreso.SelectedValue, out int bodegaReingreso);
 
-            // Calcular ítems y montos devueltos
-            decimal totalDevuelto = 0;
-            var itemsADevolver = new System.Collections.Generic.List<Tuple<int, int, decimal>>();
-
+            var articulos = new Newtonsoft.Json.Linq.JArray();
             foreach (GridViewRow row in gvItemsVenta.Rows)
             {
-                HiddenField hfIdVariante = (HiddenField)row.FindControl("hfIdVariante");
-                HiddenField hfPrecioUnitario = (HiddenField)row.FindControl("hfPrecioUnitario");
-                HiddenField hfCantOriginal = (HiddenField)row.FindControl("hfCantOriginal");
-                TextBox txtCantDevolver = (TextBox)row.FindControl("txtCantDevolver");
-
-                if (hfIdVariante != null && txtCantDevolver != null && int.TryParse(txtCantDevolver.Text.Trim(), out int cantDev) && cantDev > 0)
-                {
-                    int idVariante = Convert.ToInt32(hfIdVariante.Value);
-                    decimal precioUnit = Convert.ToDecimal(hfPrecioUnitario.Value);
-                    int cantOrig = Convert.ToInt32(hfCantOriginal.Value);
-
-                    if (cantDev > cantOrig)
-                    {
-                        MostrarMensaje($"No puedes devolver {cantDev} unidades de un producto cuando solo se compraron {cantOrig}.", false);
-                        return;
-                    }
-
-                    totalDevuelto += cantDev * precioUnit;
-                    itemsADevolver.Add(new Tuple<int, int, decimal>(idVariante, cantDev, precioUnit));
-                }
+                var texto = (TextBox)row.FindControl("txtCantDevolver");
+                if (!int.TryParse(texto.Text,out int cantidad) || cantidad<0) { MostrarMensaje("Revisa las cantidades.",false); return; }
+                if (cantidad>0) articulos.Add(new Newtonsoft.Json.Linq.JObject {
+                    ["detalle"]=Convert.ToInt32(gvItemsVenta.DataKeys[row.RowIndex].Value),["cantidad"]=cantidad });
             }
-
-            if (itemsADevolver.Count == 0 || totalDevuelto <= 0)
+            if (articulos.Count==0 || (reingresarStock && bodegaReingreso<=0)) { MostrarMensaje("Revisa los productos y la bodega de reingreso.",false); return; }
+            string folio;
+            try
             {
-                MostrarMensaje("Debe indicar al menos una unidad a devolver en los productos.", false);
-                return;
-            }
-
-            decimal netoDevuelto = Math.Round(totalDevuelto / 1.19m, 2);
-            decimal ivaDevuelto = totalDevuelto - netoDevuelto;
-
-            using (var con = VentaInventario.Abrir())
-            using (var tr = con.BeginTransaction())
-            {
-                try
+                using(var con=VentaInventario.Abrir())
+                using(var tx=con.BeginTransaction())
                 {
-                    // 1. Generar Folio para Nota de Crédito (RF-VEN-09)
-                    string folioNC;
-                    using (var cmdF = VentaInventario.Comando(con, tr, "SELECT COUNT(IdVenta) + 5001 FROM venta WHERE TipoDocumento = 'Nota de Credito'"))
-                    {
-                        long correlativo = Convert.ToInt64(cmdF.ExecuteScalar() ?? 5001);
-                        folioNC = $"NC-{correlativo:D6}";
-                    }
-
-                    // 2. Insertar cabecera Nota de Crédito
-                    long idNotaCredito;
-                    string sqlNC = @"INSERT INTO venta 
-                        (TipoDocumento, Folio, Fecha, Neto, Iva, Descuento, Total, FormaPago, IdCliente, IdUsuario, IdVentaOrigen) 
-                        VALUES ('Nota de Credito', @p0, CURDATE(), @p1, @p2, 0, @p3, 'Devolucion', @p4, @p5, @p6)";
-
-                    using (var cmdNC = VentaInventario.Comando(con, tr, sqlNC,
-                        folioNC, netoDevuelto, ivaDevuelto, totalDevuelto, idCliente, UsuarioVenta, idVentaOrigen))
-                    {
-                        cmdNC.ExecuteNonQuery();
-                        idNotaCredito = cmdNC.LastInsertedId;
-                    }
-
-                    // 3. Insertar detalle devuelto y reingreso opcional a inventario (RF-VEN-09)
-                    foreach (var item in itemsADevolver)
-                    {
-                        using (var cmdDet = VentaInventario.Comando(con, tr,
-                            @"INSERT INTO ventadetalle (IdVenta, IdVariante, Cantidad, PrecioUnitario, Subtotal) 
-                              VALUES (@p0, @p1, @p2, @p3, @p4)",
-                            idNotaCredito, item.Item1, item.Item2, item.Item3, item.Item2 * item.Item3))
-                        {
-                            cmdDet.ExecuteNonQuery();
-                        }
-
-                        if (reingresarStock && bodegaReingreso > 0)
-                        {
-                            // Obtener stock anterior e incrementar existencias en la bodega elegida
-                            int stockAnt = 0;
-                            int idInvExistente = 0;
-                            using (var cmdSelInv = VentaInventario.Comando(con, tr,
-                                "SELECT IdInventario, COALESCE(StockActual, 0) FROM inventario WHERE IdVariante = @p0 AND IdBodega = @p1 FOR UPDATE",
-                                item.Item1, bodegaReingreso))
-                            using (var rdrInv = cmdSelInv.ExecuteReader())
-                            {
-                                if (rdrInv.Read())
-                                {
-                                    idInvExistente = rdrInv.GetInt32(0);
-                                    stockAnt = rdrInv.GetInt32(1);
-                                }
-                            }
-
-                            if (idInvExistente > 0)
-                            {
-                                using (var cmdInv = VentaInventario.Comando(con, tr,
-                                    "UPDATE inventario SET StockActual = StockActual + @p0, FechaActualizada = NOW() WHERE IdInventario = @p1",
-                                    item.Item2, idInvExistente))
-                                {
-                                    cmdInv.ExecuteNonQuery();
-                                }
-                            }
-                            else
-                            {
-                                using (var cmdInv = VentaInventario.Comando(con, tr,
-                                    "INSERT INTO inventario (IdVariante, IdBodega, StockActual, StockReservado, FechaActualizada) VALUES (@p0, @p1, @p2, 0, NOW())",
-                                    item.Item1, bodegaReingreso, item.Item2))
-                                {
-                                    cmdInv.ExecuteNonQuery();
-                                }
-                            }
-
-                            // Incrementar cantidad disponible en el lote de esa variante y bodega (si existe)
-                            int? idLoteReingreso = null;
-                            using (var cmdSelLote = VentaInventario.Comando(con, tr,
-                                @"SELECT IdLote FROM lote 
-                                  WHERE IdVariante = @p0 AND (IdBodega = @p1 OR IdBodega IS NULL) 
-                                  ORDER BY (IdBodega = @p1) DESC, FechaVencimiento DESC, IdLote DESC LIMIT 1",
-                                item.Item1, bodegaReingreso))
-                            {
-                                var valLote = cmdSelLote.ExecuteScalar();
-                                if (valLote != null && valLote != DBNull.Value)
-                                    idLoteReingreso = Convert.ToInt32(valLote);
-                            }
-
-                            if (idLoteReingreso.HasValue)
-                            {
-                                using (var cmdUpdLote = VentaInventario.Comando(con, tr,
-                                    @"UPDATE lote 
-                                      SET CantidadDisponible = COALESCE(CantidadDisponible, 0) + @p0,
-                                          IdBodega = COALESCE(IdBodega, @p1),
-                                          Estado = IF(Estado = 'Agotado', 'Disponible', Estado)
-                                      WHERE IdLote = @p2",
-                                    item.Item2, bodegaReingreso, idLoteReingreso.Value))
-                                {
-                                    cmdUpdLote.ExecuteNonQuery();
-                                }
-                            }
-
-                            // Incrementar stock total en variante
-                            using (var cmdVar = VentaInventario.Comando(con, tr,
-                                @"UPDATE varianteproducto 
-                                  SET StockTotal = (SELECT COALESCE(SUM(StockActual), 0) FROM inventario WHERE IdVariante = @p0)
-                                  WHERE IdVariante = @p0", item.Item1))
-                            {
-                                cmdVar.ExecuteNonQuery();
-                            }
-
-                            // Registrar movimiento de inventario de entrada por devolución
-                            if (idLoteReingreso.HasValue)
-                            {
-                                using (var cmdMov = VentaInventario.Comando(con, tr,
-                                    @"INSERT INTO movimientoinventario 
-                                      (IdLote, IdBodega, IdTipoMovimiento, IdUsuario, Cantidad, StockAnterior, StockPosterior, Referencia, Observacion, Origen, IdDetalleOrigen) 
-                                      SELECT @p0, @p1, IdTipoMovimiento, @p2, @p3, @p4, @p5, @p6, @p7, 'Devolucion', @p8
-                                      FROM tipomovimiento WHERE Nombre IN ('Entrada', 'Ajuste positivo') LIMIT 1",
-                                    idLoteReingreso.Value, bodegaReingreso, UsuarioVenta, item.Item2, stockAnt, stockAnt + item.Item2, folioNC, txtMotivo.Text.Trim(), idNotaCredito))
-                                {
-                                    cmdMov.ExecuteNonQuery();
-                                }
-                            }
-                        }
-                    }
-
-                    // 4. Si la venta original tenía saldo pendiente en cuentascobrar, rebajarlo
-                    using (var cmdCc = VentaInventario.Comando(con, tr,
-                        @"UPDATE cuentascobrar 
-                          SET MontoPendiente = GREATEST(0, MontoPendiente - @p0),
-                              EstadoPago = IF(MontoPendiente - @p0 <= 0, 'Pagado', EstadoPago) 
-                          WHERE IdVenta = @p1", totalDevuelto, idVentaOrigen))
-                    {
-                        cmdCc.ExecuteNonQuery();
-                    }
-
-                    tr.Commit();
-
-                    CargarVentasDisponibles();
-                    LimpiarPantalla();
-                    CargarHistorialNotasCredito();
-                    string mensajeStock = reingresarStock ? "Se reingresó la mercadería devuelta a la bodega." : "No se reingresó mercadería a inventario.";
-                    MostrarMensaje($"¡Nota de Crédito {folioNC} registrada exitosamente por ${totalDevuelto:N0}! {mensajeStock}", true);
-                }
-                catch (Exception ex)
-                {
-                    tr.Rollback();
-                    MostrarMensaje("Error al generar nota de crédito: " + ex.Message, false);
+                    folio=VentaInventario.NuevoFolio(con,tx,"Nota de Credito","NC",5000);
+                    using(var cmd=VentaInventario.Comando(con,tx,"CALL usp_DevolverVenta(@p0,@p1,@p2,@p3,@p4,@p5)",
+                        idVentaOrigen,UsuarioVenta,folio,reingresarStock?(object)bodegaReingreso:DBNull.Value,txtMotivo.Text.Trim(),articulos.ToString()))
+                        cmd.ExecuteNonQuery();
+                    tx.Commit();
                 }
             }
+            catch(MySqlException ex) { MostrarMensaje(ConexionErp.MensajeError(ex),false);return; }
+            CargarVentasDisponibles();
+            LimpiarPantalla();
+            CargarHistorialNotasCredito();
+            MostrarMensaje("Nota de crédito registrada: "+folio,true);
         }
 
         private void CargarHistorialNotasCredito()
         {
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 string query = @"SELECT v.IdVenta AS IdNotaCredito, 
                                         COALESCE(v.Folio, CONCAT('NC-', v.IdVenta)) AS Folio,

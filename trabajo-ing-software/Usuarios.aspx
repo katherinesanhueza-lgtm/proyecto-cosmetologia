@@ -37,32 +37,6 @@
             border-color: var(--color-acento);
             box-shadow: 0 0 0 3px rgba(122, 94, 71, 0.1);
         }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(46, 46, 46, 0.45);
-            backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-
-        .modal-content-card {
-            background: var(--color-blanco);
-            border-radius: 22px;
-            width: 90%;
-            max-width: 560px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            border: 1px solid var(--color-borde-suave);
-            padding: 30px;
-        }
     </style>
 </asp:Content>
 
@@ -94,42 +68,52 @@
                 </div>
             </div>
 
-            <!-- FORMULARIO DESPLEGABLE DE REGISTRO & EDICION -->
-            <div id="panelFormulario" class="card-dermocosmetica" style="margin-bottom: 25px; <%= string.IsNullOrEmpty(hfIdUsuario.Value) ? "display:none;" : "display:block;" %>">
-                <h3 id="lblTituloForm" runat="server" style="font-size: 18px; margin-bottom: 16px;">
-                    Registrar Nuevo Usuario
-                </h3>
+            <!-- MODAL FLOTANTE DE REGISTRO & EDICION -->
+            <div id="panelFormulario" class="modal-overlay" style="<%= string.IsNullOrEmpty(hfIdUsuario.Value) ? "display:none;" : "display:flex;" %>">
+                <div class="modal-content-card">
+                    <div class="modal-header-dermo">
+                        <div>
+                            <span class="pill-badge" style="font-size: 10px; padding: 3px 10px;">GESTI&Oacute;N DE CUENTAS</span>
+                            <h3 id="lblTituloForm" runat="server" style="font-size: 22px; margin: 6px 0 2px 0; font-family: 'Playfair Display', Georgia, serif; color: var(--color-texto);">
+                                Registrar Nuevo Usuario
+                            </h3>
+                            <div style="font-size: 12px; color: var(--color-texto-suave);">Credenciales de acceso y rol operativo en Dermo ERP</div>
+                        </div>
+                        <button type="button" class="btn btn-outline-secondary btn-sm modal-close-x" onclick="cerrarFormularioUsuario();" title="Cerrar ventana">&times;</button>
+                    </div>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                    <div class="form-group-dermo">
-                        <label class="form-label">Nombre Completo *</label>
-                        <asp:TextBox ID="txtNombre" runat="server" CssClass="form-control" placeholder="Ej: Ana Garc&iacute;a"></asp:TextBox>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px;">
+                        <div class="form-group-dermo">
+                            <label class="form-label">Nombre Completo *</label>
+                            <asp:TextBox ID="txtNombre" runat="server" CssClass="form-control" placeholder="Ej: Ana Garc&iacute;a"></asp:TextBox>
+                        </div>
+                        <div class="form-group-dermo">
+                            <label class="form-label">Correo Electr&oacute;nico *</label>
+                            <asp:TextBox ID="txtCorreo" runat="server" CssClass="form-control" placeholder="ana.garcia@dermo.cl"></asp:TextBox>
+                        </div>
+                        <div class="form-group-dermo">
+                            <label class="form-label">Contrase&ntilde;a <small class="text-muted">(opcional al editar)</small></label>
+                            <asp:TextBox ID="txtPassword" runat="server" TextMode="Password" CssClass="form-control" placeholder="••••••••"></asp:TextBox>
+                        </div>
+                        <div class="form-group-dermo">
+                            <label class="form-label">Rol Asignado *</label>
+                            <asp:DropDownList ID="ddlRol" runat="server" CssClass="form-select">
+                                <asp:ListItem Text="-- Seleccione Rol --" Value="" />
+                                <asp:ListItem Text="Administrador" Value="Administrador" />
+                                <asp:ListItem Text="Comprador" Value="Comprador" />
+                                <asp:ListItem Text="Vendedor" Value="Vendedor" />
+                                <asp:ListItem Text="Contador" Value="Contador" />
+                                <asp:ListItem Text="Bodeguero" Value="Bodeguero" />
+                                <asp:ListItem Text="Usuario general" Value="Usuario general" />
+                            </asp:DropDownList>
+                        </div>
                     </div>
-                    <div class="form-group-dermo">
-                        <label class="form-label">Correo Electr&oacute;nico *</label>
-                        <asp:TextBox ID="txtCorreo" runat="server" CssClass="form-control" placeholder="ana.garcia@dermo.cl"></asp:TextBox>
-                    </div>
-                    <div class="form-group-dermo">
-                        <label class="form-label">Contrase&ntilde;a <small class="text-muted">(opcional al editar)</small></label>
-                        <asp:TextBox ID="txtPassword" runat="server" TextMode="Password" CssClass="form-control" placeholder="••••••••"></asp:TextBox>
-                    </div>
-                    <div class="form-group-dermo">
-                        <label class="form-label">Rol Asignado *</label>
-                        <asp:DropDownList ID="ddlRol" runat="server" CssClass="form-select">
-                            <asp:ListItem Text="-- Seleccione Rol --" Value="" />
-                            <asp:ListItem Text="Administrador" Value="Administrador" />
-                            <asp:ListItem Text="Comprador" Value="Comprador" />
-                            <asp:ListItem Text="Vendedor" Value="Vendedor" />
-                            <asp:ListItem Text="Contador" Value="Contador" />
-                            <asp:ListItem Text="Bodeguero" Value="Bodeguero" />
-                            <asp:ListItem Text="Usuario general" Value="Usuario general" />
-                        </asp:DropDownList>
-                    </div>
-                </div>
 
-                <div style="display: flex; gap: 10px; margin-top: 15px;">
-                    <asp:Button ID="btnGuardar" runat="server" Text="Guardar Usuario" CssClass="btn btn-primary" OnClick="btnGuardar_Click" />
-                    <asp:Button ID="btnCancelar" runat="server" Text="Cancelar" CssClass="btn btn-outline-secondary" Visible="false" OnClick="btnCancelar_Click" />
+                    <div class="modal-footer-dermo">
+                        <button type="button" id="btnCancelarJsUsuario" class="btn btn-outline-secondary" onclick="cerrarFormularioUsuario();" style="<%= string.IsNullOrEmpty(hfIdUsuario.Value) ? "" : "display:none;" %>">Cancelar</button>
+                        <asp:Button ID="btnCancelar" runat="server" Text="Cancelar" CssClass="btn btn-outline-secondary" Visible="false" OnClick="btnCancelar_Click" />
+                        <asp:Button ID="btnGuardar" runat="server" Text="Guardar Usuario" CssClass="btn btn-primary" OnClick="btnGuardar_Click" />
+                    </div>
                 </div>
             </div>
 
@@ -212,11 +196,21 @@
             function toggleFormulario() {
                 var p = document.getElementById('panelFormulario');
                 if (p.style.display === 'none' || p.style.display === '') {
-                    p.style.display = 'block';
-                    document.getElementById('<%= txtNombre.ClientID %>').focus();
+                    p.style.display = 'flex';
+                    var inp = document.getElementById('<%= txtNombre.ClientID %>');
+                    if (inp) inp.focus();
                 } else {
-                    p.style.display = 'none';
+                    cerrarFormularioUsuario();
                 }
+            }
+            function cerrarFormularioUsuario() {
+                var btnSrv = document.getElementById('<%= btnCancelar.ClientID %>');
+                if (btnSrv) {
+                    btnSrv.click();
+                    return;
+                }
+                var p = document.getElementById('panelFormulario');
+                if (p) p.style.display = 'none';
             }
         </script>
 

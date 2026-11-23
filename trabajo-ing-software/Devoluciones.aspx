@@ -45,12 +45,25 @@
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                     Reporte Vendedores y NC
                 </a>
+                <button type="button" class="btn btn-primary" onclick="abrirModalDevolucion();">+ Nueva Nota de Cr&eacute;dito</button>
             </div>
         </div>
 
-        <!-- TARJETA 1: FORMULARIO -->
-        <section class="card-dermocosmetica" style="margin-bottom: 24px;">
-            <h2 style="margin-bottom: 16px;">1. Seleccionar Venta Original</h2>
+        <input type="hidden" id="hdnModalDevAbierto" name="modalDevAbierto" value="<%= (Request.Form["modalDevAbierto"] == "1" && lblMensajeDevolucion.ForeColor != System.Drawing.Color.Green) ? "1" : "0" %>" />
+        <div id="bannerEstadoDev" style="display:none; margin-bottom: 16px;" class="alert alert-success"></div>
+
+        <!-- MODAL FLOTANTE: FORMULARIO -->
+        <div id="modalDevolucion" class="modal-overlay" style="<%= (Request.Form["modalDevAbierto"] == "1" && lblMensajeDevolucion.ForeColor != System.Drawing.Color.Green) ? "display:flex;" : "display:none;" %>">
+        <section class="modal-content-card modal-lg-card">
+            <div class="modal-header-dermo">
+                <div>
+                    <span class="pill-badge" style="font-size: 10px; padding: 3px 10px;">POSTVENTA Y CALIDAD</span>
+                    <h2 style="font-size: 22px; margin: 6px 0 2px 0; font-family: 'Playfair Display', Georgia, serif; color: var(--color-texto);">Emitir Nota de Cr&eacute;dito / Devoluci&oacute;n</h2>
+                    <div style="font-size: 12px; color: var(--color-texto-suave);">Selecci&oacute;n de venta original, &iacute;tems devueltos y reingreso a bodega</div>
+                </div>
+                <button type="button" class="btn btn-outline-secondary btn-sm modal-close-x" onclick="cerrarModalDevolucion();" title="Cerrar ventana">&times;</button>
+            </div>
+            <h3 style="margin-bottom: 14px;">1. Seleccionar Venta Original</h3>
             
             <div class="row g-3">
                 <div class="col-md-5">
@@ -83,7 +96,7 @@
             <div class="mt-4">
                 <h6 class="text-secondary fw-bold border-bottom pb-2">2. Detalle de Ítems a Devolver</h6>
                 <div class="table-responsive">
-                    <asp:GridView ID="gvItemsVenta" runat="server" CssClass="table table-hover" AutoGenerateColumns="False" GridLines="None" EmptyDataText="Seleccione una venta para listar los productos adquiridos.">
+                    <asp:GridView ID="gvItemsVenta" DataKeyNames="IdVentaDetalle" runat="server" CssClass="table table-hover" AutoGenerateColumns="False" GridLines="None" EmptyDataText="Seleccione una venta para listar los productos adquiridos.">
                         <Columns>
                             <asp:BoundField DataField="IdVariante" HeaderText="ID SKU" />
                             <asp:BoundField DataField="Producto" HeaderText="Producto / Variante" />
@@ -124,15 +137,37 @@
                 </div>
             </div>
 
-            <div class="col-12 text-end mt-4 d-flex justify-content-between align-items-center">
+            <div class="col-12 modal-footer-dermo align-items-center justify-content-between">
                 <div>
                     <asp:Label ID="lblMensajeDevolucion" runat="server" style="font-weight:600;"></asp:Label>
                 </div>
-                <div>
-                    <asp:Button ID="btnGuardarDevolucion" runat="server" Text="Generar Nota de Crédito" CssClass="btn btn-primary" OnClick="btnGuardarDevolucion_Click" />
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-secondary" onclick="cerrarModalDevolucion();">Cancelar</button>
+                    <asp:Button ID="btnGuardarDevolucion" runat="server" Text="Generar Nota de Cr&eacute;dito" CssClass="btn btn-primary" OnClick="btnGuardarDevolucion_Click" />
                 </div>
             </div>
         </section>
+        </div>
+
+        <script>
+            function abrirModalDevolucion() {
+                document.getElementById('hdnModalDevAbierto').value = '1';
+                document.getElementById('modalDevolucion').style.display = 'flex';
+            }
+            function cerrarModalDevolucion() {
+                document.getElementById('hdnModalDevAbierto').value = '0';
+                document.getElementById('modalDevolucion').style.display = 'none';
+            }
+            (function () {
+                var m = document.getElementById('modalDevolucion');
+                var lbl = document.getElementById('<%= lblMensajeDevolucion.ClientID %>');
+                var b = document.getElementById('bannerEstadoDev');
+                if (m && m.style.display === 'none' && lbl && lbl.innerText.trim().length > 0 && b) {
+                    b.innerText = lbl.innerText.trim();
+                    b.style.display = 'block';
+                }
+            })();
+        </script>
 
         <!-- TARJETA 2: HISTORIAL -->
         <section class="card-dermocosmetica">

@@ -20,13 +20,41 @@ namespace trabajo_ing_software
         {
             base.OnInit(e); if(Session["InventarioToken"]==null)Session["InventarioToken"]=Guid.NewGuid().ToString("N"); ViewStateUserKey=(string)Session["InventarioToken"];
             modulo=Request.QueryString["m"] ?? "productos";
-            Interfaz.Controls.Add(new LiteralControl("<div class='dashboard'><div class='dashboard-header'><div><p class='dashboard-etiqueta'>MÓDULO DE INVENTARIO &bull; CONTROL DE BODEGA</p><h1>"+HttpUtility.HtmlEncode(Titulo())+"</h1><p class='dashboard-descripcion'>"+HttpUtility.HtmlEncode(Descripcion())+"</p></div></div>"));
+            bool esCrud = modulo=="productos" || modulo=="variantes" || modulo=="lotes" || modulo=="movimientos";
+            string btnNuevoHtml = esCrud
+                ? "<button type='button' class='btn btn-primary' onclick='abrirModalGestion();'>" + HttpUtility.HtmlEncode(TextoBotonNuevo()) + "</button>"
+                : "";
+            Interfaz.Controls.Add(new LiteralControl("<div class='dashboard'><div class='dashboard-header' style='display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:14px;'><div><p class='dashboard-etiqueta'>MÓDULO DE INVENTARIO &bull; CONTROL DE BODEGA</p><h1>"+HttpUtility.HtmlEncode(Titulo())+"</h1><p class='dashboard-descripcion'>"+HttpUtility.HtmlEncode(Descripcion())+"</p></div>"+btnNuevoHtml+"</div>"));
             mensaje=new Label{ID="mensaje",EnableViewState=false}; Interfaz.Controls.Add(mensaje);
-            Interfaz.Controls.Add(new LiteralControl("<section class='card-dermocosmetica contabilidad-formulario'>"));
-            try { Crear(); }
-            catch(Exception ex){MostrarError(ex);}
-            Interfaz.Controls.Add(new LiteralControl("</section><section class='card-dermocosmetica mt-4'><div class='table-responsive'>"));
-            tabla=new GridView{ID="tabla",AutoGenerateColumns=true,CssClass="table table-hover",GridLines=GridLines.None,EmptyDataText="No hay registros para los filtros seleccionados."};
+            if(esCrud)
+            {
+                bool abrirInicial = Editar > 0;
+                string estiloOverlay = abrirInicial ? "display:flex;" : "display:none;";
+                string tituloModal = (Editar > 0 ? "Editar " : "Registrar ") + NombreEntidad();
+                string urlBase = "Gestion.aspx?m=" + HttpUtility.UrlEncode(modulo);
+                Interfaz.Controls.Add(new LiteralControl(
+                    "<div id='modalGestion' class='modal-overlay' style='"+estiloOverlay+"'>"+
+                    "<div class='modal-content-card modal-md-card'>"+
+                    "<div class='modal-header-dermo'>"+
+                    "<div><span class='pill-badge' style='font-size:10px;padding:3px 10px;'>CONTROL DE BODEGA</span>"+
+                    "<h2 style='font-size:22px;margin:6px 0 2px 0;font-family:\"Playfair Display\",Georgia,serif;color:var(--color-texto);'>"+HttpUtility.HtmlEncode(tituloModal)+"</h2>"+
+                    "<div style='font-size:12px;color:var(--color-texto-suave);'>"+HttpUtility.HtmlEncode(Descripcion())+"</div></div>"+
+                    "<button type='button' class='btn btn-outline-secondary btn-sm modal-close-x' onclick=\"cerrarModalGestion('"+urlBase+"',"+(Editar>0?"true":"false")+");\" title='Cerrar ventana'>&times;</button>"+
+                    "</div>"+
+                    "<div class='modal-section-box gestion-modal-grid'>"));
+                try { Crear(true); }
+                catch(Exception ex){MostrarError(ex);}
+                Interfaz.Controls.Add(new LiteralControl("</div></div>"));
+            }
+            else
+            {
+                Interfaz.Controls.Add(new LiteralControl("<section class='card-dermocosmetica contabilidad-formulario'>"));
+                try { Crear(false); }
+                catch(Exception ex){MostrarError(ex);}
+                Interfaz.Controls.Add(new LiteralControl("</section>"));
+            }
+            Interfaz.Controls.Add(new LiteralControl("<section class='card-dermocosmetica mt-4'><div class='table-responsive'>"));
+            tabla=new GridView{ID="tabla",AutoGenerateColumns=true,CssClass="table table-hover align-middle",GridLines=GridLines.None,EmptyDataText="No hay registros para los filtros seleccionados."};
             if(modulo=="productos" || modulo=="variantes" || modulo=="lotes")
             {
                 var colEd = new HyperLinkField{HeaderText="Acción",Text="Editar",DataNavigateUrlFields=new[]{"Id"},DataNavigateUrlFormatString="Gestion.aspx?m="+modulo+"&id={0}"};
@@ -35,6 +63,8 @@ namespace trabajo_ing_software
             }
             Interfaz.Controls.Add(tabla); Interfaz.Controls.Add(new LiteralControl("</div></section></div>"));
         }
+        string TextoBotonNuevo(){switch(modulo){case "productos":return "+ Nuevo producto";case "variantes":return "+ Nueva variante";case "lotes":return "+ Nuevo lote";case "movimientos":return "+ Nuevo movimiento";default:return "+ Nuevo registro";}}
+        string NombreEntidad(){switch(modulo){case "productos":return "producto";case "variantes":return "variante";case "lotes":return "lote";case "movimientos":return "movimiento";default:return "registro";}}
         string Titulo(){switch(modulo){case "productos":return "Productos y stock mínimo";case "variantes":return "Variantes y presentaciones";case "lotes":return "Lotes y vencimientos";case "movimientos":return "Entradas, salidas y ajustes";case "historial":return "Historial de movimientos";case "alertas":return "Alertas de inventario";default:return "Reportes de inventario";}}
         string Descripcion(){switch(modulo){case "productos":return "Catálogo maestro de productos cosmecéuticos, categorías, marcas y umbrales mínimos de reposición.";case "variantes":return "Administración de presentaciones, códigos SKU únicos, volúmenes y formatos comerciales por producto.";case "lotes":return "Registro y seguimiento de lotes físicos por bodega con fechas de vencimiento bajo política FEFO.";case "movimientos":return "Registro transaccional de entradas, salidas, mermas y ajustes de inventario con respaldo en Kardex.";case "historial":return "Auditoría cronológica de todos los movimientos de inventario por lote, bodega y usuario responsable.";case "alertas":return "Monitoreo preventivo de productos con stock crítico y lotes próximos a vencer o vencidos.";default:return "Consulta y seguimiento general de existencias y control logístico de inventario.";}}
         void Texto(string id,string titulo,int longitud=100,string tipo="")
@@ -66,7 +96,7 @@ namespace trabajo_ing_software
         object FK(string id){int n=N(id);return n==0?(object)null:n;}
         string Requerido(string id){string v=V(id);if(v=="")throw new ArgumentException("Completa el campo "+id+".");return v;}
         DateTime Fecha(string id){DateTime d;if(!DateTime.TryParseExact(V(id),"yyyy-MM-dd",CultureInfo.InvariantCulture,DateTimeStyles.None,out d))throw new ArgumentException("Revisa la fecha de "+id+".");return d;}
-        void Crear()
+        void Crear(bool esModal)
         {
             if(modulo=="productos")
             {
@@ -86,7 +116,7 @@ namespace trabajo_ing_software
                 Lista("Bodega","Bodega","SELECT IdBodega Id,Nombre FROM bodega WHERE Activo=1");
                 Texto("Numero","Número de lote",50);Texto("Ingreso","Fecha de ingreso",10,"date");Texto("Vencimiento","Fecha de vencimiento",10,"date");
                 Opciones("Estado","Estado","Disponible","Cuarentena","Vencido","Agotado");
-                Interfaz.Controls.Add(new LiteralControl("<p>Las cantidades se registran desde Movimientos para conservar la trazabilidad. Los lotes nuevos comienzan con cero unidades.</p>"));
+                Interfaz.Controls.Add(new LiteralControl("<p class='gestion-modal-nota'>Las cantidades se registran desde Movimientos para conservar la trazabilidad. Los lotes nuevos comienzan con cero unidades.</p>"));
             }
             else if(modulo=="movimientos")
             {
@@ -96,7 +126,7 @@ namespace trabajo_ing_software
                 Texto("Cantidad","Cantidad de unidades",10,"number");Texto("Motivo","Motivo / justificación",255);
                 Lista("Compra","Detalle de recepción de compra","SELECT d.IdDetalleRec Id,CONCAT('Recepción #',d.IdRecepcion,' · detalle #',d.IdDetalleRec,' · ',v.Sku,' · ',d.Cantidad,' unidades') Nombre FROM detallerecepcion d JOIN varianteproducto v ON v.IdVariante=d.IdVariante WHERE NOT EXISTS(SELECT 1 FROM movimientoinventario m WHERE m.Origen='Entrada' AND m.IdDetalleOrigen=d.IdDetalleRec)",true);
                 Lista("Venta","Detalle de venta","SELECT d.IdVentaDetalle Id,CONCAT('Venta #',d.IdVenta,' · detalle #',d.IdVentaDetalle,' · ',v.Sku,' · ',d.Cantidad,' unidades') Nombre FROM ventadetalle d JOIN varianteproducto v ON v.IdVariante=d.IdVariante WHERE NOT EXISTS(SELECT 1 FROM movimientoinventario m WHERE m.Origen='Salida' AND m.IdDetalleOrigen=d.IdVentaDetalle)",true);
-                Interfaz.Controls.Add(new LiteralControl("<p>Entradas: selecciona una recepción de Compras. Salidas: selecciona un detalle de Ventas. Registra su cantidad completa. Para pérdidas, daños, vencimiento o diferencias usa un ajuste y explica el motivo.</p>"));
+                Interfaz.Controls.Add(new LiteralControl("<p class='gestion-modal-nota'>Entradas: selecciona una recepción de Compras. Salidas: selecciona un detalle de Ventas. Para pérdidas, daños o diferencias usa un ajuste e indica el motivo.</p>"));
             }
             else
             {
@@ -106,8 +136,18 @@ namespace trabajo_ing_software
                 else Opciones("Estado","Estado","Todos","Disponible","Stock bajo","Sin stock","Próximo a vencer","Vencido");
                 Boton("Consultar",(s,e)=>{});Boton("Exportar CSV",Exportar);return;
             }
-            Boton(Editar>0?"Guardar cambios":"Registrar",Guardar);
-            Interfaz.Controls.Add(new HyperLink{Text="Nuevo registro",NavigateUrl="Gestion.aspx?m="+modulo,CssClass="btn btn-outline-secondary m-2"});
+            if(esModal)
+            {
+                string urlBase = "Gestion.aspx?m=" + HttpUtility.UrlEncode(modulo);
+                Interfaz.Controls.Add(new LiteralControl("</div><div class='modal-footer-dermo'><button type='button' class='btn btn-outline-secondary' onclick=\"cerrarModalGestion('"+urlBase+"',"+(Editar>0?"true":"false")+");\">Cancelar</button>"));
+                Boton(Editar>0?"Guardar cambios":"Registrar",Guardar);
+                Interfaz.Controls.Add(new LiteralControl("</div>"));
+            }
+            else
+            {
+                Boton(Editar>0?"Guardar cambios":"Registrar",Guardar);
+                Interfaz.Controls.Add(new HyperLink{Text="Nuevo registro",NavigateUrl="Gestion.aspx?m="+modulo,CssClass="btn btn-outline-secondary m-2"});
+            }
             if(!IsPostBack && Editar>0) CargarEdicion();
         }
         void Asignar(string id,object valor){var c=campos[id];string v=Convert.ToString(valor);if(c is TextBox)((TextBox)c).Text=v;else{var d=(DropDownList)c;if(d.Items.FindByValue(v)!=null)d.SelectedValue=v;}}
@@ -146,6 +186,7 @@ namespace trabajo_ing_software
                 else if(modulo=="movimientos")
                 {string tipo=V("Tipo");InventarioDatos.Mover(N("Lote",1),N("Bodega",1),UsuarioInventario,tipo,N("Cantidad",1),Requerido("Motivo"),tipo=="Entrada"?N("Compra",1):tipo=="Salida"?N("Venta",1):0);}
                 mensaje.Text="Registro guardado correctamente.";mensaje.CssClass="alert alert-success d-block";
+                ClientScript.RegisterStartupScript(GetType(), "cerrarModalGestionOk", "var m=document.getElementById('modalGestion');if(m)m.style.display='none';", true);
             }
             catch(Exception ex){MostrarError(ex);}
         }

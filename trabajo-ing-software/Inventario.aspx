@@ -102,29 +102,29 @@
             <section class="dashboard-seccion">
                 <div class="card-dermocosmetica">
                     <h2>Productos en inventario</h2>
-                    <p>
-                        Filtra y consulta las existencias disponibles por SKU, bodega y estado de reposición.
+                    <p class="text-muted mb-3">
+                        Filtra y consulta las existencias disponibles por SKU, bodega y estado de reposici&oacute;n.
                     </p>
 
                     <!-- BUSCADOR Y FILTROS -->
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-4">
-                            <label for="txtBuscar" class="form-label">
-                                Buscar producto
-                            </label>
-                            <asp:TextBox
-                                ID="txtBuscar"
-                                runat="server"
-                                CssClass="form-control"
-                                placeholder="Nombre o SKU"
-                                MaxLength="100">
-                            </asp:TextBox>
+                    <div class="inv-filter-bar mb-4">
+                        <div>
+                            <label for="<%= txtBuscar.ClientID %>" class="form-label">Buscar producto</label>
+                            <div style="position: relative; display: flex; align-items: center;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 12px; color: #736E67; pointer-events: none;" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                <asp:TextBox
+                                    ID="txtBuscar"
+                                    runat="server"
+                                    CssClass="form-control"
+                                    style="padding-left: 36px;"
+                                    placeholder="Nombre o SKU"
+                                    MaxLength="100">
+                                </asp:TextBox>
+                            </div>
                         </div>
 
-                        <div class="col-md-3">
-                            <label class="form-label">
-                                Bodega
-                            </label>
+                        <div>
+                            <label class="form-label">Bodega</label>
                             <asp:DropDownList
                                 ID="ddlBodega"
                                 runat="server"
@@ -132,10 +132,8 @@
                             </asp:DropDownList>
                         </div>
 
-                        <div class="col-md-3">
-                            <label class="form-label">
-                                Estado del stock
-                            </label>
+                        <div>
+                            <label class="form-label">Estado del stock</label>
                             <asp:DropDownList
                                 ID="ddlEstado"
                                 runat="server"
@@ -147,23 +145,20 @@
                             </asp:DropDownList>
                         </div>
 
-                        <div class="col-md-2 d-flex align-items-end">
+                        <div class="inv-filter-actions">
                             <asp:Button
                                 ID="btnBuscar"
                                 runat="server"
                                 Text="Buscar"
-                                CssClass="btn btn-primary w-100"
+                                CssClass="btn btn-primary"
                                 OnClick="btnBuscar_Click" />
+                            <asp:Button
+                                ID="btnLimpiar"
+                                runat="server"
+                                Text="Limpiar filtros"
+                                CssClass="btn btn-outline-secondary"
+                                OnClick="btnLimpiar_Click" />
                         </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <asp:Button
-                            ID="btnLimpiar"
-                            runat="server"
-                            Text="Limpiar filtros"
-                            CssClass="btn btn-outline-secondary"
-                            OnClick="btnLimpiar_Click" />
                     </div>
 
                     <!-- MENSAJES -->

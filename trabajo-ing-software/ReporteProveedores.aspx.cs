@@ -7,7 +7,7 @@ using MySql.Data.MySqlClient;
 
 namespace trabajo_ing_software
 {
-    public partial class ReporteProveedores : System.Web.UI.Page
+    public partial class ReporteProveedores : PaginaCompras
     {
         string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null
             ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString
@@ -23,7 +23,7 @@ namespace trabajo_ing_software
 
             string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
             if (!rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase) &&
-                !rolUsuario.Equals("Comprador", StringComparison.OrdinalIgnoreCase))
+                !rolUsuario.Equals("Comprador", StringComparison.OrdinalIgnoreCase) && !rolUsuario.Equals("Contador", StringComparison.OrdinalIgnoreCase))
             {
                 ConfiguracionGlobal.RedirigirSegunRol(Response, rolUsuario);
                 return;
@@ -304,36 +304,38 @@ namespace trabajo_ing_software
 
         protected void btnExportarExcel_Click(object sender, EventArgs e)
         {
-            DataTable dt = ConsultarTablaProveedores();
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine("Laboratorio;Marca;País;Plazo Crédito (días);Órdenes;Recepciones;Devoluciones;Lead Time Promedio (días);Tasa Defectos (%);Cumplimiento (%);Calificación");
+            DataTable raw = ConsultarTablaProveedores();
+            DataTable limpio = new DataTable();
+            limpio.Columns.Add("Laboratorio", typeof(string));
+            limpio.Columns.Add("Marca", typeof(string));
+            limpio.Columns.Add("País", typeof(string));
+            limpio.Columns.Add("Plazo Crédito (Días)", typeof(int));
+            limpio.Columns.Add("Órdenes", typeof(int));
+            limpio.Columns.Add("Recepciones", typeof(int));
+            limpio.Columns.Add("Devoluciones", typeof(int));
+            limpio.Columns.Add("Lead Time Promedio (Días)", typeof(decimal));
+            limpio.Columns.Add("Tasa de Defectos (%)", typeof(decimal));
+            limpio.Columns.Add("Cumplimiento (%)", typeof(int));
+            limpio.Columns.Add("Calificación", typeof(string));
 
-            foreach (DataRow dr in dt.Rows)
+            foreach (DataRow r in raw.Rows)
             {
-                sb.AppendLine(string.Format("\"{0}\";\"{1}\";\"{2}\";{3};{4};{5};{6};{7:F1};{8:F1};{9};{10}",
-                    dr["RazonSocial"],
-                    dr["Marca"],
-                    dr["Pais"],
-                    dr["DiasPago"],
-                    dr["TotalOC"],
-                    dr["TotalRecepciones"],
-                    dr["TotalDevoluciones"],
-                    Convert.ToDouble(dr["LeadTimePromedioDias"]),
-                    Convert.ToDouble(dr["TasaDefectosPorcentaje"]),
-                    dr["PorcentajeCumplimiento"],
-                    dr["Calificacion"]
-                ));
+                limpio.Rows.Add(
+                    Convert.ToString(r["RazonSocial"]),
+                    Convert.ToString(r["Marca"]),
+                    Convert.ToString(r["Pais"]),
+                    Convert.ToInt32(r["DiasPago"]),
+                    Convert.ToInt32(r["TotalOC"]),
+                    Convert.ToInt32(r["TotalRecepciones"]),
+                    Convert.ToInt32(r["TotalDevoluciones"]),
+                    Math.Round(Convert.ToDecimal(r["LeadTimePromedioDias"]), 1),
+                    Math.Round(Convert.ToDecimal(r["TasaDefectosPorcentaje"]), 1),
+                    Convert.ToInt32(r["PorcentajeCumplimiento"]),
+                    Convert.ToString(r["Calificacion"])
+                );
             }
-            Response.Clear();
-            Response.Buffer = true;
-            Response.AddHeader("content-disposition", "attachment;filename=Reporte_Evaluacion_Proveedores.csv");
-            Response.Charset = "utf-8";
-            Response.ContentType = "text/csv";
-            Response.ContentEncoding = Encoding.UTF8;
-            Response.BinaryWrite(Encoding.UTF8.GetPreamble());
-            Response.Output.Write(sb.ToString());
-            Response.Flush();
-            Response.End();
+
+            ContabilidadExportacion.DescargarExcel(Response, limpio, "Reporte_Evaluacion_Proveedores");
         }
 
         protected void btnVolver_Click(object sender, EventArgs e)

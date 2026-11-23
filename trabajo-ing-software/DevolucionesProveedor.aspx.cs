@@ -7,7 +7,7 @@ using MySql.Data.MySqlClient;
 
 namespace trabajo_ing_software
 {
-    public partial class DevolucionesProveedor : Page
+    public partial class DevolucionesProveedor : PaginaCompras
     {
         private readonly string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null
             ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString
@@ -65,7 +65,7 @@ namespace trabajo_ing_software
                            WHERE IFNULL(r.Estado, 'Aprobada') = 'Aprobada'
                            ORDER BY r.FechaRecepcion DESC, r.IdRecepcion DESC";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlCommand cmd = new MySqlCommand(sql, con))
             {
                 con.Open();
@@ -105,7 +105,7 @@ namespace trabajo_ing_software
                            GROUP BY l.IdLote, v.Sku, p.Nombre, v.NombreVariante, l.NumeroLote, l.CantidadDisponible, l.CostoUnitario, l.Estado
                            ORDER BY p.Nombre, l.NumeroLote";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlCommand cmd = new MySqlCommand(sql, con))
             {
                 cmd.Parameters.AddWithValue("@IdRec", idRecepcion);
@@ -170,7 +170,7 @@ namespace trabajo_ing_software
 
             sql += " ORDER BY dp.Fecha DESC, dp.IdDevolucion DESC";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlCommand cmd = new MySqlCommand(sql, con))
             {
                 if (!string.IsNullOrEmpty(busqueda))
@@ -197,7 +197,7 @@ namespace trabajo_ing_software
                            FROM DevolucionProveedor dp
                            INNER JOIN Lote l ON l.IdLote = dp.IdLote";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlCommand cmd = new MySqlCommand(sql, con))
             {
                 con.Open();
@@ -229,6 +229,7 @@ namespace trabajo_ing_software
 
         protected void btnGuardar_Click(object sender, EventArgs e)
         {
+            ExigirEscrituraCompras();
             if (!PuedeEditar)
             {
                 MostrarMensaje("No tienes permisos para registrar reclamos a proveedor.", false);
@@ -268,7 +269,7 @@ namespace trabajo_ing_software
                 motivoFinal = motivoFinal.Substring(0, 200);
 
             // Validar cantidad máxima disponible del lote o recibida en esa recepción
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 con.Open();
                 string sqlVal = @"SELECT IFNULL(CantidadDisponible, 0) FROM Lote WHERE IdLote = @IdLote";
@@ -349,7 +350,8 @@ namespace trabajo_ing_software
 
         private void ActualizarEstado(int idDev, string nuevoEstado)
         {
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            ExigirEscrituraCompras();
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlCommand cmd = new MySqlCommand("UPDATE DevolucionProveedor SET Estado = @Estado WHERE IdDevolucion = @Id", con))
             {
                 cmd.Parameters.AddWithValue("@Estado", nuevoEstado);
@@ -365,70 +367,22 @@ namespace trabajo_ing_software
 
         private void AceptarDevolucionConInventario(int idDev)
         {
-            int idLote = 0;
-            int idBodega = 0;
-            int cantidad = 0;
-            string motivo = "";
-            string estadoActual = "";
-
-            using (MySqlConnection con = new MySqlConnection(connectionString))
-            {
-                con.Open();
-                string sql = @"SELECT dp.IdLote, dp.Cantidad, IFNULL(dp.Motivo, ''), IFNULL(dp.Estado, 'Pendiente'), IFNULL(l.IdBodega, 0)
-                               FROM DevolucionProveedor dp
-                               INNER JOIN Lote l ON l.IdLote = dp.IdLote
-                               WHERE dp.IdDevolucion = @Id";
-                using (MySqlCommand cmd = new MySqlCommand(sql, con))
-                {
-                    cmd.Parameters.AddWithValue("@Id", idDev);
-                    using (MySqlDataReader dr = cmd.ExecuteReader())
-                    {
-                        if (!dr.Read())
-                        {
-                            MostrarMensaje("No se encontró el reclamo seleccionado.", false);
-                            return;
-                        }
-                        idLote = Convert.ToInt32(dr[0]);
-                        cantidad = Convert.ToInt32(dr[1]);
-                        motivo = Convert.ToString(dr[2]);
-                        estadoActual = Convert.ToString(dr[3]);
-                        idBodega = Convert.ToInt32(dr[4]);
-                    }
-                }
-            }
-
-            if (estadoActual != "Pendiente" && estadoActual != "En Revisión")
-            {
-                MostrarMensaje("Solo se pueden aceptar reclamos en estado Pendiente o En Revisión.", false);
-                return;
-            }
-
+            ExigirEscrituraCompras();
             try
             {
-                if (idBodega > 0)
+                using(var con=ConexionErp.Crear(connectionString))
                 {
-                    int idUsuario = Convert.ToInt32(Session["IdUsuario"]);
-                    string obsMov = string.Format("Devolución a proveedor DEV-{0:D4}: {1}", idDev, motivo);
-                    if (obsMov.Length > 255) obsMov = obsMov.Substring(0, 255);
-                    InventarioDatos.Mover(idLote, idBodega, idUsuario, "Ajuste negativo", cantidad, obsMov, 0);
-                }
-
-                using (MySqlConnection con = new MySqlConnection(connectionString))
-                using (MySqlCommand cmd = new MySqlCommand("UPDATE DevolucionProveedor SET Estado = 'Aceptado' WHERE IdDevolucion = @Id", con))
-                {
-                    cmd.Parameters.AddWithValue("@Id", idDev);
                     con.Open();
-                    cmd.ExecuteNonQuery();
+                    using(var tx=con.BeginTransaction())
+                    using(var cmd=VentaInventario.Comando(con,tx,"CALL usp_AceptarDevolucionProveedor(@p0,@p1)",idDev,Convert.ToInt32(Session["IdUsuario"])))
+                    {
+                        cmd.ExecuteNonQuery();
+                        tx.Commit();
+                    }
                 }
-
-                MostrarMensaje(string.Format("Devolución DEV-{0:D4} aceptada. Se descontaron {1} unidades del lote y se registró la salida en Kardex.", idDev, cantidad), true);
+                MostrarMensaje("Devolución aceptada y salida registrada en el Kardex.",true);
             }
-            catch (Exception ex)
-            {
-                MostrarMensaje("No fue posible aceptar la devolución: " + ex.Message, false);
-            }
-
-            CargarLotesPorRecepcion();
+            catch(MySqlException ex) { MostrarMensaje(ConexionErp.MensajeError(ex),false); }
             CargarDevoluciones();
             CalcularKPIs();
         }
@@ -452,7 +406,7 @@ namespace trabajo_ing_software
                            INNER JOIN Usuario u ON u.IdUsuario = dp.IdUsuario
                            WHERE dp.IdDevolucion = @Id";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlCommand cmd = new MySqlCommand(sql, con))
             {
                 cmd.Parameters.AddWithValue("@Id", idDev);

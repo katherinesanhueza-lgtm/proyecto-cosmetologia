@@ -8,7 +8,7 @@ using MySql.Data.MySqlClient;
 
 namespace trabajo_ing_software
 {
-    public partial class CotizacionesImportacion : Page
+    public partial class CotizacionesImportacion : PaginaCompras
     {
         private readonly string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null
             ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString
@@ -83,7 +83,7 @@ namespace trabajo_ing_software
         {
             ddlLaboratorio.Items.Clear();
             ddlLaboratorio.Items.Add(new ListItem("-- Seleccionar Laboratorio --", ""));
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlCommand cmd = new MySqlCommand("SELECT IdLaboratorio, RazonSocial, Pais FROM Laboratorio WHERE Activo = 1 ORDER BY RazonSocial", con))
             {
                 con.Open();
@@ -106,7 +106,7 @@ namespace trabajo_ing_software
                            INNER JOIN Producto p ON v.IdProducto = p.IdProducto
                            WHERE v.Activo = 1 AND p.Activo = 1
                            ORDER BY p.Nombre, v.NombreVariante";
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlCommand cmd = new MySqlCommand(sql, con))
             {
                 con.Open();
@@ -129,7 +129,7 @@ namespace trabajo_ing_software
                 lblInfoLab.Text = "Seleccione un proveedor";
                 return;
             }
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlCommand cmd = new MySqlCommand("SELECT Pais, DiasPago, Contacto FROM Laboratorio WHERE IdLaboratorio = @Id", con))
             {
                 cmd.Parameters.AddWithValue("@Id", Convert.ToInt32(ddlLaboratorio.SelectedValue));
@@ -137,9 +137,16 @@ namespace trabajo_ing_software
                 using (MySqlDataReader dr = cmd.ExecuteReader())
                 {
                     if (dr.Read())
+                    {
+                        string pais = Convert.ToString(dr["Pais"]).Trim();
+                        if (((DataTable)ViewState["DetalleCotizacion"])?.Rows.Count == 0)
+                            ddlMoneda.SelectedValue = string.Equals(pais,"Francia",StringComparison.OrdinalIgnoreCase) || string.Equals(pais,"Alemania",StringComparison.OrdinalIgnoreCase) || string.Equals(pais,"España",StringComparison.OrdinalIgnoreCase) ? "EUR" : string.Equals(pais,"Chile",StringComparison.OrdinalIgnoreCase) ? "CLP" : "USD";
                         lblInfoLab.Text = $"Origen: {dr["Pais"]} | Crédito: {dr["DiasPago"]} días | Contacto: {dr["Contacto"]}";
+                    }
                 }
             }
+            ActualizarTipoCambioSegunMoneda(ddlMoneda.SelectedValue);
+            RecalcularTotales();
         }
 
         protected void ddlMoneda_SelectedIndexChanged(object sender, EventArgs e)
@@ -152,7 +159,6 @@ namespace trabajo_ing_software
         {
             ActualizarTipoCambioSegunMoneda(ddlMoneda.SelectedValue, true);
             RecalcularTotales();
-            MostrarMensaje($"Tipo de cambio de {ddlMoneda.SelectedValue} actualizado en vivo exitosamente.", true);
         }
 
         private void ActualizarTipoCambioSegunMoneda(string moneda, bool forzar = false)
@@ -177,7 +183,7 @@ namespace trabajo_ing_software
             }
             else
             {
-                lblInfoTipoCambio.Text = $"Al día ({info.FechaDesc}) · Editable";
+                lblInfoTipoCambio.Text = $"Referencia guardada ({info.FechaDesc}) · Editable";
                 lblInfoTipoCambio.ForeColor = System.Drawing.ColorTranslator.FromHtml("#27AE60");
             }
         }
@@ -186,7 +192,7 @@ namespace trabajo_ing_software
         {
             if (string.IsNullOrEmpty(ddlProducto.SelectedValue)) return;
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlCommand cmd = new MySqlCommand("SELECT IFNULL(CostoPromedio, 0) FROM VarianteProducto WHERE IdVariante = @Id", con))
             {
                 cmd.Parameters.AddWithValue("@Id", Convert.ToInt32(ddlProducto.SelectedValue));
@@ -221,7 +227,7 @@ namespace trabajo_ing_software
             string sku = "";
             string prodNombre = "";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlCommand cmd = new MySqlCommand("SELECT v.Sku, CONCAT(p.Nombre, ' - ', IFNULL(v.NombreVariante, '')) AS Nombre FROM VarianteProducto v INNER JOIN Producto p ON p.IdProducto = v.IdProducto WHERE v.IdVariante = @Id", con))
             {
                 cmd.Parameters.AddWithValue("@Id", idVar);
@@ -317,7 +323,7 @@ namespace trabajo_ing_software
             int idUsuario = Convert.ToInt32(Session["IdUsuario"]);
             string moneda = ddlMoneda.SelectedValue;
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 con.Open();
                 using (MySqlTransaction trans = con.BeginTransaction())
@@ -362,7 +368,7 @@ namespace trabajo_ing_software
                     catch (Exception ex)
                     {
                         trans.Rollback();
-                        MostrarMensaje("Error al guardar cotización: " + ex.Message, false);
+                        MostrarMensaje("Error al guardar cotización: " + ConexionErp.MensajeError(ex), false);
                     }
                 }
             }
@@ -373,7 +379,7 @@ namespace trabajo_ing_software
             if (!PuedeEditar) return;
             int idUsuario = Convert.ToInt32(Session["IdUsuario"]);
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 con.Open();
                 using (MySqlTransaction trans = con.BeginTransaction())
@@ -478,7 +484,7 @@ namespace trabajo_ing_software
                     catch (Exception ex)
                     {
                         trans.Rollback();
-                        MostrarMensaje("Error al convertir cotización a OC: " + ex.Message, false);
+                        MostrarMensaje("Error al convertir cotización a OC: " + ConexionErp.MensajeError(ex), false);
                     }
                 }
             }
@@ -505,7 +511,7 @@ namespace trabajo_ing_software
 
             sql += " GROUP BY c.IdCotizacion, l.RazonSocial, c.Fecha, c.Moneda, c.TipoCambio, c.Estado ORDER BY c.IdCotizacion DESC";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlCommand cmd = new MySqlCommand(sql, con))
             {
                 if (!string.IsNullOrEmpty(filtro)) cmd.Parameters.AddWithValue("@Filtro", "%" + filtro + "%");
@@ -533,7 +539,7 @@ namespace trabajo_ing_software
                                     WHERE c2.Estado IN ('Solicitada', 'Aprobada')), 0) AS MontoClp
                            FROM CotizacionImportacion";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlCommand cmd = new MySqlCommand(sql, con))
             {
                 con.Open();
@@ -574,7 +580,7 @@ namespace trabajo_ing_software
 
         private void CambiarEstadoCotizacion(int idCot, string nuevoEstado)
         {
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlCommand cmd = new MySqlCommand("UPDATE CotizacionImportacion SET Estado = @Estado WHERE IdCotizacion = @Id", con))
             {
                 cmd.Parameters.AddWithValue("@Estado", nuevoEstado);
@@ -589,7 +595,7 @@ namespace trabajo_ing_software
 
         private void AbrirModalDetalle(int idCot)
         {
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 con.Open();
                 decimal tc = 1m;

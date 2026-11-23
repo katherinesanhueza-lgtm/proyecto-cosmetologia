@@ -288,9 +288,8 @@
             <div style="max-width: 1200px; margin: 35px auto 0 auto; padding-top: 20px; border-top: 1px solid var(--color-borde-suave); display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--color-texto-suave); flex-wrap: wrap; gap: 15px;">
                 <div>&copy; 2026 Dermo ERP &middot; Sistema de Gesti&oacute;n Empresarial. Todos los derechos reservados.</div>
                 <div style="display: flex; gap: 20px;">
-                    <a href="#" style="color: inherit; text-decoration: none;">Privacidad Corporativa</a>
-                    <a href="#" style="color: inherit; text-decoration: none;">T&eacute;rminos de Uso</a>
-                    <a href="#" style="color: inherit; text-decoration: none;">Soporte T&eacute;cnico</a>
+                    <a href="Privacidad.aspx" style="color: inherit; text-decoration: none;">Privacidad y Datos Personales</a>
+                    <a href="Privacidad.aspx" style="color: inherit; text-decoration: none;">Derechos ARCO (Ley 19.628)</a>
                 </div>
             </div>
         </footer>

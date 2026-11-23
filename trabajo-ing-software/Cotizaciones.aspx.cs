@@ -15,7 +15,7 @@ namespace trabajo_ing_software
         {
             if (!IsPostBack)
             {
-                using (var con = new MySqlConnection(connectionString))
+                using (var con = ConexionErp.Crear(connectionString))
                 {
                     con.Open();
                     VentaInventario.AsegurarEsquema(con);
@@ -53,7 +53,7 @@ namespace trabajo_ing_software
 
         private void CargarClientes()
         {
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 string query = "SELECT IdCliente, Nombre FROM cliente ORDER BY Nombre ASC";
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
@@ -73,7 +73,7 @@ namespace trabajo_ing_software
 
         private void CargarProductos()
         {
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 string query = @"SELECT v.IdVariante, CONCAT(p.Nombre, ' (', v.NombreVariante, ' - SKU: ', v.Sku, ')') AS NombreCompleto 
                                  FROM varianteproducto v 
@@ -97,7 +97,7 @@ namespace trabajo_ing_software
 
         private void CargarHistorial()
         {
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 // Auto-actualiza a 'Vencido' aquellas cotizaciones vigentes cuya fecha de vencimiento ya pasó
                 string actualizaVencidos = @"UPDATE cotizacion 
@@ -183,6 +183,7 @@ namespace trabajo_ing_software
 
         protected void btnGuardarCotizacion_Click(object sender, EventArgs e)
         {
+            ExigirEscrituraVentas();
             DataTable dtDetalle = (DataTable)ViewState["DetalleCotizacion"];
 
             if (ddlClientes.SelectedValue == "" || dtDetalle.Rows.Count == 0)
@@ -201,7 +202,7 @@ namespace trabajo_ing_software
             decimal totalFinal = 0;
             foreach (DataRow fila in dtDetalle.Rows) totalFinal += Convert.ToDecimal(fila["Subtotal"]);
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 con.Open();
                 using (MySqlTransaction tr = con.BeginTransaction())
@@ -248,7 +249,7 @@ namespace trabajo_ing_software
                     catch (Exception ex)
                     {
                         tr.Rollback();
-                        MostrarMensaje("Error al guardar cotización: " + ex.Message, false);
+                        MostrarMensaje("Error al guardar cotización: " + ConexionErp.MensajeError(ex), false);
                     }
                 }
             }
@@ -274,8 +275,9 @@ namespace trabajo_ing_software
 
         private void CambiarEstado(int idCotizacion, string nuevoEstado)
         {
+            ExigirEscrituraVentas();
             string query = "UPDATE cotizacion SET Estado = @Estado WHERE IdCotizacion = @Id";
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlCommand cmd = new MySqlCommand(query, con))
             {
                 cmd.Parameters.AddWithValue("@Estado", nuevoEstado);
@@ -312,7 +314,7 @@ namespace trabajo_ing_software
         {
             if (ddlProductos.SelectedValue != "")
             {
-                using (MySqlConnection con = new MySqlConnection(connectionString))
+                using (MySqlConnection con = ConexionErp.Crear(connectionString))
                 {
                     string query = "SELECT PrecioVenta FROM varianteproducto WHERE IdVariante = @id";
                     using (MySqlCommand cmd = new MySqlCommand(query, con))

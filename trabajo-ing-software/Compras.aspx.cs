@@ -7,7 +7,7 @@ using MySql.Data.MySqlClient;
 
 namespace trabajo_ing_software
 {
-    public partial class Compras : Page
+    public partial class Compras : PaginaCompras
     {
         private static readonly CultureInfo Cultura = CultureInfo.GetCultureInfo("es-CL");
 

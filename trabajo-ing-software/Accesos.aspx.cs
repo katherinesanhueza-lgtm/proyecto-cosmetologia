@@ -52,7 +52,7 @@ namespace trabajo_ing_software
 
         private void CargarUsuarios()
         {
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 string query = "SELECT IdUsuario, Nombre FROM Usuario WHERE Activo = 1";
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
@@ -72,7 +72,7 @@ namespace trabajo_ing_software
 
         private void CargarPerfiles()
         {
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 string query = "SELECT IdRol, Nombre FROM Rol";
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
@@ -92,7 +92,7 @@ namespace trabajo_ing_software
 
         private void CargarTablaAccesos()
         {
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 string query = @"SELECT u.Nombre, u.Correo, IFNULL(r.Nombre, 'Sin Asignar') AS Perfil
                                  FROM Usuario u
@@ -127,7 +127,7 @@ namespace trabajo_ing_software
                 return;
             }
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 string query = "UPDATE Usuario SET IdRol = @IdRol, Rol = @NombreRol WHERE IdUsuario = @IdUsuario";
                 using (MySqlCommand cmd = new MySqlCommand(query, con))

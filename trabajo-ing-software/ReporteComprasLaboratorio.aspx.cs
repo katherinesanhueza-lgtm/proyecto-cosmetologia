@@ -10,7 +10,7 @@ using MySql.Data.MySqlClient;
 
 namespace trabajo_ing_software
 {
-    public partial class ReporteComprasLaboratorio : Page
+    public partial class ReporteComprasLaboratorio : PaginaCompras
     {
         private readonly string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null
             ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString
@@ -241,37 +241,36 @@ namespace trabajo_ing_software
 
         protected void btnExportarExcel_Click(object sender, EventArgs e)
         {
-            DataTable dt = ConsultarComprasAgrupadas();
+            DataTable raw = ConsultarComprasAgrupadas();
+            DataTable limpio = new DataTable();
+            limpio.Columns.Add("Laboratorio", typeof(string));
+            limpio.Columns.Add("País", typeof(string));
+            limpio.Columns.Add("Marca", typeof(string));
+            limpio.Columns.Add("N° OC", typeof(int));
+            limpio.Columns.Add("Unidades", typeof(int));
+            limpio.Columns.Add("Neto (CLP)", typeof(decimal));
+            limpio.Columns.Add("IVA (CLP)", typeof(decimal));
+            limpio.Columns.Add("Total (CLP)", typeof(decimal));
+            limpio.Columns.Add("Participación (%)", typeof(decimal));
+            limpio.Columns.Add("Reclamos", typeof(int));
 
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine("Laboratorio;País;Marca;N° Órdenes;Unidades;Neto ($);IVA ($);Total ($);Participación (%);Reclamos");
-
-            foreach (DataRow dr in dt.Rows)
+            foreach (DataRow r in raw.Rows)
             {
-                sb.AppendLine(string.Format("\"{0}\";\"{1}\";\"{2}\";{3};{4};{5};{6};{7};{8};{9}",
-                    dr["RazonSocial"],
-                    dr["Pais"],
-                    dr["MarcaEfectiva"],
-                    dr["TotalOC"],
-                    dr["UnidadesTotales"],
-                    dr["Neto"],
-                    dr["Iva"],
-                    dr["Total"],
-                    dr["ParticipacionPct"],
-                    dr["TotalReclamos"]
-                ));
+                limpio.Rows.Add(
+                    Convert.ToString(r["RazonSocial"]),
+                    Convert.ToString(r["Pais"]),
+                    Convert.ToString(r["MarcaEfectiva"]),
+                    Convert.ToInt32(r["TotalOC"]),
+                    Convert.ToInt32(r["UnidadesTotales"]),
+                    Convert.ToDecimal(r["Neto"]),
+                    Convert.ToDecimal(r["Iva"]),
+                    Convert.ToDecimal(r["Total"]),
+                    Math.Round(Convert.ToDecimal(r["ParticipacionPct"]), 1),
+                    Convert.ToInt32(r["TotalReclamos"])
+                );
             }
 
-            Response.Clear();
-            Response.Buffer = true;
-            Response.AddHeader("content-disposition", "attachment;filename=Reporte_Compras_Laboratorio_Marca.csv");
-            Response.Charset = "utf-8";
-            Response.ContentType = "text/csv";
-            Response.ContentEncoding = Encoding.UTF8;
-            Response.BinaryWrite(Encoding.UTF8.GetPreamble());
-            Response.Output.Write(sb.ToString());
-            Response.Flush();
-            Response.End();
+            ContabilidadExportacion.DescargarExcel(Response, limpio, "Reporte_Compras_Laboratorio_Marca");
         }
 
         protected void btnLogout_Click(object sender, EventArgs e)

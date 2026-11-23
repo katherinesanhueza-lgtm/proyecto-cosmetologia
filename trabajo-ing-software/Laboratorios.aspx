@@ -9,15 +9,38 @@
 
         .filter-toolbar-row {
             display: grid;
-            grid-template-columns: 1fr 180px 140px auto;
-            gap: 14px;
+            grid-template-columns: minmax(220px, 1fr) 175px 145px auto;
+            gap: 12px;
             align-items: center;
             background-color: var(--color-blanco);
             border: 1px solid var(--color-borde-suave);
-            border-radius: 25px;
-            padding: 8px 18px;
+            border-radius: 16px;
+            padding: 14px 18px !important;
             margin-bottom: 22px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+        .labs-search-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+        .labs-search-icon {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--color-texto-suave);
+            pointer-events: none;
+            display: inline-flex;
+        }
+        .labs-search-wrap .form-control {
+            padding-left: 38px;
+            width: 100%;
+        }
+        .labs-count-wrap {
+            text-align: right;
+            white-space: nowrap;
         }
 
         /* Banner de alerta y notificación (Estética Dermo) */
@@ -171,12 +194,24 @@
             margin-top: 25px;
         }
 
-        @media (max-width: 1050px) {
+        @media (max-width: 1180px) {
             .filter-toolbar-row {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr 1fr auto;
+            }
+            .labs-search-wrap {
+                grid-column: 1 / -1;
             }
             .kpi-row-3col {
                 grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 640px) {
+            .filter-toolbar-row {
+                grid-template-columns: 1fr 1fr;
+            }
+            .labs-count-wrap {
+                grid-column: 1 / -1;
+                text-align: left;
             }
         }
     </style>
@@ -213,8 +248,10 @@
 
             <!-- BARRA DE FILTROS Y BUSQUEDA -->
             <div class="filter-toolbar-row card-dermocosmetica">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--color-texto-suave); flex-shrink: 0;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <div class="labs-search-wrap">
+                    <span class="labs-search-icon" aria-hidden="true">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </span>
                     <asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control" placeholder="Buscar por laboratorio, marca o representante comercial..." AutoPostBack="true" OnTextChanged="txtBuscar_TextChanged"></asp:TextBox>
                 </div>
                 <div>
@@ -237,7 +274,7 @@
                         <asp:ListItem Text="Inactivo" Value="0" />
                     </asp:DropDownList>
                 </div>
-                <div style="text-align: right;">
+                <div class="labs-count-wrap">
                     <span class="pill-badge" style="background-color: #FAF8F5; font-size: 11px;">
                         &bull; <asp:Label ID="lblTotalHomologados" runat="server" Text="0"></asp:Label> Laboratorios Homologados
                     </span>

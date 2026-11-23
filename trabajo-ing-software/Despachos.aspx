@@ -5,14 +5,26 @@
     <style>
         .card-dermocosmetica h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 14px; }
         .form-label { font-size: 0.875rem; font-weight: 500; color: #24211e; margin-bottom: 6px; }
-        .table { font-size: 0.85rem; }
-        .table th { font-size: 0.85rem; }
-        .table td { font-size: 0.85rem; }
-        .badge-pendiente { background-color: #FFF3CD; color: #856404; padding: 4px 10px; border-radius: 12px; font-weight: 600; font-size: 12px; display: inline-block; }
-        .badge-preparacion { background-color: #EBF3FA; color: #2980B9; padding: 4px 10px; border-radius: 12px; font-weight: 600; font-size: 12px; display: inline-block; }
-        .badge-ruta { background-color: #F3E5F5; color: #6A1B9A; padding: 4px 10px; border-radius: 12px; font-weight: 600; font-size: 12px; display: inline-block; }
-        .badge-entregado { background-color: #E8F8F0; color: #27AE60; padding: 4px 10px; border-radius: 12px; font-weight: 600; font-size: 12px; display: inline-block; }
-        .badge-cancelado { background-color: #FDEDEC; color: #C0392B; padding: 4px 10px; border-radius: 12px; font-weight: 600; font-size: 12px; display: inline-block; }
+        .table { font-size: 0.79rem; }
+        .table th { font-size: 0.73rem; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.35px; padding: 9px 6px !important; }
+        .table td { font-size: 0.79rem; padding: 9px 6px !important; vertical-align: middle; }
+        .badge-pendiente { background-color: #FFF3CD; color: #856404; padding: 3px 9px; border-radius: 12px; font-weight: 600; font-size: 11px; display: inline-block; white-space: nowrap; }
+        .badge-preparacion { background-color: #EBF3FA; color: #2980B9; padding: 3px 9px; border-radius: 12px; font-weight: 600; font-size: 11px; display: inline-block; white-space: nowrap; }
+        .badge-ruta { background-color: #F3E5F5; color: #6A1B9A; padding: 3px 9px; border-radius: 12px; font-weight: 600; font-size: 11px; display: inline-block; white-space: nowrap; }
+        .badge-entregado { background-color: #E8F8F0; color: #27AE60; padding: 3px 9px; border-radius: 12px; font-weight: 600; font-size: 11px; display: inline-block; white-space: nowrap; }
+        .badge-cancelado { background-color: #FDEDEC; color: #C0392B; padding: 3px 9px; border-radius: 12px; font-weight: 600; font-size: 11px; display: inline-block; white-space: nowrap; }
+        .desp-acciones-fila {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: nowrap;
+            white-space: nowrap;
+        }
+        .desp-btn-sm {
+            padding: 4px 8px !important;
+            font-size: 0.72rem !important;
+            white-space: nowrap !important;
+        }
     </style>
 </asp:Content>
 
@@ -25,17 +37,29 @@
                 <h1>Gesti&oacute;n y Control de Despachos</h1>
                 <p class="text-muted" style="margin-top: 4px;">Programaci&oacute;n de env&iacute;os, asignaci&oacute;n de transportistas, seguimiento de ruta y registro de entregas.</p>
             </div>
-            <div class="compras-acciones">
-                <a href="ReporteVentas.aspx?tipo=2&amp;origen=despachos" class="btn btn-outline-secondary">
+            <div class="compras-acciones" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <a href="ReporteVentas.aspx?tipo=8&amp;origen=despachos" class="btn btn-outline-secondary">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                     Reporte Consolidado
                 </a>
+                <button type="button" class="btn btn-primary" onclick="abrirModalDespacho();">+ Programar Despacho</button>
             </div>
         </div>
 
-        <!-- TARJETA 1: FORMULARIO DE PROGRAMACIÓN -->
-        <section class="card-dermocosmetica" style="margin-bottom: 24px;">
-            <h2 style="margin-bottom: 16px;">Programar Nuevo Despacho</h2>
+        <input type="hidden" id="hdnModalDespAbierto" name="modalDespAbierto" value="<%= (Request.Form["modalDespAbierto"] == "1" && lblMensajeDespacho.ForeColor != System.Drawing.Color.Green) ? "1" : "0" %>" />
+        <div id="bannerEstadoDesp" style="display:none; margin-bottom: 16px;" class="alert alert-success"></div>
+
+        <!-- MODAL FLOTANTE: FORMULARIO DE PROGRAMACIÓN -->
+        <div id="modalDespacho" class="modal-overlay" style="<%= (Request.Form["modalDespAbierto"] == "1" && lblMensajeDespacho.ForeColor != System.Drawing.Color.Green) ? "display:flex;" : "display:none;" %>">
+        <section class="modal-content-card modal-lg-card">
+            <div class="modal-header-dermo">
+                <div>
+                    <span class="pill-badge" style="font-size: 10px; padding: 3px 10px;">LOG&Iacute;STICA Y DISTRIBUCI&Oacute;N</span>
+                    <h2 style="font-size: 22px; margin: 6px 0 2px 0; font-family: 'Playfair Display', Georgia, serif; color: var(--color-texto);">Programar Nuevo Despacho</h2>
+                    <div style="font-size: 12px; color: var(--color-texto-suave);">Asignaci&oacute;n de documento de venta, transportista y fecha estimada</div>
+                </div>
+                <button type="button" class="btn btn-outline-secondary btn-sm modal-close-x" onclick="cerrarModalDespacho();" title="Cerrar ventana">&times;</button>
+            </div>
             
             <div class="row g-3">
                 <div class="col-md-4">
@@ -75,16 +99,38 @@
                     <asp:TextBox ID="txtObservaciones" runat="server" CssClass="form-control" Placeholder="Ej: Dejar en conserjería..."></asp:TextBox>
                 </div>
 
-                <div class="col-12 text-end mt-4 d-flex justify-content-between align-items-center">
+                <div class="col-12 modal-footer-dermo align-items-center justify-content-between">
                     <div>
                         <asp:Label ID="lblMensajeDespacho" runat="server" style="font-weight:600;"></asp:Label>
                     </div>
-                    <div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-secondary" onclick="cerrarModalDespacho();">Cancelar</button>
                         <asp:Button ID="btnGuardarDespacho" runat="server" Text="Programar Despacho" CssClass="btn btn-primary" OnClick="btnGuardarDespacho_Click" />
                     </div>
                 </div>
             </div>
         </section>
+        </div>
+
+        <script>
+            function abrirModalDespacho() {
+                document.getElementById('hdnModalDespAbierto').value = '1';
+                document.getElementById('modalDespacho').style.display = 'flex';
+            }
+            function cerrarModalDespacho() {
+                document.getElementById('hdnModalDespAbierto').value = '0';
+                document.getElementById('modalDespacho').style.display = 'none';
+            }
+            (function () {
+                var m = document.getElementById('modalDespacho');
+                var lbl = document.getElementById('<%= lblMensajeDespacho.ClientID %>');
+                var b = document.getElementById('bannerEstadoDesp');
+                if (m && m.style.display === 'none' && lbl && lbl.innerText.trim().length > 0 && b) {
+                    b.innerText = lbl.innerText.trim();
+                    b.style.display = 'block';
+                }
+            })();
+        </script>
 
         <!-- TARJETA 2: CONTROL DE ESTADOS Y REGISTRO DE ENTREGAS -->
         <section class="card-dermocosmetica">
@@ -105,43 +151,45 @@
             <div class="table-responsive">
                 <asp:GridView ID="gvDespachos" runat="server" CssClass="table table-hover" AutoGenerateColumns="False" GridLines="None" OnRowCommand="gvDespachos_RowCommand" EmptyDataText="No hay despachos registrados.">
                     <Columns>
-                        <asp:BoundField DataField="IdDespacho" HeaderText="ID" />
-                        <asp:BoundField DataField="Documento" HeaderText="Documento Venta" />
+                        <asp:BoundField DataField="IdDespacho" HeaderText="ID" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center" />
+                        <asp:BoundField DataField="Documento" HeaderText="Documento" ItemStyle-CssClass="text-nowrap fw-semibold" />
                         <asp:BoundField DataField="Cliente" HeaderText="Cliente" />
-                        <asp:BoundField DataField="Tipo" HeaderText="Transportista" />
-                        <asp:BoundField DataField="FechaEstimada" HeaderText="F. Estimada" DataFormatString="{0:dd/MM/yyyy}" />
-                        <asp:BoundField DataField="FechaEntrega" HeaderText="F. Entrega Real" DataFormatString="{0:dd/MM/yyyy}" NullDisplayText="Pendiente" />
-                        <asp:TemplateField HeaderText="Estado">
+                        <asp:BoundField DataField="Tipo" HeaderText="Transportista" ItemStyle-CssClass="text-nowrap" />
+                        <asp:BoundField DataField="FechaEstimada" HeaderText="F. Estimada" DataFormatString="{0:dd/MM/yyyy}" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center text-nowrap" />
+                        <asp:BoundField DataField="FechaEntrega" HeaderText="F. Entrega" DataFormatString="{0:dd/MM/yyyy}" NullDisplayText="Pendiente" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center text-nowrap" />
+                        <asp:TemplateField HeaderText="Estado" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center">
                             <ItemTemplate>
                                 <span class='<%# GetClaseEstado(Eval("Estado").ToString()) %>'>
-                                    <%# Eval("Estado") %>
+                                    <%# Eval("Estado").ToString() == "En Preparacion" ? "En Preparaci&oacute;n" : Eval("Estado") %>
                                 </span>
                             </ItemTemplate>
                         </asp:TemplateField>
                         <asp:BoundField DataField="Observaciones" HeaderText="Observaciones" NullDisplayText="—" />
-                        <asp:TemplateField HeaderText="Acciones / Control de Ruta">
+                        <asp:TemplateField HeaderText="Acciones" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center text-nowrap">
                             <ItemTemplate>
-                                <asp:LinkButton ID="btnPreparar" runat="server" CssClass="btn btn-outline-secondary btn-sm me-1" 
-                                    CommandName="CambiarEstado" CommandArgument='<%# Eval("IdDespacho") + "|En Preparacion" %>'
-                                    Visible='<%# Eval("Estado").ToString() == "Pendiente" %>'>
-                                    A Preparación
-                                </asp:LinkButton>
-                                <asp:LinkButton ID="btnRuta" runat="server" CssClass="btn btn-outline-secondary btn-sm me-1" 
-                                    CommandName="CambiarEstado" CommandArgument='<%# Eval("IdDespacho") + "|En Ruta" %>'
-                                    Visible='<%# Eval("Estado").ToString() == "En Preparacion" %>'>
-                                    Enviar a Ruta
-                                </asp:LinkButton>
-                                <asp:LinkButton ID="btnEntregar" runat="server" CssClass="btn btn-primary btn-sm me-1" 
-                                    CommandName="RegistrarEntrega" CommandArgument='<%# Eval("IdDespacho") %>'
-                                    Visible='<%# Eval("Estado").ToString() == "En Ruta" || Eval("Estado").ToString() == "En Preparacion" || Eval("Estado").ToString() == "Pendiente" %>'>
-                                    Registrar Entrega
-                                </asp:LinkButton>
-                                <asp:LinkButton ID="btnCancelar" runat="server" CssClass="btn btn-outline-danger btn-sm" 
-                                    CommandName="CambiarEstado" CommandArgument='<%# Eval("IdDespacho") + "|Cancelado" %>'
-                                    Visible='<%# Eval("Estado").ToString() != "Entregado" && Eval("Estado").ToString() != "Cancelado" %>'
-                                    OnClientClick="return confirm('¿Seguro que deseas anular este despacho?');">
-                                    Anular
-                                </asp:LinkButton>
+                                <div class="desp-acciones-fila">
+                                    <asp:LinkButton ID="btnPreparar" runat="server" CssClass="btn btn-outline-secondary btn-sm desp-btn-sm"
+                                        CommandName="CambiarEstado" CommandArgument='<%# Eval("IdDespacho") + "|En Preparacion" %>'
+                                        Visible='<%# Eval("Estado").ToString() == "Pendiente" %>'>
+                                        Preparar
+                                    </asp:LinkButton>
+                                    <asp:LinkButton ID="btnRuta" runat="server" CssClass="btn btn-outline-secondary btn-sm desp-btn-sm"
+                                        CommandName="CambiarEstado" CommandArgument='<%# Eval("IdDespacho") + "|En Ruta" %>'
+                                        Visible='<%# Eval("Estado").ToString() == "En Preparacion" %>'>
+                                        En Ruta
+                                    </asp:LinkButton>
+                                    <asp:LinkButton ID="btnEntregar" runat="server" CssClass="btn btn-primary btn-sm desp-btn-sm"
+                                        CommandName="RegistrarEntrega" CommandArgument='<%# Eval("IdDespacho") %>'
+                                        Visible='<%# Eval("Estado").ToString() == "En Ruta" || Eval("Estado").ToString() == "En Preparacion" || Eval("Estado").ToString() == "Pendiente" %>'>
+                                        Entregar
+                                    </asp:LinkButton>
+                                    <asp:LinkButton ID="btnCancelar" runat="server" CssClass="btn btn-outline-danger btn-sm desp-btn-sm"
+                                        CommandName="CambiarEstado" CommandArgument='<%# Eval("IdDespacho") + "|Cancelado" %>'
+                                        Visible='<%# Eval("Estado").ToString() != "Entregado" && Eval("Estado").ToString() != "Cancelado" %>'
+                                        OnClientClick="return confirm('&iquest;Seguro que deseas anular este despacho?');">
+                                        Anular
+                                    </asp:LinkButton>
+                                </div>
                             </ItemTemplate>
                         </asp:TemplateField>
                     </Columns>

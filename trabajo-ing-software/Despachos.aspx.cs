@@ -17,7 +17,7 @@ namespace trabajo_ing_software
 
             if (!IsPostBack)
             {
-                using (var con = new MySqlConnection(connectionString))
+                using (var con = ConexionErp.Crear(connectionString))
                 {
                     con.Open();
                     VentaInventario.AsegurarEsquema(con);
@@ -43,7 +43,7 @@ namespace trabajo_ing_software
 
         private void CargarVentas()
         {
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 string query = @"SELECT IdVenta, 
                                  CONCAT(TipoDocumento, ' N° ', COALESCE(Folio, IdVenta), ' · Total: $', FORMAT(Total, 0)) AS DescripcionVenta 
@@ -70,7 +70,7 @@ namespace trabajo_ing_software
         {
             if (ddlDocumentoOrigen.SelectedValue != "")
             {
-                using (MySqlConnection con = new MySqlConnection(connectionString))
+                using (MySqlConnection con = ConexionErp.Crear(connectionString))
                 {
                     string query = @"SELECT c.Nombre 
                                      FROM venta v 
@@ -96,13 +96,14 @@ namespace trabajo_ing_software
 
         protected void btnGuardarDespacho_Click(object sender, EventArgs e)
         {
+            ExigirEscrituraVentas();
             if (ddlDocumentoOrigen.SelectedValue == "" || ddlTransportista.SelectedValue == "" || string.IsNullOrEmpty(txtFechaEstimada.Text))
             {
                 MostrarMensaje("Complete todos los campos obligatorios del despacho.", false);
                 return;
             }
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 string query = @"INSERT INTO despacho (IdVenta, Estado, FechaEstimada, Tipo, Observaciones, IdUsuario) 
                                  VALUES (@idVenta, @estado, @fecha, @tipo, @obs, @idUsuario)";
@@ -127,7 +128,7 @@ namespace trabajo_ing_software
                     }
                     catch (Exception ex)
                     {
-                        MostrarMensaje("Error al programar despacho: " + ex.Message, false);
+                        MostrarMensaje("Error al programar despacho: " + ConexionErp.MensajeError(ex), false);
                     }
                 }
             }
@@ -146,7 +147,7 @@ namespace trabajo_ing_software
                 filtro = "WHERE d.Estado = @EstadoFiltro";
             }
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 string query = $@"SELECT d.IdDespacho, 
                                          CONCAT(v.TipoDocumento, ' #', COALESCE(v.Folio, v.IdVenta)) AS Documento,
@@ -202,7 +203,8 @@ namespace trabajo_ing_software
 
         private void ActualizarEstadoDespacho(int idDespacho, string nuevoEstado, DateTime? fechaEntrega)
         {
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            ExigirEscrituraVentas();
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 string query = "UPDATE despacho SET Estado = @Estado, FechaEntrega = @FechaEntrega WHERE IdDespacho = @Id";
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
@@ -220,7 +222,7 @@ namespace trabajo_ing_software
                     }
                     catch (Exception ex)
                     {
-                        MostrarMensaje("Error al actualizar despacho: " + ex.Message, false);
+                        MostrarMensaje("Error al actualizar despacho: " + ConexionErp.MensajeError(ex), false);
                     }
                 }
             }

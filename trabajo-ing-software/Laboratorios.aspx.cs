@@ -6,7 +6,7 @@ using System.Web.UI.WebControls;
 
 namespace trabajo_ing_software
 {
-    public partial class Laboratorios : System.Web.UI.Page
+    public partial class Laboratorios : PaginaCompras
     {
         string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=;";
 
@@ -64,118 +64,56 @@ namespace trabajo_ing_software
             CargarLaboratorios();
         }
 
-        // 1. READ: Listar Laboratorios con filtros y cálculo de KPIs
+        // 1. READ: Listar Laboratorios con filtros y cálculo de KPIs (vía CapaNegocio -> CapaDatos)
         private void CargarLaboratorios()
         {
             string filtro = txtBuscar != null ? txtBuscar.Text.Trim() : "";
             string pais = ddlFiltroPais != null ? ddlFiltroPais.SelectedValue : "";
             string estado = ddlFiltroEstado != null ? ddlFiltroEstado.SelectedValue : "";
 
-            string query = "SELECT IdLaboratorio, Rut, RazonSocial, Marca, Pais, Contacto, Email, Telefono, DiasPago, Activo FROM Laboratorio WHERE 1=1";
+            DataTable dt = CapaNegocio.ComprasServicio.ListarLaboratorios(filtro, pais, estado);
+            gvLaboratorios.DataSource = dt;
+            gvLaboratorios.DataBind();
 
-            if (!string.IsNullOrEmpty(filtro))
+            // Actualización de KPIs en pantalla
+            if (lblTotalHomologados != null)
             {
-                query += " AND (RazonSocial LIKE @Filtro OR Marca LIKE @Filtro OR Contacto LIKE @Filtro OR Rut LIKE @Filtro)";
+                lblTotalHomologados.Text = dt.Rows.Count.ToString();
             }
-            if (!string.IsNullOrEmpty(pais))
-            {
-                query += " AND Pais LIKE @Pais";
-            }
-            if (!string.IsNullOrEmpty(estado))
-            {
-                query += " AND Activo = @Estado";
-            }
-            query += " ORDER BY IdLaboratorio DESC";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            if (lblPlazoPromedio != null)
             {
-                using (MySqlCommand cmd = new MySqlCommand(query, con))
+                if (dt.Rows.Count > 0)
                 {
-                    if (!string.IsNullOrEmpty(filtro))
-                        cmd.Parameters.AddWithValue("@Filtro", "%" + filtro + "%");
-                    if (!string.IsNullOrEmpty(pais))
-                        cmd.Parameters.AddWithValue("@Pais", "%" + pais + "%");
-                    if (!string.IsNullOrEmpty(estado))
-                        cmd.Parameters.AddWithValue("@Estado", estado == "1");
-
-                    using (MySqlDataAdapter da = new MySqlDataAdapter(cmd))
+                    double sumaDias = 0;
+                    int countValidos = 0;
+                    foreach (DataRow row in dt.Rows)
                     {
-                        DataTable dt = new DataTable();
-                        da.Fill(dt);
-                        gvLaboratorios.DataSource = dt;
-                        gvLaboratorios.DataBind();
-
-                        // Actualización de KPIs en pantalla
-                        if (lblTotalHomologados != null)
+                        if (row["DiasPago"] != DBNull.Value && double.TryParse(row["DiasPago"].ToString(), out double dias))
                         {
-                            lblTotalHomologados.Text = dt.Rows.Count.ToString();
-                        }
-
-                        if (lblPlazoPromedio != null)
-                        {
-                            if (dt.Rows.Count > 0)
-                            {
-                                double sumaDias = 0;
-                                int countValidos = 0;
-                                foreach (DataRow row in dt.Rows)
-                                {
-                                    if (row["DiasPago"] != DBNull.Value && double.TryParse(row["DiasPago"].ToString(), out double dias))
-                                    {
-                                        sumaDias += dias;
-                                        countValidos++;
-                                    }
-                                }
-                                int promedio = countValidos > 0 ? (int)Math.Round(sumaDias / countValidos) : 30;
-                                lblPlazoPromedio.Text = promedio.ToString();
-                            }
-                            else
-                            {
-                                lblPlazoPromedio.Text = "0";
-                            }
+                            sumaDias += dias;
+                            countValidos++;
                         }
                     }
+                    int promedio = countValidos > 0 ? (int)Math.Round(sumaDias / countValidos) : 30;
+                    lblPlazoPromedio.Text = promedio.ToString();
+                }
+                else
+                {
+                    lblPlazoPromedio.Text = "0";
                 }
             }
         }
 
-        // 2. VALIDACIONES DE NEGOCIO: RUT, EMAIL Y TELÉFONO
-        private bool ValidarRut(string rut)
+        // 2. VALIDACIONES DE NEGOCIO: delegadas a CapaNegocio.ComprasServicio
+        internal static bool ValidarRut(string rut)
         {
-            if (string.IsNullOrWhiteSpace(rut)) return false;
-
-            // Limpiar puntos, espacios y guiones
-            string limpio = rut.Replace(".", "").Replace("-", "").Trim().ToUpper();
-
-            // Longitud válida para RUT chileno (entre 7 y 9 caracteres: cuerpo de 6 a 8 dígitos + dígito verificador)
-            if (limpio.Length < 7 || limpio.Length > 9) return false;
-
-            string cuerpo = limpio.Substring(0, limpio.Length - 1);
-            char dv = limpio[limpio.Length - 1];
-
-            // El cuerpo debe ser estrictamente numérico
-            if (!long.TryParse(cuerpo, out long rutNumero) || rutNumero <= 0) return false;
-
-            // El dígito verificador debe ser un número o la letra 'K'
-            if (!char.IsDigit(dv) && dv != 'K') return false;
-
-            return true;
+            return CapaNegocio.ComprasServicio.ValidarRutChileno(rut);
         }
 
-        // Algoritmo matemático oficial Módulo 11 (para cálculo y defensa técnica)
         public static char CalcularDigitoVerificador(string cuerpo)
         {
-            int suma = 0;
-            int multiplicador = 2;
-            for (int i = cuerpo.Length - 1; i >= 0; i--)
-            {
-                suma += (cuerpo[i] - '0') * multiplicador;
-                multiplicador = (multiplicador == 7) ? 2 : multiplicador + 1;
-            }
-            int resto = suma % 11;
-            int resultado = 11 - resto;
-            if (resultado == 11) return '0';
-            if (resultado == 10) return 'K';
-            return resultado.ToString()[0];
+            return CapaNegocio.ComprasServicio.CalcularDigitoVerificador(cuerpo);
         }
 
         private string FormatearRut(string rut)
@@ -225,6 +163,7 @@ namespace trabajo_ing_software
         // 3. CREATE o UPDATE: Guardar o Modificar Laboratorio
         protected void btnGuardar_Click(object sender, EventArgs e)
         {
+            ExigirEscrituraCompras();
             string rut = txtRut.Text.Trim();
             string razonSocial = txtRazonSocial.Text.Trim();
             string marca = txtMarca.Text.Trim();
@@ -284,7 +223,7 @@ namespace trabajo_ing_software
 
             bool esEdicion = !string.IsNullOrEmpty(hfIdLaboratorio.Value);
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 string query = "";
 
@@ -343,7 +282,7 @@ namespace trabajo_ing_software
                         }
                         else
                         {
-                            lblMensaje.Text = "Error en base de datos: " + ex.Message;
+                            lblMensaje.Text = "Error en base de datos: " + ConexionErp.MensajeError(ex);
                         }
                     }
                 }
@@ -376,7 +315,7 @@ namespace trabajo_ing_software
         {
             string query = "SELECT IdLaboratorio, Rut, RazonSocial, Marca, Pais, Contacto, Email, Telefono, DiasPago FROM Laboratorio WHERE IdLaboratorio = @Id";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
@@ -411,8 +350,9 @@ namespace trabajo_ing_software
 
         private void CambiarEstado(int idLab, bool nuevoEstado)
         {
+            ExigirEscrituraCompras();
             string query = "UPDATE Laboratorio SET Activo = @NuevoEstado WHERE IdLaboratorio = @IdLaboratorio";
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
@@ -432,9 +372,10 @@ namespace trabajo_ing_software
 
         private void EliminarLaboratorio(int idLab)
         {
+            ExigirEscrituraCompras();
             string query = "DELETE FROM Laboratorio WHERE IdLaboratorio = @IdLaboratorio";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {

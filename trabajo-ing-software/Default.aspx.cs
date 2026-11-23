@@ -9,6 +9,12 @@ namespace trabajo_ing_software
     {
         private static readonly CultureInfo CulturaCl = new CultureInfo("es-CL");
 
+        protected bool VerArea(string area)
+        {
+            string rol = Convert.ToString(Session["RolUsuario"]);
+            return rol == "Administrador" || rol == area || (rol == "Contador" && area != "Administrador");
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (Session["IdUsuario"] == null)
