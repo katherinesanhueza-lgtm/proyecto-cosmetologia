@@ -49,7 +49,7 @@ namespace trabajo_ing_software
             ddlFiltroLab.Items.Clear();
             ddlFiltroLab.Items.Add(new ListItem("Todos los Laboratorios", ""));
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlCommand cmd = new MySqlCommand("SELECT IdLaboratorio, RazonSocial FROM Laboratorio ORDER BY RazonSocial", con))
             {
                 con.Open();
@@ -67,7 +67,7 @@ namespace trabajo_ing_software
         {
             ddlPeriodo.Items.Clear();
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlCommand cmd = new MySqlCommand("SELECT IdPeriodo, Nombre FROM periodocontable WHERE Estado = 'Abierto' ORDER BY FechaInicio DESC", con))
             {
                 con.Open();
@@ -102,7 +102,7 @@ namespace trabajo_ing_software
                            WHERE (cp.Monto - IFNULL(p.Pagado, 0)) > 0
                            ORDER BY DATE_ADD(r.FechaRecepcion, INTERVAL IFNULL(l.DiasPago, 30) DAY) ASC";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlCommand cmd = new MySqlCommand(sql, con))
             {
                 con.Open();
@@ -145,7 +145,7 @@ namespace trabajo_ing_software
                                   ON p.IdCuentaPagar = cp.IdCuentaPagar
                            WHERE cp.IdCuentaPagar = @Id";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlCommand cmd = new MySqlCommand(sql, con))
             {
                 cmd.Parameters.AddWithValue("@Id", idCxp);
@@ -248,7 +248,7 @@ namespace trabajo_ing_software
 
             sql += " ORDER BY CASE WHEN t.SaldoPendiente > 0 THEN 0 ELSE 1 END, t.FechaVencimiento ASC, t.IdCuentaPagar DESC";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlCommand cmd = new MySqlCommand(sql, con))
             {
                 if (!string.IsNullOrEmpty(busq))
@@ -278,7 +278,7 @@ namespace trabajo_ing_software
                            INNER JOIN usuario u ON u.IdUsuario = pp.IdUsuario
                            ORDER BY pp.Fecha DESC, pp.IdPagoProveedor DESC";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlDataAdapter da = new MySqlDataAdapter(sql, con))
             {
                 DataTable dt = new DataTable();
@@ -305,7 +305,7 @@ namespace trabajo_ing_software
                                       ON p.IdCuentaPagar = cp.IdCuentaPagar
                            ) q";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 con.Open();
                 using (MySqlCommand cmd = new MySqlCommand(sql, con))
@@ -386,7 +386,7 @@ namespace trabajo_ing_software
 
             int nuevoIdPago = 0;
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 con.Open();
                 using (MySqlTransaction trans = con.BeginTransaction())
@@ -493,7 +493,7 @@ namespace trabajo_ing_software
                     catch (Exception ex)
                     {
                         trans.Rollback();
-                        MostrarMensaje("Error al registrar pago: " + ex.Message, false);
+                        MostrarMensaje("Error al registrar pago: " + ConexionErp.MensajeError(ex), false);
                         return;
                     }
                 }
@@ -573,7 +573,7 @@ namespace trabajo_ing_software
                            INNER JOIN usuario u ON u.IdUsuario = pp.IdUsuario
                            WHERE pp.IdPagoProveedor = @IdPago";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlCommand cmd = new MySqlCommand(sql, con))
             {
                 cmd.Parameters.AddWithValue("@IdPago", idPago);

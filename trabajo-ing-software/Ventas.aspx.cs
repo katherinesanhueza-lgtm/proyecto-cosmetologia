@@ -399,6 +399,7 @@ namespace trabajo_ing_software
 
         protected void btnFinalizarVenta_Click(object sender, EventArgs e)
         {
+            ExigirEscrituraVentas();
             if (!Equals(ViewState["VentaEnCurso"], Session["VentaEnCurso"]))
             {
                 Mostrar("Este carrito ya fue procesado o se abrió otro. Recarga antes de continuar.", false);

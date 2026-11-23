@@ -95,6 +95,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Drawing" />
@@ -314,6 +315,18 @@
     <Compile Include="ReporteProveedores.aspx.designer.cs">
       <DependentUpon>ReporteProveedores.aspx</DependentUpon>
     </Compile>
+    <Compile Include="ConexionErp.cs" />
+    <Compile Include="CapaDatos\ComprasRepositorio.cs" />
+    <Compile Include="CapaDatos\ProteccionDatosRepositorio.cs" />
+    <Compile Include="CapaNegocio\ComprasServicio.cs" />
+    <Compile Include="CapaNegocio\ProteccionDatosServicio.cs" />
+    <Content Include="Auditoria.aspx" />
+    <Content Include="Privacidad.aspx" />
+    <Compile Include="PaginaCompras.cs" />
+    <Content Include="Marcas.aspx" />
+    <Content Include="App_Data\007_integracion_erp.sql" />
+    <Content Include="App_Data\actualizacion_bd_compras.sql" />
+    <Compile Include="ClaveUsuario.cs" />
     <Compile Include="ConfiguracionGlobal.cs" />
     <Compile Include="OrdenesCompra.aspx.cs">
       <DependentUpon>OrdenesCompra.aspx</DependentUpon>

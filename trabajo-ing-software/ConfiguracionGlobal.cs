@@ -92,6 +92,7 @@ namespace trabajo_ing_software
                 return (1m, DateTime.Today.ToString("dd-MM-yyyy"), false);
             }
 
+            if (moneda != "EUR" && moneda != "USD") throw new ArgumentException("Selecciona USD, EUR o CLP.");
             string hoyStr = DateTime.Today.ToString("yyyy-MM-dd");
             string fechaGuardada = ObtenerValor("FechaTipoCambio", "");
 
@@ -117,13 +118,11 @@ namespace trabajo_ing_software
                 {
                     string json = reader.ReadToEnd();
                     var obj = Newtonsoft.Json.Linq.JObject.Parse(json);
-                    if (obj["rates"]?["CLP"] != null)
+                    if ((decimal?)obj["rates"]?["CLP"] > 0 && (decimal?)obj["rates"]?["EUR"] > 0)
                     {
                         decimal usdClp = Convert.ToDecimal(obj["rates"]["CLP"], System.Globalization.CultureInfo.InvariantCulture);
-                        decimal eurUsd = obj["rates"]?["EUR"] != null 
-                            ? Convert.ToDecimal(obj["rates"]["EUR"], System.Globalization.CultureInfo.InvariantCulture) 
-                            : 0.9m;
-                        decimal eurClp = eurUsd > 0 ? Math.Round(usdClp / eurUsd, 2) : 1020m;
+                        decimal eurosPorDolar = (decimal)obj["rates"]["EUR"];
+                        decimal eurClp = Math.Round(usdClp / eurosPorDolar, 2);
                         usdClp = Math.Round(usdClp, 2);
 
                         GuardarValor("TipoCambioUSD", usdClp.ToString(System.Globalization.CultureInfo.InvariantCulture), "Tipo de cambio oficial USD -> CLP");
@@ -139,21 +138,16 @@ namespace trabajo_ing_software
             }
 
             decimal tasaFinal = ObtenerTasaGuardada(moneda);
-            string fechaRetorno = sincronizado ? DateTime.Today.ToString("dd-MM-yyyy") : (string.IsNullOrEmpty(fechaGuardada) ? DateTime.Today.ToString("dd-MM-yyyy") : fechaGuardada);
+            string fechaRetorno = sincronizado ? DateTime.Today.ToString("dd-MM-yyyy") : (string.IsNullOrEmpty(fechaGuardada) ? "referencia sin sincronizar" : fechaGuardada);
             return (tasaFinal, fechaRetorno, sincronizado);
         }
 
-        private static decimal ObtenerTasaGuardada(string moneda)  //else if para agregar otra moneda
+        private static decimal ObtenerTasaGuardada(string moneda)
         {
             if (string.Equals(moneda, "EUR", StringComparison.OrdinalIgnoreCase))
             {
                 string valStr = ObtenerValor("TipoCambioEUR", "1020");
                 return decimal.TryParse(valStr.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal eur) ? eur : 1020m;
-            }
-            else if (string.Equals(moneda, "ARG", StringComparison.OrdinalIgnoreCase))
-            {
-                string valStr = ObtenerValor("TipoCambioARG", "0.95");
-                return decimal.TryParse(valStr.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal arg) ? arg : 0.95m;
             }
             else
             {
@@ -236,7 +230,7 @@ namespace trabajo_ing_software
             }
 
             if (rol.Equals("Bodeguero", StringComparison.OrdinalIgnoreCase))
-                response.Redirect("Recepciones.aspx");
+                response.Redirect("Inventario.aspx");
             else if (rol.Equals("Comprador", StringComparison.OrdinalIgnoreCase))
                 response.Redirect("OrdenesCompra.aspx");
             else if (rol.Equals("Contador", StringComparison.OrdinalIgnoreCase))

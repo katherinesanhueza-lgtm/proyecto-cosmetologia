@@ -107,11 +107,35 @@ namespace trabajo_ing_software
                     break;
                 case "pagos":
                     Titulo.Text = "Proyección de pagos a laboratorios";
+                    Periodos(true);
                     Texto("Buscar", "Laboratorio", 100);
+                    AccionesReporte();
+                    break;
+                case "tesoreria":
+                    Titulo.Text = "Cobros a clientes";
+                    var pendientes = Lista("Cuenta", "Documento pendiente");
+                    pendientes.DataSource = ContabilidadDatos.Consultar(@"SELECT cc.IdCuenta, CONCAT(v.Folio,' · ',c.Nombre,' · $',cc.MontoPendiente) Documento
+                        FROM cuentascobrar cc JOIN venta v USING(IdVenta) JOIN cliente c USING(IdCliente) WHERE cc.MontoPendiente>0 ORDER BY cc.FechaVence");
+                    pendientes.DataValueField = "IdCuenta";
+                    pendientes.DataTextField = "Documento";
+                    pendientes.DataBind();
+                    Texto("Importe","Monto a cobrar (CLP)",18);
+                    Texto("Fecha","Fecha del cobro",10,TextBoxMode.Date);
+                    ((TextBox)campos["Fecha"]).Text = DateTime.Today.ToString("yyyy-MM-dd");
+                    var medio = Lista("Medio","Medio de pago");
+                    foreach (string m in new[]{"Transferencia","Efectivo","Tarjeta"}) medio.Items.Add(m);
+
+                    Boton("Registrar cobro", RegistrarCobro);
+                    break;
+                case "iva":
+                    Titulo.Text = "Declaración de IVA";
+                    Periodos(false);
+                    Boton("Registrar declaración y cerrar período", CerrarPeriodo);
                     AccionesReporte();
                     break;
                 case "cobros":
                     Titulo.Text = "Antigüedad de saldos y morosidad";
+                    Periodos(true);
                     Texto("Buscar", "Cliente", 100);
                     AccionesReporte();
                     break;
@@ -316,12 +340,35 @@ namespace trabajo_ing_software
             Mostrar("Cuenta contable actualizada correctamente.", true);
         }
 
+        private void RegistrarCobro()
+        {
+            using (var con = VentaInventario.Abrir())
+            using (var tx = con.BeginTransaction())
+            using (var cmd = VentaInventario.Comando(con, tx,"CALL usp_RegistrarCobro(@p0,@p1,@p2,@p3,@p4,@p5)",
+                Entero("Cuenta"),Monto(Valor("Importe")),Valor("Medio"),Fecha("Fecha"),usuario,ViewState["SolicitudCobro"]))
+            {
+                cmd.ExecuteNonQuery();
+                tx.Commit();
+            }
+            Response.Redirect("Contabilidad.aspx?vista=tesoreria");
+        }
+
         private void CerrarPeriodo()
         {
-            int filas = ContabilidadDatos.Ejecutar("UPDATE periodocontable SET Estado='Cerrado' WHERE IdPeriodo=@Id AND Estado='Abierto'",
-                new MySqlParameter("@Id", Entero("Periodo")));
-            if (filas != 1) throw new ArgumentException("Selecciona un período abierto.");
-            Mostrar("Período cerrado.", true);
+            using (var con = VentaInventario.Abrir())
+            using (var tx = con.BeginTransaction())
+            {
+                int periodo = Entero("Periodo");
+                using (var cmd = VentaInventario.Comando(con, tx, "SELECT Estado FROM periodocontable WHERE IdPeriodo=@p0 FOR UPDATE", periodo))
+                    if (Convert.ToString(cmd.ExecuteScalar()) != "Abierto") throw new ArgumentException("Selecciona un período abierto.");
+                using (var cmd = VentaInventario.Comando(con, tx, @"INSERT INTO declaracioniva(IdPeriodo,Monto,Fecha,IdUsuario)
+                    SELECT @p0,COALESCE(SUM(CASE WHEN c.Codigo IN ('2108','1109') THEN d.Haber-d.Debe ELSE 0 END),0),CURDATE(),@p1
+                    FROM asientocontable a JOIN detalleasiento d USING(IdAsiento) JOIN cuentacontable c USING(IdCuentaContable) WHERE a.IdPeriodo=@p0", periodo,usuario))
+                    cmd.ExecuteNonQuery();
+                using (var cmd = VentaInventario.Comando(con, tx, "UPDATE periodocontable SET Estado='Cerrado' WHERE IdPeriodo=@p0",periodo)) cmd.ExecuteNonQuery();
+                tx.Commit();
+            }
+            Mostrar("Declaración registrada y período cerrado.",true);
         }
 
         private static decimal Monto(string valor)
@@ -378,6 +425,7 @@ namespace trabajo_ing_software
         {
             base.OnPreRender(e);
             if (!autorizado) return;
+            if (vista == "tesoreria" && ViewState["SolicitudCobro"] == null) ViewState["SolicitudCobro"] = Guid.NewGuid().ToString();
             if (string.Equals(vista, "resumen", StringComparison.OrdinalIgnoreCase))
             {
                 CargarResumenContabilidad();
@@ -493,14 +541,26 @@ namespace trabajo_ing_software
                 case "balance":
                 case "resultados":
                     int? periodo = Valor("Periodo") == "" ? (int?)null : Entero("Periodo");
-                    string filtro = vista == "resultados" ? " AND c.Tipo IN (N'Ingreso',N'Costo',N'Gasto')" : "";
+                    string filtro = vista == "resultados" ? " AND c.Tipo IN (N'Ingreso',N'Costo',N'Gasto',N'Resultado Ganancia',N'Resultado Pérdida')" : "";
                     return ContabilidadDatos.Consultar(@"SELECT c.Codigo AS Código,c.Nombre AS Cuenta,c.Tipo,
                         SUM(d.Debe) AS Debe,SUM(d.Haber) AS Haber,
-                        SUM(CASE WHEN c.Tipo IN (N'Pasivo',N'Patrimonio',N'Ingreso') THEN d.Haber-d.Debe ELSE d.Debe-d.Haber END) AS Saldo
+                        SUM(CASE WHEN c.Tipo IN (N'Pasivo',N'Patrimonio',N'Ingreso',N'Resultado Ganancia') THEN d.Haber-d.Debe ELSE d.Debe-d.Haber END) AS Saldo
                         FROM detalleasiento d JOIN asientocontable a ON a.IdAsiento=d.IdAsiento
                         JOIN cuentacontable c ON c.IdCuentaContable=d.IdCuentaContable
                         WHERE (@Periodo IS NULL OR a.IdPeriodo=@Periodo)" + filtro + " GROUP BY c.Codigo,c.Nombre,c.Tipo ORDER BY c.Codigo",
                         new MySqlParameter("@Periodo", MySqlDbType.Int32) { Value = (object)periodo ?? DBNull.Value });
+                case "tesoreria":
+                    return ContabilidadDatos.Consultar(@"SELECT co.Fecha,v.Folio,c.Nombre Cliente,co.Medio,co.Monto,co.IdAsiento Asiento
+                        FROM cobrocliente co JOIN cuentascobrar cc USING(IdCuenta) JOIN venta v USING(IdVenta) JOIN cliente c USING(IdCliente) ORDER BY co.IdCobro DESC");
+                case "iva":
+                    return ContabilidadDatos.Consultar(@"SELECT p.Nombre Periodo,p.Estado,
+                        COALESCE(SUM(IF(c.Codigo='2108',d.Haber-d.Debe,0)),0) Debito,
+                        COALESCE(SUM(IF(c.Codigo='1109',d.Debe-d.Haber,0)),0) Credito,
+                        GREATEST(COALESCE(MAX(i.Monto),0),0) PorPagar,GREATEST(-COALESCE(MAX(i.Monto),0),0) Remanente
+                        FROM periodocontable p LEFT JOIN asientocontable a USING(IdPeriodo)
+                        LEFT JOIN detalleasiento d USING(IdAsiento) LEFT JOIN cuentacontable c USING(IdCuentaContable)
+                        LEFT JOIN declaracioniva i ON i.IdPeriodo=p.IdPeriodo WHERE p.IdPeriodo=@periodo GROUP BY p.IdPeriodo,p.Nombre,p.Estado",
+                        new MySqlParameter("@periodo", Valor("Periodo")));
                 case "inventario":
                     return ContabilidadDatos.InventarioValorizado(Valor("Buscar"));
                 case "pagos":
@@ -521,7 +581,7 @@ namespace trabajo_ing_software
                                  WHEN DATEDIFF(Vencimiento,CURDATE())<=60 THEN N'31 a 60 días'
                                  WHEN DATEDIFF(Vencimiento,CURDATE())<=90 THEN N'61 a 90 días'
                                  ELSE N'Más de 90 días' END AS Tramo
-                        FROM Pendientes WHERE Saldo>0 ORDER BY Vencimiento, Laboratorio", Buscar());
+                        FROM Pendientes WHERE Saldo>0 AND (@Periodo IS NULL OR EXISTS(SELECT 1 FROM periodocontable pc WHERE pc.IdPeriodo=@Periodo AND Vencimiento BETWEEN pc.FechaInicio AND pc.FechaFin)) ORDER BY Vencimiento, Laboratorio", Buscar(), PeriodoFiltro());
                 case "cobros":
                     return ContabilidadDatos.Consultar(@"
                         SELECT c.Nombre AS Cliente, cc.IdVenta AS Venta, cc.EstadoPago AS Estado,
@@ -531,7 +591,7 @@ namespace trabajo_ing_software
                                  ELSE DATEDIFF(CURDATE(),cc.FechaVence) END AS DíasVencidos
                         FROM cuentascobrar cc JOIN venta v ON v.IdVenta=cc.IdVenta
                         JOIN cliente c ON c.IdCliente=v.IdCliente
-                        WHERE cc.MontoPendiente>0 AND c.Nombre LIKE @Buscar ORDER BY cc.FechaVence,c.Nombre", Buscar());
+                        WHERE cc.MontoPendiente>0 AND c.Nombre LIKE @Buscar AND (@Periodo IS NULL OR EXISTS(SELECT 1 FROM periodocontable pc WHERE pc.IdPeriodo=@Periodo AND cc.FechaVence BETWEEN pc.FechaInicio AND pc.FechaFin)) ORDER BY cc.FechaVence,c.Nombre", Buscar(), PeriodoFiltro());
                 case "perdidas":
                     int? periodoMerma = Valor("Periodo") == "" ? (int?)null : Entero("Periodo");
                     return ContabilidadDatos.Consultar(@"
@@ -547,10 +607,15 @@ namespace trabajo_ing_software
                         ORDER BY m.Fecha DESC,m.IdMerma DESC", Buscar(),
                         new MySqlParameter("@Periodo", MySqlDbType.Int32) { Value = (object)periodoMerma ?? DBNull.Value });
                 default:
-                    return ContabilidadDatos.Consultar(@"SELECT c.IdCuentaContable AS Id,c.Codigo AS Código,c.Nombre AS Cuenta,c.Tipo,c.Nivel,p.Codigo AS CuentaSuperior,
+                    return ContabilidadDatos.Consultar(@"SELECT c.IdCuentaContable AS Id,c.Codigo AS Código,c.Nombre AS Cuenta,c.Tipo,c.Nivel,IF((SELECT COUNT(*) FROM cuentacontable x WHERE x.Codigo=c.Codigo)>1,'Código duplicado','') AS Revisión,p.Codigo AS CuentaSuperior,
                         CASE c.Imputable WHEN 1 THEN N'Sí' ELSE N'No' END AS Imputable
                         FROM cuentacontable c LEFT JOIN cuentacontable p ON p.IdCuentaContable=c.IdCuentaPadre ORDER BY c.Codigo");
             }
+        }
+
+        private MySqlParameter PeriodoFiltro()
+        {
+            return new MySqlParameter("@Periodo", MySqlDbType.Int32) { Value = Valor("Periodo") == "" ? (object)DBNull.Value : Entero("Periodo") };
         }
 
         private MySqlParameter Buscar()
@@ -577,8 +642,8 @@ namespace trabajo_ing_software
             DataTable tabla = ObtenerRegistros();
             byte[] archivo = pdf ? ContabilidadExportacion.Pdf(Titulo.Text, tabla) : ContabilidadExportacion.Excel(tabla);
             Response.Clear();
-            Response.ContentType = pdf ? "application/pdf" : "application/vnd.ms-excel";
-            Response.AddHeader("Content-Disposition", "attachment; filename=" + vista + (pdf ? ".pdf" : ".xml"));
+            Response.ContentType = pdf ? "application/pdf" : ContabilidadExportacion.ExcelMimeType;
+            Response.AddHeader("Content-Disposition", "attachment; filename=" + vista + (pdf ? ".pdf" : ".xlsx"));
             Response.BinaryWrite(archivo);
             Response.Flush();
             Response.SuppressContent = true;

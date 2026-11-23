@@ -33,7 +33,7 @@
 
             <div class="inicio-indicadores-4">
                 <!-- RESUMEN COMPRAS -->
-                <div class="card-dermocosmetica inicio-indicador">
+                <% if (VerArea("Comprador")) { %><div class="card-dermocosmetica inicio-indicador">
                     <span class="inicio-icono" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14v14H5z M9 8V6a3 3 0 0 1 6 0v2" /></svg>
                     </span>
@@ -42,10 +42,10 @@
                         <asp:Label ID="lblComprasTotal" runat="server" Text="$0" CssClass="inicio-valor" />
                         <asp:Label ID="lblComprasDetalle" runat="server" Text="0 órdenes · 0 laboratorios" CssClass="inicio-detalle" />
                     </div>
-                </div>
+                </div><% } %>
 
                 <!-- RESUMEN VENTAS -->
-                <div class="card-dermocosmetica inicio-indicador">
+                <% if (VerArea("Vendedor")) { %><div class="card-dermocosmetica inicio-indicador">
                     <span class="inicio-icono" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h14l2 4v7H3v-7z M7 9V4h10v5 M7 15h3 M15 15h2" /></svg>
                     </span>
@@ -54,7 +54,7 @@
                         <asp:Label ID="lblVentasTotal" runat="server" Text="$0" CssClass="inicio-valor" />
                         <asp:Label ID="lblVentasDetalle" runat="server" Text="0 documentos · 0 clientes" CssClass="inicio-detalle" />
                     </div>
-                </div>
+                </div><% } %>
 
                 <!-- RESUMEN INVENTARIO -->
                 <div class="card-dermocosmetica inicio-indicador">
@@ -69,7 +69,7 @@
                 </div>
 
                 <!-- RESUMEN CONTABILIDAD -->
-                <div class="card-dermocosmetica inicio-indicador">
+                <% if (VerArea("Contador")) { %><div class="card-dermocosmetica inicio-indicador">
                     <span class="inicio-icono" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-6 9 6H3z M5 20h14 M7 10v7 M12 10v7 M17 10v7" /></svg>
                     </span>
@@ -78,7 +78,7 @@
                         <asp:Label ID="lblContabilidadTotal" runat="server" Text="0" CssClass="inicio-valor" />
                         <asp:Label ID="lblContabilidadDetalle" runat="server" Text="0 CxP · 0 CxC vigentes" CssClass="inicio-detalle" />
                     </div>
-                </div>
+                </div><% } %>
             </div>
 
             <div class="inicio-indicadores" style="margin-top: 14px;">
@@ -104,7 +104,7 @@
                     </div>
                 </div>
 
-                <div class="card-dermocosmetica inicio-indicador">
+                <% if ((VerArea("Administrador") || Convert.ToString(Session["RolUsuario"])=="Bodeguero")) { %><div class="card-dermocosmetica inicio-indicador">
                     <span class="inicio-icono" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z M3.27 6.96L12 12.01l8.73-5.05 M12 22.08V12" /></svg>
                     </span>
@@ -113,7 +113,7 @@
                         <asp:Label ID="lblOperacionesCurso" runat="server" Text="0" CssClass="inicio-valor" />
                         <span class="inicio-detalle">Lotes vigentes con trazabilidad FEFO</span>
                     </div>
-                </div>
+                </div><% } %>
             </div>
         </section>
 
@@ -123,10 +123,6 @@
                     <h2 id="modulos-inicio">Accesos rápidos</h2>
                     <p>Navega directamente al módulo operativo que necesitas gestionar.</p>
                 </div>
-                <a class="btn btn-outline-secondary" href="<%: ResolveUrl("~/ReporteInventario.aspx") %>">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                    Reporte de inventario
-                </a>
             </div>
             <div class="inicio-modulos">
                 <a href="<%: ResolveUrl("~/Inventario.aspx") %>" class="inicio-modulo">
@@ -137,30 +133,30 @@
                     <p>Consulta existencias por SKU y bodega, control de lotes FEFO y movimientos de kardex.</p>
                     <span class="inicio-enlace">Ver inventario</span>
                 </a>
-                <a href="<%: ResolveUrl("~/Compras.aspx") %>" class="inicio-modulo">
+                <% if (VerArea("Comprador")) { %><a href="<%: ResolveUrl("~/Compras.aspx") %>" class="inicio-modulo">
                     <span class="inicio-icono" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14v14H5z M9 8V6a3 3 0 0 1 6 0v2" /></svg>
                     </span>
                     <h3>Compras</h3>
                     <p>Administra laboratorios proveedores, cotizaciones de importación, órdenes y recepciones.</p>
                     <span class="inicio-enlace">Ir a compras</span>
-                </a>
-                <a href="<%: ResolveUrl("~/Ventas.aspx") %>" class="inicio-modulo">
+                </a><% } %>
+                <% if (VerArea("Vendedor")) { %><a href="<%: ResolveUrl("~/Ventas.aspx") %>" class="inicio-modulo">
                     <span class="inicio-icono" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h14l2 4v7H3v-7z M7 9V4h10v5 M7 15h3 M15 15h2" /></svg>
                     </span>
                     <h3>Ventas</h3>
                     <p>Gestiona cartera de clientes, presupuestos, emisión de boletas y facturas y despachos.</p>
                     <span class="inicio-enlace">Ir a ventas</span>
-                </a>
-                <a href="<%: ResolveUrl("~/Contabilidad.aspx") %>" class="inicio-modulo">
+                </a><% } %>
+                <% if (VerArea("Contador")) { %><a href="<%: ResolveUrl("~/Contabilidad.aspx") %>" class="inicio-modulo">
                     <span class="inicio-icono" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-6 9 6H3z M5 20h14 M7 10v7 M12 10v7 M17 10v7" /></svg>
                     </span>
                     <h3>Contabilidad</h3>
                     <p>Consulta plan de cuentas, libro diario, cuentas por pagar y por cobrar y flujo de caja.</p>
                     <span class="inicio-enlace">Ir a contabilidad</span>
-                </a>
+                </a><% } %>
             </div>
         </section>
 

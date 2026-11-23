@@ -46,29 +46,43 @@
             color: var(--color-texto);
         }
 
-        .form-grid-3col {
+        .cot-head-row-1 {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
+            grid-template-columns: 1.6fr 1fr;
+            gap: 14px;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+        .cot-head-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1.6fr;
+            gap: 14px;
+            align-items: start;
         }
 
         .item-add-row {
             display: grid;
-            grid-template-columns: 2fr 120px 160px auto;
+            grid-template-columns: minmax(220px, 1fr) 95px 145px auto;
             gap: 12px;
             align-items: end;
             background: #FAF8F5;
-            padding: 16px;
+            padding: 14px 16px;
             border-radius: 14px;
             border: 1px solid var(--color-borde-suave);
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
 
         .filter-toolbar-row {
-            display: flex;
+            display: grid;
+            grid-template-columns: minmax(220px, 1fr) 200px auto;
             gap: 12px;
             align-items: center;
-            flex-wrap: wrap;
+            background-color: var(--color-blanco);
+            border: 1px solid var(--color-borde-suave);
+            border-radius: 16px;
+            padding: 14px 18px !important;
+            margin-bottom: 22px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
         }
 
         .badge-cot {
@@ -83,33 +97,11 @@
         .badge-cot-rechazada { background: #FDEDEC; color: #C0392B; }
         .badge-cot-convertida { background: #F5EFEB; color: #7A5E47; }
 
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(46, 46, 46, 0.45);
-            backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-
-        .modal-content-card {
-            background: var(--color-blanco);
-            border-radius: 20px;
-            width: 92%;
-            max-width: 820px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            border: 1px solid var(--color-borde-suave);
-            padding: 28px;
-        }
-
-        @media (max-width: 1050px) {
+        @media (max-width: 960px) {
             .kpi-row-4col { grid-template-columns: repeat(2, 1fr); }
-            .form-grid-3col, .item-add-row { grid-template-columns: 1fr; }
+            .cot-head-row-1, .cot-head-row-2, .item-add-row { grid-template-columns: 1fr; }
+            .filter-toolbar-row { grid-template-columns: 1fr auto; }
+            .filter-toolbar-row > div:first-child { grid-column: 1 / -1; }
         }
     </style>
 </asp:Content>
@@ -186,44 +178,49 @@
             <!-- MENSAJES -->
             <asp:Label ID="lblMensaje" runat="server" Visible="false" style="display: block; padding: 12px 16px; border-radius: 12px; margin-bottom: 18px; font-size: 13px; font-weight: 500;"></asp:Label>
 
-            <!-- FORMULARIO NUEVA COTIZACION -->
-            <asp:Panel ID="pnlFormulario" runat="server" Visible="false" CssClass="card-dermocosmetica" style="margin-bottom: 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-borde-suave); padding-bottom: 14px; margin-bottom: 18px;">
-                    <h2 style="font-size: 20px; margin: 0;">Registrar Cotizaci&oacute;n de Importaci&oacute;n</h2>
-                    <asp:Button ID="btnCerrarForm" runat="server" Text="Cerrar" CssClass="btn btn-outline-secondary btn-sm" OnClick="btnCerrarForm_Click" />
+            <!-- MODAL FLOTANTE NUEVA COTIZACION -->
+            <asp:Panel ID="pnlFormulario" runat="server" Visible="false" CssClass="modal-overlay">
+                <div class="modal-content-card modal-lg-card">
+                <div class="modal-header-dermo">
+                    <div>
+                        <span class="pill-badge" style="font-size: 10px; padding: 3px 10px;">IMPORTACI&Oacute;N DE INSUMOS</span>
+                        <h2 style="font-size: 22px; margin: 6px 0 2px 0; font-family: 'Playfair Display', Georgia, serif; color: var(--color-texto);">Registrar Cotizaci&oacute;n de Importaci&oacute;n</h2>
+                        <div style="font-size: 12px; color: var(--color-texto-suave);">Detalle de proveedor extranjero, divisa y art&iacute;culos cotizados</div>
+                    </div>
+                    <asp:Button ID="btnCerrarForm" runat="server" Text="&#215;" CssClass="btn btn-outline-secondary btn-sm modal-close-x" OnClick="btnCerrarForm_Click" CausesValidation="false" ToolTip="Cerrar ventana" />
                 </div>
 
-                <div class="form-grid-3col" style="margin-bottom: 14px;">
-                    <div>
-                        <label class="form-label">Laboratorio / Proveedor Extranjero (*)</label>
-                        <asp:DropDownList ID="ddlLaboratorio" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlLaboratorio_SelectedIndexChanged"></asp:DropDownList>
-                        <small class="text-muted"><asp:Label ID="lblInfoLab" runat="server" Text="Seleccione un proveedor"></asp:Label></small>
+                <div class="modal-section-box">
+                    <div class="cot-head-row-1">
+                        <div>
+                            <label class="form-label">Laboratorio / Proveedor Extranjero (*)</label>
+                            <asp:DropDownList ID="ddlLaboratorio" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlLaboratorio_SelectedIndexChanged"></asp:DropDownList>
+                            <small class="text-muted d-block mt-1"><asp:Label ID="lblInfoLab" runat="server" Text="Seleccione un proveedor"></asp:Label></small>
+                        </div>
+                        <div>
+                            <label class="form-label">Fecha Cotizaci&oacute;n (*)</label>
+                            <asp:TextBox ID="txtFecha" runat="server" TextMode="Date" CssClass="form-control"></asp:TextBox>
+                        </div>
                     </div>
 
-                    <div>
-                        <label class="form-label">Fecha Cotizaci&oacute;n (*)</label>
-                        <asp:TextBox ID="txtFecha" runat="server" TextMode="Date" CssClass="form-control"></asp:TextBox>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="cot-head-row-2">
                         <div>
                             <label class="form-label">Moneda (*)</label>
                             <asp:DropDownList ID="ddlMoneda" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlMoneda_SelectedIndexChanged">
                                 <asp:ListItem Value="USD" Text="USD ($)" Selected="True"></asp:ListItem>
                                 <asp:ListItem Value="EUR" Text="EUR (&euro;)"></asp:ListItem>
                                 <asp:ListItem Value="CLP" Text="CLP ($)"></asp:ListItem>
-                                <asp:ListItem Value="ARG" Text="ARG ($)"></asp:ListItem>  
                             </asp:DropDownList>
                         </div>
                         <div>
-                            <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                                <label class="form-label" style="margin-bottom: 2px;">Tipo Cambio (CLP)</label>
-                                <asp:LinkButton ID="btnActualizarTC" runat="server" OnClick="btnActualizarTC_Click" CausesValidation="false" 
-                                    style="font-size: 0.72rem; color: #8A6D3B; text-decoration: none; font-weight: 600;" 
-                                    ToolTip="Sincronizar tasa oficial en vivo">Actualizar Cambio</asp:LinkButton>
+                            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 5px;">
+                                <label class="form-label" style="margin-bottom: 0;">Tipo Cambio (CLP)</label>
+                                <asp:LinkButton ID="btnActualizarTC" runat="server" OnClick="btnActualizarTC_Click" CausesValidation="false"
+                                    style="font-size: 0.76rem; color: #7A5E47; text-decoration: none; font-weight: 600; white-space: nowrap;"
+                                    ToolTip="Sincronizar tasa oficial en vivo">Actualizar cambio</asp:LinkButton>
                             </div>
                             <asp:TextBox ID="txtTipoCambio" runat="server" CssClass="form-control" Text="950"></asp:TextBox>
-                            <small style="display: block; font-size: 0.72rem; margin-top: 2px;">
+                            <small style="display: block; font-size: 0.74rem; margin-top: 4px;">
                                 <asp:Label ID="lblInfoTipoCambio" runat="server" Text="Al d&iacute;a · Editable" ForeColor="#27AE60"></asp:Label>
                             </small>
                         </div>
@@ -241,11 +238,11 @@
                         <asp:TextBox ID="txtCantidad" runat="server" TextMode="Number" CssClass="form-control" Text="10"></asp:TextBox>
                     </div>
                     <div>
-                        <label class="form-label">Costo Unit. (en Moneda)</label>
+                        <label class="form-label">Costo Unitario</label>
                         <asp:TextBox ID="txtCostoMoneda" runat="server" CssClass="form-control" placeholder="Ej: 15.50"></asp:TextBox>
                     </div>
                     <div>
-                        <asp:Button ID="btnAgregarItem" runat="server" Text="+ Agregar" CssClass="btn btn-primary" OnClick="btnAgregarItem_Click" />
+                        <asp:Button ID="btnAgregarItem" runat="server" Text="+ Agregar" CssClass="btn btn-primary" style="height: 38px; white-space: nowrap;" OnClick="btnAgregarItem_Click" />
                     </div>
                 </div>
 
@@ -278,6 +275,7 @@
                         <asp:Button ID="btnCancelarForm" runat="server" Text="Cancelar" CssClass="btn btn-outline-secondary" OnClick="btnCerrarForm_Click" />
                         <asp:Button ID="btnGuardarCot" runat="server" Text="Guardar Cotizaci&oacute;n" CssClass="btn btn-primary" OnClick="btnGuardarCot_Click" />
                     </div>
+                </div>
                 </div>
             </asp:Panel>
 

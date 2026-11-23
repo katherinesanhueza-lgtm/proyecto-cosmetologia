@@ -123,6 +123,9 @@
                     <asp:ListItem Text="3. Comportamiento y Créditos por Cliente" Value="3"></asp:ListItem>
                     <asp:ListItem Text="4. Rendimiento Comercial por Vendedor" Value="4"></asp:ListItem>
                     <asp:ListItem Text="5. Presupuestos y Tasa de Conversión" Value="5"></asp:ListItem>
+                    <asp:ListItem Text="Pareto de clientes mayoristas" Value="6" />
+                    <asp:ListItem Text="Ingresos por categoría" Value="7" />
+                    <asp:ListItem Text="Efectividad de entregas" Value="8" />
                 </asp:DropDownList>
                 <asp:Button ID="btnDescargarPDF" runat="server" Visible="false" />
                 <asp:Label ID="lblCantidadVentas" runat="server" Text="0"></asp:Label>
@@ -150,7 +153,7 @@
             </div>
 
             <!-- TARJETAS DE KPIS ANALITICOS (ARRIBA DE LOS FILTROS, IGUAL QUE EN COMPRAS) -->
-            <div class="kpi-grid-4col no-print">
+            <div runat="server" id="indicadoresDetalle" class="kpi-grid-4col no-print">
                 <div class="kpi-card">
                     <div class="kpi-titulo"><asp:Label ID="lblKpi1Titulo" runat="server" Text="Total Documentos"></asp:Label></div>
                     <div class="kpi-valor"><asp:Label ID="lblTotalTransacciones" runat="server" Text="0"></asp:Label></div>
@@ -359,6 +362,7 @@
                 </asp:Panel>
 
                 <!-- REPORTE 5: PRESUPUESTOS Y CONVERSIÓN -->
+                <asp:GridView ID="gvAnalisis" runat="server" AutoGenerateColumns="true" CssClass="table" EmptyDataText="Sin registros en el período." />
                 <asp:Panel ID="pnlReporte5" runat="server" Visible="false">
                     <div class="table-dermo-container" style="border: none; box-shadow: none;">
                         <asp:GridView ID="gvCotizacionesReporte" runat="server" CssClass="table table-hover align-middle" AutoGenerateColumns="False" GridLines="None" EmptyDataText="No se registran cotizaciones en el per&iacute;odo seleccionado.">

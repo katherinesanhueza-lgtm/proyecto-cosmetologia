@@ -122,6 +122,16 @@ namespace trabajo_ing_software
 
         private void AlternarPaneles()
         {
+            bool analisis = int.Parse(ddlTipoReporte.SelectedValue) >= 6;
+            gvAnalisis.Visible = analisis;
+            indicadoresDetalle.Visible = !analisis;
+            if (analisis)
+            {
+                Page.Title = lblTituloPagina.Text = lblTituloReporte.InnerText = ddlTipoReporte.SelectedItem.Text;
+                lblSubtituloPagina.Text = "";
+                lblBadgeReporte.Text = "REPORTE DE VENTAS";
+                lblResumenEtiqueta.Text = "Registros";
+            }
             pnlReporte1.Visible = ddlTipoReporte.SelectedValue == "1";
             pnlReporte2.Visible = ddlTipoReporte.SelectedValue == "2";
             pnlReporte3.Visible = ddlTipoReporte.SelectedValue == "3";
@@ -190,11 +200,49 @@ namespace trabajo_ing_software
                 case "3": CargarReporte3(desde, hasta); break;
                 case "4": CargarReporte4(desde, hasta); break;
                 case "5": CargarReporte5(desde, hasta); break;
+                case "6": case "7": case "8": CargarAnalisis(desde,hasta); break;
                 default: CargarReporte1(desde, hasta); break;
             }
         }
 
         // Reporte 1: Historial General de Comprobantes
+        private DataTable CargarAnalisis(DateTime desde, DateTime hasta)
+        {
+            string filtro = @" AND COALESCE(v.Estado,'Emitida')<>'Anulada' AND (@p2='' OR v.IdCliente=@p2)
+                AND (@p3='Todos' OR v.TipoDocumento=@p3)";
+            string sql;
+            switch (ddlTipoReporte.SelectedValue)
+            {
+                case "6":
+                    sql = @"WITH totales AS (SELECT c.IdCliente,c.Nombre,SUM(IF(v.TipoDocumento='Nota de Credito',-ABS(v.Total),v.Total)) AS Monto
+                        FROM venta v JOIN cliente c USING(IdCliente) WHERE c.Categoria='Mayorista' AND v.Fecha BETWEEN @p0 AND @p1" + filtro +
+                        @" GROUP BY c.IdCliente,c.Nombre HAVING Monto>0), ranking AS
+                        (SELECT *,SUM(Monto) OVER(ORDER BY Monto DESC,IdCliente) Acumulado,SUM(Monto) OVER() Total FROM totales)
+                        SELECT Nombre Cliente,Monto,ROUND(100*Acumulado/Total,2) PorcentajeAcumulado,
+                        IF(Acumulado-Monto<Total*0.8,'Sí','No') Grupo80 FROM ranking ORDER BY Monto DESC,IdCliente";
+                    break;
+                case "7":
+                    sql = @"SELECT COALESCE(c.Nombre,'Sin categoría') Categoria,
+                        ROUND(SUM(IF(v.TipoDocumento='Nota de Credito',-ABS(v.Neto),v.Neto)*ABS(d.Subtotal)/NULLIF(t.Base,0)),2) IngresoNeto
+                        FROM venta v JOIN ventadetalle d USING(IdVenta)
+                        JOIN (SELECT IdVenta,SUM(ABS(Subtotal)) Base FROM ventadetalle GROUP BY IdVenta) t USING(IdVenta)
+                        JOIN varianteproducto vp ON vp.IdVariante=d.IdVariante JOIN producto p ON p.IdProducto=vp.IdProducto
+                        LEFT JOIN categoria c ON c.IdCategoria=p.IdCategoria WHERE v.Fecha BETWEEN @p0 AND @p1" + filtro + " GROUP BY c.IdCategoria,c.Nombre ORDER BY IngresoNeto DESC";
+                    break;
+                default:
+                    sql = @"SELECT d.Tipo Transportista,COUNT(*) Programados,SUM(IF(d.FechaEntrega<=d.FechaEstimada,1,0)) ATiempo,
+                        ROUND(100*SUM(IF(d.FechaEntrega<=d.FechaEstimada,1,0))/COUNT(*),2) PorcentajeATiempo
+                        FROM despacho d JOIN venta v USING(IdVenta) WHERE d.Estado<>'Cancelado' AND d.FechaEstimada BETWEEN @p0 AND @p1
+                        AND (d.FechaEntrega IS NOT NULL OR d.FechaEstimada<=CURDATE())" + filtro + " GROUP BY d.Tipo ORDER BY d.Tipo";
+                    break;
+            }
+            var datos = VentaInventario.Consultar(sql,desde.Date,hasta.Date,ddlFiltroCliente.SelectedValue,ddlFiltroDocumento.SelectedValue);
+            gvAnalisis.DataSource = datos;
+            gvAnalisis.DataBind();
+            lblResumenTotal.Text = datos.Rows.Count.ToString();
+            return datos;
+        }
+
         private DataTable CargarReporte1(DateTime desde, DateTime hasta)
         {
             string filtroExtra = "";
@@ -492,7 +540,7 @@ namespace trabajo_ing_software
                                     c.FechaVencimiento,
                                     c.Estado,
                                     c.Total,
-                                    IF(c.Estado = 'Aceptado' OR EXISTS(SELECT 1 FROM venta v WHERE v.IdCotizacion = c.IdCotizacion), 'Concretada en Venta', 'En Seguimiento') AS VentaConcretada
+                                    IF(EXISTS(SELECT 1 FROM venta v WHERE v.IdCotizacion = c.IdCotizacion), 'Concretada en Venta', 'En Seguimiento') AS VentaConcretada
                              FROM cotizacion c
                              INNER JOIN cliente cl ON c.IdCliente = cl.IdCliente
                              WHERE c.FechaEmision BETWEEN @Desde AND @Hasta {filtroCliente}
@@ -559,6 +607,10 @@ namespace trabajo_ing_software
 
             switch (ddlTipoReporte.SelectedValue)
             {
+                case "6": case "7": case "8":
+                    dtExportar = CargarAnalisis(desde,hasta);
+                    nombreArchivo = "Analisis_Ventas_" + ddlTipoReporte.SelectedValue;
+                    break;
                 case "2":
                     dtExportar = CargarReporte2(desde, hasta);
                     nombreArchivo = "Ventas_Rentabilidad_Productos";
@@ -581,15 +633,7 @@ namespace trabajo_ing_software
                     break;
             }
 
-            byte[] excelBytes = ContabilidadExportacion.Excel(dtExportar);
-
-            Response.Clear();
-            Response.Buffer = true;
-            Response.ContentType = "application/vnd.ms-excel";
-            Response.AddHeader("content-disposition", $"attachment;filename={nombreArchivo}_{DateTime.Now:yyyyMMdd}.xls");
-            Response.Charset = "utf-8";
-            Response.BinaryWrite(excelBytes);
-            Response.End();
+            ContabilidadExportacion.DescargarExcel(Response, dtExportar, $"{nombreArchivo}_{DateTime.Now:yyyyMMdd}");
         }
     }
 }

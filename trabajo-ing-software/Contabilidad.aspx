@@ -87,9 +87,9 @@
             </header>
 
             <section class="card-dermocosmetica">
-                <h2><asp:Literal ID="Titulo" runat="server" Mode="Encode" /></h2>
+                <h2 style="margin-bottom: 14px;"><asp:Literal ID="Titulo" runat="server" Mode="Encode" /></h2>
                 <asp:Label ID="Mensaje" runat="server" EnableViewState="false" role="status" />
-                <div class="contabilidad-formulario">
+                <div class="contabilidad-formulario" style="margin-top: 6px;">
                     <asp:PlaceHolder ID="Formulario" runat="server" />
                 </div>
                 <div class="table-responsive mt-4">
@@ -97,6 +97,20 @@
                         GridLines="None" EmptyDataText="No hay registros para esta consulta." EnableViewState="false" />
                 </div>
             </section>
+            <script>
+                (function () {
+                    var el = document.getElementById('<%= Mensaje.ClientID %>');
+                    if (el && el.innerText && el.innerText.trim().length > 0) {
+                        var btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'dermo-alert-close';
+                        btn.setAttribute('aria-label', 'Cerrar alerta');
+                        btn.innerHTML = '&times;';
+                        btn.onclick = function () { el.style.display = 'none'; };
+                        el.appendChild(btn);
+                    }
+                })();
+            </script>
         </asp:Panel>
 
     </div>

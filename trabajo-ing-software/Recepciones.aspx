@@ -16,14 +16,14 @@
 
         .filter-toolbar-row {
             display: grid;
-            grid-template-columns: 1fr 240px auto;
-            gap: 14px;
+            grid-template-columns: minmax(220px, 1fr) 240px auto;
+            gap: 12px;
             align-items: center;
             background-color: var(--color-blanco);
             border: 1px solid var(--color-borde-suave);
-            border-radius: 25px;
-            padding: 8px 18px;
-            margin-bottom: 25px;
+            border-radius: 16px;
+            padding: 14px 18px !important;
+            margin-bottom: 24px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.02);
         }
 
@@ -48,11 +48,16 @@
             gap: 8px;
         }
 
-        .form-grid-3col {
+        .form-grid-2x2 {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 18px;
+            grid-template-columns: 1.35fr 1fr;
+            gap: 12px 16px;
+            align-items: end;
+        }
+        @media (max-width: 760px) {
+            .form-grid-2x2 {
+                grid-template-columns: 1fr;
+            }
         }
 
         .info-oc-banner {
@@ -87,33 +92,6 @@
             font-weight: 600;
         }
 
-        /* Modal Overlay */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(46, 46, 46, 0.45);
-            backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-
-        .modal-content-card {
-            background: var(--color-blanco);
-            border-radius: 22px;
-            width: 90%;
-            max-width: 900px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            border: 1px solid var(--color-borde-suave);
-            padding: 30px;
-        }
-
         @media (max-width: 1024px) {
             .kpi-row-4col {
                 grid-template-columns: repeat(2, 1fr);
@@ -122,7 +100,10 @@
                 grid-template-columns: 1fr;
             }
             .filter-toolbar-row {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr auto;
+            }
+            .filter-toolbar-row > div:first-child {
+                grid-column: 1 / -1;
             }
         }
     </style>
@@ -192,110 +173,120 @@
                 <asp:Label ID="lblMensaje" runat="server"></asp:Label>
             </asp:Panel>
 
-            <!-- FORMULARIO DE RECEPCION Y ASIGNACION DE LOTES -->
-            <asp:Panel ID="pnlFormularioRec" runat="server" Visible="false" CssClass="form-rec-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--color-borde-suave); padding-bottom: 12px;">
+            <!-- MODAL FLOTANTE DE RECEPCION Y ASIGNACION DE LOTES -->
+            <asp:Panel ID="pnlFormularioRec" runat="server" Visible="false" CssClass="modal-overlay">
+                <div class="modal-content-card modal-lg-card">
+                <div class="modal-header-dermo">
                     <div>
                         <span class="pill-badge" style="font-size: 10px; padding: 3px 10px;">RECEPCI&Oacute;N F&Iacute;SICA</span>
-                        <h2 style="font-size: 20px; margin-top: 4px;">Ingreso de Mercader&iacute;a contra &Oacute;rden de Compra</h2>
+                        <h2 style="font-size: 22px; margin: 6px 0 2px 0; font-family: 'Playfair Display', Georgia, serif; color: var(--color-texto);">Ingreso de Mercader&iacute;a contra &Oacute;rden de Compra</h2>
                     </div>
-                    <asp:Button ID="btnCerrarForm" runat="server" Text="Cerrar Formulario" CssClass="btn btn-outline-secondary" OnClick="btnCerrarForm_Click" />
+                    <asp:Button ID="btnCerrarForm" runat="server" Text="&#215;" CssClass="btn btn-outline-secondary btn-sm modal-close-x" OnClick="btnCerrarForm_Click" CausesValidation="false" ToolTip="Cerrar ventana" />
                 </div>
 
                 <!-- 1. CABECERA DE LA RECEPCION -->
-                <div class="form-section-title">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-                    1. Datos de la &Oacute;rden de Compra y Documento Tributario del Proveedor
+                <div class="modal-section-box">
+                    <div class="form-section-title" style="margin-bottom: 10px;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                        1. Datos de la Orden de Compra y Documento del Proveedor
+                    </div>
+
+                    <div class="form-grid-2x2">
+                        <div class="form-group-dermo">
+                            <asp:Label runat="server" CssClass="form-label" AssociatedControlID="ddlOrdenCompra">Orden de Compra (*)</asp:Label>
+                            <asp:DropDownList ID="ddlOrdenCompra" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlOrdenCompra_SelectedIndexChanged"></asp:DropDownList>
+                        </div>
+
+                        <div class="form-group-dermo">
+                            <asp:Label runat="server" CssClass="form-label" AssociatedControlID="txtGuiaDespacho">N&deg; Gu&iacute;a / Factura Proveedor (*)</asp:Label>
+                            <asp:TextBox ID="txtGuiaDespacho" runat="server" CssClass="form-control" placeholder="Ej: GD-884920"></asp:TextBox>
+                        </div>
+
+                        <div class="form-group-dermo">
+                            <asp:Label runat="server" AssociatedControlID="ddlBodega" CssClass="form-label">Bodega de Destino (*)</asp:Label>
+                            <asp:DropDownList ID="ddlBodega" runat="server" CssClass="form-select" />
+                        </div>
+
+                        <div class="form-group-dermo">
+                            <asp:Label runat="server" CssClass="form-label" AssociatedControlID="txtFechaRecepcion">Fecha de Recepci&oacute;n (*)</asp:Label>
+                            <asp:TextBox ID="txtFechaRecepcion" runat="server" TextMode="Date" CssClass="form-control"></asp:TextBox>
+                        </div>
+                    </div>
+
+                    <!-- BANNER DE RESUMEN DE LA OC SELECCIONADA -->
+                    <asp:Panel ID="pnlInfoOC" runat="server" Visible="false" CssClass="info-oc-banner" style="margin-top: 12px; margin-bottom: 0; background-color: #FFFFFF;">
+                        <div><strong>Laboratorio:</strong> <asp:Label ID="lblInfoLaboratorio" runat="server"></asp:Label></div>
+                        <div><strong>RUT Proveedor:</strong> <asp:Label ID="lblInfoRut" runat="server"></asp:Label></div>
+                        <div><strong>Emisi&oacute;n OC:</strong> <asp:Label ID="lblInfoFechaOC" runat="server"></asp:Label></div>
+                        <div><strong>Estado:</strong> <asp:Label ID="lblInfoEstadoOC" runat="server" Font-Bold="true"></asp:Label></div>
+                        <div><strong>Total OC:</strong> <asp:Label ID="lblInfoTotalOC" runat="server" ForeColor="#7A5E47" Font-Bold="true"></asp:Label></div>
+                    </asp:Panel>
                 </div>
-
-                <div class="form-grid-3col">
-                    <div class="form-group-dermo">
-                        <asp:Label runat="server" CssClass="form-label" AssociatedControlID="ddlOrdenCompra">Seleccionar &Oacute;rden de Compra (*)</asp:Label>
-                        <asp:DropDownList ID="ddlOrdenCompra" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlOrdenCompra_SelectedIndexChanged"></asp:DropDownList>
-                    </div>
-
-                    <div class="form-group-dermo">
-                        <asp:Label runat="server" CssClass="form-label" AssociatedControlID="txtGuiaDespacho">N&deg; Gu&iacute;a de Despacho / Factura Proveedor (*)</asp:Label>
-                        <asp:TextBox ID="txtGuiaDespacho" runat="server" CssClass="form-control" placeholder="Ej: GD-884920"></asp:TextBox>
-                    </div>
-
-                    <div class="form-group-dermo">
-                        <asp:Label runat="server" CssClass="form-label" AssociatedControlID="txtFechaRecepcion">Fecha de Recepci&oacute;n (*)</asp:Label>
-                        <asp:TextBox ID="txtFechaRecepcion" runat="server" TextMode="Date" CssClass="form-control"></asp:TextBox>
-                    </div>
-                    <div class="form-group-dermo">
-                        <asp:Label runat="server" AssociatedControlID="ddlBodega" CssClass="label-dermo">Bodega de destino (*)</asp:Label>
-                        <asp:DropDownList ID="ddlBodega" runat="server" CssClass="form-select" />
-                    </div>
-                </div>
-
-                <!-- BANNER DE RESUMEN DE LA OC SELECCIONADA -->
-                <asp:Panel ID="pnlInfoOC" runat="server" Visible="false" CssClass="info-oc-banner">
-                    <div><strong>Laboratorio:</strong> <asp:Label ID="lblInfoLaboratorio" runat="server"></asp:Label></div>
-                    <div><strong>RUT Proveedor:</strong> <asp:Label ID="lblInfoRut" runat="server"></asp:Label></div>
-                    <div><strong>Fecha Emisi&oacute;n OC:</strong> <asp:Label ID="lblInfoFechaOC" runat="server"></asp:Label></div>
-                    <div><strong>Estado Actual:</strong> <asp:Label ID="lblInfoEstadoOC" runat="server" Font-Bold="true"></asp:Label></div>
-                    <div><strong>Monto Total OC:</strong> <asp:Label ID="lblInfoTotalOC" runat="server" ForeColor="#7A5E47" Font-Bold="true"></asp:Label></div>
-                </asp:Panel>
 
                 <!-- 2. DETALLE DE PRODUCTOS A RECEPCIONAR Y ASIGNACION DE LOTES -->
-                <div class="form-section-title">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                    2. Asignaci&oacute;n de Lotes, Vencimientos y Conteo F&iacute;sico (Criterio FEFO)
+                <div class="modal-section-box" style="margin-bottom: 12px;">
+                    <div class="form-section-title" style="margin-bottom: 8px;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                        2. Asignaci&oacute;n de Lotes, Vencimientos y Conteo F&iacute;sico (FEFO)
+                    </div>
+
+                    <p class="text-muted" style="margin-bottom: 10px; font-size: 12px;">
+                        Indique la cantidad recepcionada en bodega, el c&oacute;digo de lote impreso en el empaque y la fecha de caducidad para el control FEFO.
+                    </p>
+
+                    <div class="table-dermo-container" style="margin-bottom: 0; border-radius: 12px;">
+                        <asp:GridView ID="gvItemsRecepcion" runat="server" AutoGenerateColumns="False" CssClass="table table-hover align-middle" GridLines="None" ShowHeaderWhenEmpty="True">
+                            <EmptyDataTemplate>
+                                <div style="padding: 18px 16px; text-align: center; color: #736E67; font-size: 13px; background: #FFFFFF;">
+                                    Seleccione una <strong>Orden de Compra pendiente</strong> en el paso 1 para cargar los productos, asignar el <strong>N&deg; de lote</strong> y definir la <strong>fecha de vencimiento (FEFO)</strong>.
+                                </div>
+                            </EmptyDataTemplate>
+                            <Columns>
+                                <asp:BoundField DataField="Sku" HeaderText="SKU" />
+                                <asp:BoundField DataField="Producto" HeaderText="Producto e Insumo" />
+                                <asp:BoundField DataField="NombreVariante" HeaderText="Variante / Presentaci&oacute;n" />
+                                <asp:BoundField DataField="CantidadPedida" HeaderText="Pedidas" />
+                                <asp:BoundField DataField="CantidadRecibida" HeaderText="Ya Recibidas" />
+                                <asp:BoundField DataField="CantidadPendiente" HeaderText="Pendientes" />
+
+                                <asp:TemplateField HeaderText="Cant. a Recibir (*)">
+                                    <ItemTemplate>
+                                        <asp:HiddenField ID="hfIdDetalleOC" runat="server" Value='<%# Eval("IdDetalleOC") %>' />
+                                        <asp:HiddenField ID="hfIdVariante" runat="server" Value='<%# Eval("IdVariante") %>' />
+                                        <asp:HiddenField ID="hfCostoUnitario" runat="server" Value='<%# Eval("CostoUnitario") %>' />
+                                        <asp:HiddenField ID="hfCantidadPendiente" runat="server" Value='<%# Eval("CantidadPendiente") %>' />
+                                        <asp:TextBox ID="txtCantRecibir" runat="server" Text='<%# Eval("CantidadPendiente") %>' TextMode="Number" min="0" max='<%# Eval("CantidadPendiente") %>' CssClass="form-control form-control-sm" style="width: 80px;"></asp:TextBox>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+
+                                <asp:TemplateField HeaderText="N&deg; Lote (*)">
+                                    <ItemTemplate>
+                                        <asp:TextBox ID="txtNumeroLote" runat="server" Text='<%# Eval("SugerenciaLote") %>' CssClass="form-control form-control-sm" placeholder="Ej: LOT-2026-A" style="width: 140px;"></asp:TextBox>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+
+                                <asp:TemplateField HeaderText="Fecha Vencimiento (*)">
+                                    <ItemTemplate>
+                                        <asp:TextBox ID="txtFechaVencimiento" runat="server" Text='<%# Eval("SugerenciaVencimiento") %>' TextMode="Date" CssClass="form-control form-control-sm" style="width: 135px;"></asp:TextBox>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+
+                                <asp:BoundField DataField="CostoUnitario" HeaderText="Costo Unit." DataFormatString="{0:C0}" />
+                            </Columns>
+                        </asp:GridView>
+                    </div>
                 </div>
 
-                <p class="text-muted" style="margin-bottom: 12px; font-size: 12px;">
-                    Indique la cantidad recepcionada efectivamente en bodega, el c&oacute;digo de lote impreso en el empaque y la fecha de caducidad exigida para el control de inventario FEFO.
-                </p>
-
-                <div class="table-dermo-container" style="margin-bottom: 20px;">
-                    <asp:GridView ID="gvItemsRecepcion" runat="server" AutoGenerateColumns="False" CssClass="table table-hover align-middle" GridLines="None" EmptyDataText="Seleccione una orden de compra para cargar sus l&iacute;neas de productos.">
-                        <Columns>
-                            <asp:BoundField DataField="Sku" HeaderText="SKU" />
-                            <asp:BoundField DataField="Producto" HeaderText="Producto e Insumo" />
-                            <asp:BoundField DataField="NombreVariante" HeaderText="Variante / Presentaci&oacute;n" />
-                            <asp:BoundField DataField="CantidadPedida" HeaderText="Pedidas" />
-                            <asp:BoundField DataField="CantidadRecibida" HeaderText="Ya Recibidas" />
-                            <asp:BoundField DataField="CantidadPendiente" HeaderText="Pendientes" />
-
-                            <asp:TemplateField HeaderText="Cant. a Recibir (*)">
-                                <ItemTemplate>
-                                    <asp:HiddenField ID="hfIdDetalleOC" runat="server" Value='<%# Eval("IdDetalleOC") %>' />
-                                    <asp:HiddenField ID="hfIdVariante" runat="server" Value='<%# Eval("IdVariante") %>' />
-                                    <asp:HiddenField ID="hfCostoUnitario" runat="server" Value='<%# Eval("CostoUnitario") %>' />
-                                    <asp:HiddenField ID="hfCantidadPendiente" runat="server" Value='<%# Eval("CantidadPendiente") %>' />
-                                    <asp:TextBox ID="txtCantRecibir" runat="server" Text='<%# Eval("CantidadPendiente") %>' TextMode="Number" min="0" max='<%# Eval("CantidadPendiente") %>' CssClass="form-control form-control-sm" style="width: 80px;"></asp:TextBox>
-                                </ItemTemplate>
-                            </asp:TemplateField>
-
-                            <asp:TemplateField HeaderText="N&deg; Lote (*)">
-                                <ItemTemplate>
-                                    <asp:TextBox ID="txtNumeroLote" runat="server" Text='<%# Eval("SugerenciaLote") %>' CssClass="form-control form-control-sm" placeholder="Ej: LOT-2026-A" style="width: 140px;"></asp:TextBox>
-                                </ItemTemplate>
-                            </asp:TemplateField>
-
-                            <asp:TemplateField HeaderText="Fecha Vencimiento (*)">
-                                <ItemTemplate>
-                                    <asp:TextBox ID="txtFechaVencimiento" runat="server" Text='<%# Eval("SugerenciaVencimiento") %>' TextMode="Date" CssClass="form-control form-control-sm" style="width: 135px;"></asp:TextBox>
-                                </ItemTemplate>
-                            </asp:TemplateField>
-
-                            <asp:BoundField DataField="CostoUnitario" HeaderText="Costo Unit." DataFormatString="{0:C0}" />
-                        </Columns>
-                    </asp:GridView>
-                </div>
-
-                <div style="background-color: #FAF8F5; border-radius: 12px; padding: 14px 18px; border: 1px solid var(--color-borde-suave); margin-bottom: 20px;">
-                    <strong style="color: var(--color-acento); font-size: 12px;">Regla de Integraci&oacute;n Transaccional (ACID):</strong>
-                    <span style="font-size: 12px; color: var(--color-texto-suave);">
-                        Al aprobar la recepci&oacute;n, el sistema registrar&aacute; el movimiento f&iacute;sico en `RecepcionCompra`, dar&aacute; de alta los lotes disponibles en `Lote` (Inventario), recalcular&aacute; el stock total y actualizar&aacute; el estado de la &Oacute;rden de Compra a `Recibida` o `Parcial` de forma simult&aacute;nea.
-                    </span>
+                <div style="background-color: #FAF8F5; border-radius: 12px; padding: 10px 14px; border: 1px solid var(--color-borde-suave); font-size: 12px; color: var(--color-texto-suave); line-height: 1.45;">
+                    <strong style="color: var(--color-acento);">Integraci&oacute;n autom&aacute;tica de bodega:</strong>
+                    Al aprobar la recepci&oacute;n se registrar&aacute; el ingreso f&iacute;sico, se dar&aacute;n de alta los lotes en inventario, se actualizar&aacute; el stock total y la orden pasar&aacute; a <strong>Recibida</strong> o <strong>Parcial</strong> de forma simult&aacute;nea.
                 </div>
 
                 <!-- BOTONES DE ACCION -->
-                <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                <div class="modal-footer-dermo">
                     <asp:Button ID="btnCancelarForm" runat="server" Text="Cancelar" CssClass="btn btn-outline-secondary" OnClick="btnCerrarForm_Click" />
                     <asp:Button ID="btnAprobarRecepcion" runat="server" Text="Aprobar e Ingresar a Bodega" CssClass="btn btn-primary" OnClick="btnAprobarRecepcion_Click" />
+                </div>
                 </div>
             </asp:Panel>
 
@@ -371,41 +362,57 @@
 
         <!-- MODAL DE CONSULTA DE LOTES RECIBIDOS (SOLO LECTURA) -->
         <asp:Panel ID="pnlModalDetalle" runat="server" Visible="false" CssClass="modal-overlay">
-            <div class="modal-content-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-borde-suave); padding-bottom: 14px; margin-bottom: 20px;">
+            <div class="modal-content-card modal-lg-card">
+                <div class="modal-header-dermo">
                     <div>
                         <span class="pill-badge" style="font-size: 10px; padding: 3px 10px;">DETALLE DE INGRESO</span>
-                        <h2 style="font-size: 22px; margin-top: 4px;">
+                        <h2 style="font-size: 22px; margin: 6px 0 2px 0; font-family: 'Playfair Display', Georgia, serif; color: var(--color-texto);">
                             Recepci&oacute;n <asp:Label ID="lblModalIdRec" runat="server" ForeColor="#7A5E47"></asp:Label>
                         </h2>
+                        <div style="font-size: 12px; color: var(--color-texto-suave);">Detalle de lotes ingresados a bodega y trazabilidad FEFO</div>
                     </div>
-                    <asp:Button ID="btnCerrarModal" runat="server" Text="Cerrar" CssClass="btn btn-outline-secondary" OnClick="btnCerrarModal_Click" />
+                    <asp:Button ID="btnCerrarModal" runat="server" Text="&#215;" CssClass="btn btn-outline-secondary btn-sm modal-close-x" OnClick="btnCerrarModal_Click" CausesValidation="false" ToolTip="Cerrar ventana" />
                 </div>
 
-                <div class="info-oc-banner" style="margin-bottom: 20px;">
-                    <div><strong>&Oacute;rden de Compra:</strong> <asp:Label ID="lblModalOC" runat="server"></asp:Label></div>
-                    <div><strong>Proveedor:</strong> <asp:Label ID="lblModalProveedor" runat="server"></asp:Label></div>
-                    <div><strong>Gu&iacute;a Despacho:</strong> <asp:Label ID="lblModalGuia" runat="server" Font-Bold="true"></asp:Label></div>
-                    <div><strong>Fecha:</strong> <asp:Label ID="lblModalFecha" runat="server"></asp:Label></div>
-                    <div><strong>Estado:</strong> <asp:Label ID="lblModalEstado" runat="server" Font-Bold="true"></asp:Label></div>
+                <div class="modal-section-box" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 12px 16px;">
+                    <div>
+                        <div style="font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--color-texto-suave); font-weight: 700;">Orden de Compra</div>
+                        <div style="font-size: 13.5px; font-weight: 600; color: var(--color-texto); margin-top: 2px;"><asp:Label ID="lblModalOC" runat="server"></asp:Label></div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--color-texto-suave); font-weight: 700;">Proveedor</div>
+                        <div style="font-size: 13.5px; font-weight: 600; color: var(--color-texto); margin-top: 2px;"><asp:Label ID="lblModalProveedor" runat="server"></asp:Label></div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--color-texto-suave); font-weight: 700;">Gu&iacute;a Despacho</div>
+                        <div style="font-size: 13.5px; font-weight: 700; color: var(--color-acento); margin-top: 2px;"><asp:Label ID="lblModalGuia" runat="server"></asp:Label></div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--color-texto-suave); font-weight: 700;">Fecha</div>
+                        <div style="font-size: 13.5px; font-weight: 600; color: var(--color-texto); margin-top: 2px;"><asp:Label ID="lblModalFecha" runat="server"></asp:Label></div>
+                    </div>
+                    <div>
+                        <div style="font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--color-texto-suave); font-weight: 700;">Estado</div>
+                        <div style="margin-top: 2px;"><span class="badge-rec-completa"><asp:Label ID="lblModalEstado" runat="server"></asp:Label></span></div>
+                    </div>
                 </div>
 
-                <div class="table-dermo-container" style="margin-bottom: 20px;">
+                <div class="table-dermo-container" style="margin-bottom: 12px; border-radius: 14px;">
                     <asp:GridView ID="gvModalLotes" runat="server" AutoGenerateColumns="False" CssClass="table table-hover align-middle" GridLines="None" EmptyDataText="No hay productos registrados en esta recepci&oacute;n.">
                         <Columns>
-                            <asp:BoundField DataField="Sku" HeaderText="SKU" />
+                            <asp:BoundField DataField="Sku" HeaderText="SKU" HeaderStyle-CssClass="text-nowrap" ItemStyle-CssClass="text-nowrap fw-semibold" />
                             <asp:BoundField DataField="Producto" HeaderText="Producto" />
-                            <asp:BoundField DataField="NombreVariante" HeaderText="Variante" />
-                            <asp:BoundField DataField="NumeroLote" HeaderText="N&deg; Lote Asignado" />
-                            <asp:BoundField DataField="FechaVencimiento" HeaderText="Vencimiento (FEFO)" DataFormatString="{0:dd/MM/yyyy}" />
-                            <asp:BoundField DataField="Cantidad" HeaderText="Unidades" />
-                            <asp:BoundField DataField="CostoUnitario" HeaderText="Costo Unit." DataFormatString="{0:C0}" />
-                            <asp:BoundField DataField="SubtotalLinea" HeaderText="Total Línea" DataFormatString="{0:C0}" />
+                            <asp:BoundField DataField="NombreVariante" HeaderText="Variante" HeaderStyle-CssClass="text-nowrap" ItemStyle-CssClass="text-nowrap" />
+                            <asp:BoundField DataField="NumeroLote" HeaderText="N&deg; Lote" HeaderStyle-CssClass="text-nowrap" ItemStyle-CssClass="text-nowrap" />
+                            <asp:BoundField DataField="FechaVencimiento" HeaderText="Vencimiento" DataFormatString="{0:dd/MM/yyyy}" HeaderStyle-CssClass="text-nowrap text-center" ItemStyle-CssClass="text-nowrap text-center" />
+                            <asp:BoundField DataField="Cantidad" HeaderText="Unid." HeaderStyle-CssClass="text-nowrap text-center" ItemStyle-CssClass="text-nowrap text-center fw-semibold" />
+                            <asp:BoundField DataField="CostoUnitario" HeaderText="Costo Unit." DataFormatString="{0:C0}" HeaderStyle-CssClass="text-nowrap text-end" ItemStyle-CssClass="text-nowrap text-end" />
+                            <asp:BoundField DataField="SubtotalLinea" HeaderText="Subtotal" DataFormatString="{0:C0}" HeaderStyle-CssClass="text-nowrap text-end" ItemStyle-CssClass="text-nowrap text-end fw-semibold" />
                         </Columns>
                     </asp:GridView>
                 </div>
 
-                <div style="text-align: right; margin-top: 25px; border-top: 1px solid var(--color-borde-suave); padding-top: 15px;">
+                <div class="modal-footer-dermo">
                     <button type="button" onclick="window.print();" class="btn btn-outline-secondary">
                         Imprimir Comprobante de Entrada
                     </button>

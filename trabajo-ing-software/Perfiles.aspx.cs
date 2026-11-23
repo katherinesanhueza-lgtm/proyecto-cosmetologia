@@ -34,7 +34,7 @@ namespace trabajo_ing_software
 
         private void CargarPerfiles()
         {
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            using (MySqlConnection conn = ConexionErp.Crear(connectionString))
             {
                 string query = "SELECT IdRol, Nombre FROM Rol";
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
@@ -59,7 +59,7 @@ namespace trabajo_ing_software
                 return;
             }
 
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            using (MySqlConnection conn = ConexionErp.Crear(connectionString))
             {
                 string query = "INSERT INTO Rol (Nombre) VALUES (@Nombre)";
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))
@@ -82,7 +82,7 @@ namespace trabajo_ing_software
         {
             int idRol = Convert.ToInt32(gvPerfiles.DataKeys[e.RowIndex].Value);
 
-            using (MySqlConnection conn = new MySqlConnection(connectionString))
+            using (MySqlConnection conn = ConexionErp.Crear(connectionString))
             {
                 string query = "DELETE FROM Rol WHERE IdRol = @IdRol";
                 using (MySqlCommand cmd = new MySqlCommand(query, conn))

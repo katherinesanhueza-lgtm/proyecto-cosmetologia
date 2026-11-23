@@ -49,7 +49,7 @@ namespace trabajo_ing_software
 
             try
             {
-                using (MySqlConnection con = new MySqlConnection(connectionString))
+                using (MySqlConnection con = ConexionErp.Crear(connectionString))
                 {
                     con.Open();
                     VentaInventario.AsegurarEsquema(con);
@@ -66,13 +66,14 @@ namespace trabajo_ing_software
             }
             catch (Exception ex)
             {
-                lblMensaje.Text = "Error al consultar clientes: " + ex.Message;
+                lblMensaje.Text = "Error al consultar clientes: " + ConexionErp.MensajeError(ex);
                 lblMensaje.ForeColor = System.Drawing.Color.Red;
             }
         }
 
         protected void btnGuardar_Click(object sender, EventArgs e)
         {
+            ExigirEscrituraVentas();
             string rut = txtRut.Text.Trim();
             string nombre = txtNombre.Text.Trim();
             string categoria = ddlCategoria.SelectedValue;
@@ -82,7 +83,10 @@ namespace trabajo_ing_software
             string correo = txtCorreo.Text.Trim();
             string telefono = txtTelefono.Text.Trim();
 
-            decimal.TryParse(txtLimiteCredito.Text.Trim(), out decimal limiteCredito);
+            decimal.TryParse(txtLimiteCredito.Text.Trim().Replace(",", "."),
+                System.Globalization.NumberStyles.Any,
+                System.Globalization.CultureInfo.InvariantCulture,
+                out decimal limiteCredito);
             int.TryParse(txtDiasCredito.Text.Trim(), out int diasCredito);
 
             if (string.IsNullOrEmpty(rut) || string.IsNullOrEmpty(nombre))
@@ -92,9 +96,15 @@ namespace trabajo_ing_software
                 return;
             }
 
+            if (!Laboratorios.ValidarRut(rut))
+            {
+                lblMensaje.Text = "Verifica el dígito verificador del RUT.";
+                return;
+            }
+
             bool esEdicion = !string.IsNullOrEmpty(hfIdCliente.Value);
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 string query;
                 if (!esEdicion)
@@ -141,7 +151,7 @@ namespace trabajo_ing_software
                     }
                     catch (MySqlException ex)
                     {
-                        lblMensaje.Text = "Error al guardar cliente: " + ex.Message;
+                        lblMensaje.Text = "Error al guardar cliente: " + ConexionErp.MensajeError(ex);
                         lblMensaje.ForeColor = System.Drawing.Color.Red;
                     }
                 }
@@ -169,8 +179,9 @@ namespace trabajo_ing_software
 
         private void CambiarEstadoCliente(int idCliente, int nuevoEstado)
         {
+            ExigirEscrituraVentas();
             string query = "UPDATE cliente SET Activo = @Activo WHERE IdCliente = @IdCliente";
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlCommand cmd = new MySqlCommand(query, con))
             {
                 cmd.Parameters.AddWithValue("@Activo", nuevoEstado);
@@ -185,7 +196,7 @@ namespace trabajo_ing_software
                 }
                 catch (Exception ex)
                 {
-                    lblMensaje.Text = "Error al actualizar estado: " + ex.Message;
+                    lblMensaje.Text = "Error al actualizar estado: " + ConexionErp.MensajeError(ex);
                     lblMensaje.ForeColor = System.Drawing.Color.Red;
                 }
             }
@@ -205,7 +216,7 @@ namespace trabajo_ing_software
                                     COALESCE(DiasCredito, 0) AS DiasCredito
                              FROM cliente WHERE IdCliente = @Id";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlCommand cmd = new MySqlCommand(query, con))
             {
                 cmd.Parameters.AddWithValue("@Id", idCliente);
@@ -227,7 +238,7 @@ namespace trabajo_ing_software
                         txtContacto.Text = reader["Contacto"].ToString();
                         txtCorreo.Text = reader["Correo"].ToString();
                         txtTelefono.Text = reader["Telefono"].ToString();
-                        txtLimiteCredito.Text = reader["LimiteCredito"].ToString();
+                        txtLimiteCredito.Text = Math.Round(Convert.ToDecimal(reader["LimiteCredito"]), 0).ToString(System.Globalization.CultureInfo.InvariantCulture);
                         txtDiasCredito.Text = reader["DiasCredito"].ToString();
 
                         lblTituloForm.InnerText = "Modificar Cliente (ID: " + hfIdCliente.Value + ")";

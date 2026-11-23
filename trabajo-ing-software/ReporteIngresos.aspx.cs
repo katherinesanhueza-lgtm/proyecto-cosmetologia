@@ -8,7 +8,7 @@ using System.Web.UI.WebControls;
 
 namespace trabajo_ing_software
 {
-    public partial class ReporteIngresos : System.Web.UI.Page
+    public partial class ReporteIngresos : PaginaCompras
     {
         private string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=;";
 
@@ -23,7 +23,7 @@ namespace trabajo_ing_software
             // Control de acceso RBAC: Administrador, Bodeguero y Contador
             string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
             if (!rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase) && 
-                !rolUsuario.Equals("Bodeguero", StringComparison.OrdinalIgnoreCase) &&
+                !rolUsuario.Equals("Comprador", StringComparison.OrdinalIgnoreCase) &&
                 !rolUsuario.Equals("Contador", StringComparison.OrdinalIgnoreCase))
             {
                 ConfiguracionGlobal.RedirigirSegunRol(Response, rolUsuario);
@@ -217,39 +217,46 @@ namespace trabajo_ing_software
                         DataTable dt = new DataTable();
                         da.Fill(dt);
 
-                        StringBuilder sb = new StringBuilder();
-                        sb.AppendLine("N° Recepción;N° OC;Guía Despacho;Proveedor;RUT;Fecha Recepción;SKU;Producto;Variante;Lote;Vencimiento;Cantidad;Costo Unitario ($);Total Línea ($)");
+                        DataTable limpio = new DataTable();
+                        limpio.Columns.Add("N° Recepción", typeof(string));
+                        limpio.Columns.Add("N° OC", typeof(string));
+                        limpio.Columns.Add("Guía Despacho", typeof(string));
+                        limpio.Columns.Add("Proveedor", typeof(string));
+                        limpio.Columns.Add("RUT", typeof(string));
+                        limpio.Columns.Add("Fecha Ingreso", typeof(DateTime));
+                        limpio.Columns.Add("SKU", typeof(string));
+                        limpio.Columns.Add("Producto", typeof(string));
+                        limpio.Columns.Add("Variante", typeof(string));
+                        limpio.Columns.Add("Lote Asignado", typeof(string));
+                        limpio.Columns.Add("Fecha Vencimiento", typeof(string));
+                        limpio.Columns.Add("Cantidad", typeof(int));
+                        limpio.Columns.Add("Costo Unitario (CLP)", typeof(decimal));
+                        limpio.Columns.Add("Total Línea (CLP)", typeof(decimal));
 
-                        foreach (DataRow dr in dt.Rows)
+                        foreach (DataRow r in dt.Rows)
                         {
-                            sb.AppendLine(string.Format("REC-{0:D4};{1};{2};\"{3}\";{4};{5:dd/MM/yyyy};{6};\"{7}\";\"{8}\";{9};{10:dd/MM/yyyy};{11};{12};{13}",
-                                dr["IdRecepcion"],
-                                dr["NumeroOC"],
-                                dr["GuiaDespacho"],
-                                dr["RazonSocial"],
-                                dr["Rut"],
-                                dr["FechaRecepcion"],
-                                dr["Sku"],
-                                dr["Producto"],
-                                dr["NombreVariante"],
-                                dr["NumeroLote"],
-                                dr["FechaVencimiento"],
-                                dr["Cantidad"],
-                                dr["CostoUnitario"],
-                                dr["SubtotalLinea"]
-                            ));
+                            string venc = r["FechaVencimiento"] != DBNull.Value
+                                ? Convert.ToDateTime(r["FechaVencimiento"]).ToString("dd/MM/yyyy")
+                                : "";
+                            limpio.Rows.Add(
+                                "REC-" + Convert.ToInt32(r["IdRecepcion"]).ToString("D4"),
+                                Convert.ToString(r["NumeroOC"]),
+                                Convert.ToString(r["GuiaDespacho"]),
+                                Convert.ToString(r["RazonSocial"]),
+                                Convert.ToString(r["Rut"]),
+                                Convert.ToDateTime(r["FechaRecepcion"]),
+                                Convert.ToString(r["Sku"]),
+                                Convert.ToString(r["Producto"]),
+                                Convert.ToString(r["NombreVariante"]),
+                                Convert.ToString(r["NumeroLote"]),
+                                venc,
+                                Convert.ToInt32(r["Cantidad"]),
+                                Convert.ToDecimal(r["CostoUnitario"]),
+                                Convert.ToDecimal(r["SubtotalLinea"])
+                            );
                         }
 
-                        Response.Clear();
-                        Response.Buffer = true;
-                        Response.AddHeader("content-disposition", "attachment;filename=Consolidado_Ingresos_Lotes.csv");
-                        Response.Charset = "utf-8";
-                        Response.ContentType = "text/csv";
-                        Response.ContentEncoding = Encoding.UTF8;
-                        Response.BinaryWrite(Encoding.UTF8.GetPreamble());
-                        Response.Output.Write(sb.ToString());
-                        Response.Flush();
-                        Response.End();
+                        ContabilidadExportacion.DescargarExcel(Response, limpio, "Consolidado_Ingresos_Lotes");
                     }
                 }
             }

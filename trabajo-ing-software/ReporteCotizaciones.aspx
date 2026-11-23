@@ -19,13 +19,17 @@
 
         .cost-filter-grid {
             display: grid;
-            grid-template-columns: 155px 155px 1.35fr 1.15fr 170px;
-            gap: 14px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px 16px;
             align-items: end;
         }
 
         .cost-filter-grid > .compras-acciones {
-            grid-column: 1 / -1;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            align-items: center;
+            flex-wrap: wrap;
         }
 
         .kpi-grid-4col {

@@ -48,21 +48,29 @@
 
         .form-grid-2col {
             display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 16px;
+            grid-template-columns: 1.7fr 1fr;
+            gap: 14px;
+            align-items: end;
         }
 
         .form-grid-3col {
             display: grid;
-            grid-template-columns: 2fr 140px 1.2fr;
-            gap: 16px;
+            grid-template-columns: 1.55fr 110px 1.35fr;
+            gap: 14px;
+            align-items: end;
         }
 
         .filter-toolbar-row {
-            display: flex;
+            display: grid;
+            grid-template-columns: minmax(220px, 1fr) 210px auto;
             gap: 12px;
             align-items: center;
-            flex-wrap: wrap;
+            background-color: var(--color-blanco);
+            border: 1px solid var(--color-borde-suave);
+            border-radius: 16px;
+            padding: 14px 18px !important;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
         }
 
         .badge-dev {
@@ -77,33 +85,11 @@
         .badge-dev-aceptado { background: #E8F8F0; color: #27AE60; }
         .badge-dev-rechazado { background: #FDEDEC; color: #C0392B; }
 
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(46, 46, 46, 0.45);
-            backdrop-filter: blur(4px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-        }
-
-        .modal-content-card {
-            background: var(--color-blanco);
-            border-radius: 20px;
-            width: 92%;
-            max-width: 760px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            border: 1px solid var(--color-borde-suave);
-            padding: 28px;
-        }
-
-        @media (max-width: 1050px) {
+        @media (max-width: 960px) {
             .kpi-row-4col { grid-template-columns: repeat(2, 1fr); }
             .form-grid-2col, .form-grid-3col { grid-template-columns: 1fr; }
+            .filter-toolbar-row { grid-template-columns: 1fr auto; }
+            .filter-toolbar-row > div:first-child { grid-column: 1 / -1; }
         }
     </style>
 </asp:Content>
@@ -177,53 +163,58 @@
             <!-- ALERTAS -->
             <asp:Label ID="lblMensaje" runat="server" Visible="false" style="display: block; padding: 14px 18px; border-radius: 14px; margin-bottom: 18px; font-weight: 500;"></asp:Label>
 
-            <!-- PANEL NUEVO RECLAMO -->
-            <asp:Panel ID="pnlFormulario" runat="server" Visible="false" style="margin-bottom: 24px;">
-                <div class="card-dermocosmetica">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid var(--color-borde-suave); padding-bottom: 12px;">
-                        <h3 style="margin: 0;">Registrar Reclamo / Devoluci&oacute;n a Proveedor</h3>
-                        <asp:LinkButton ID="btnCerrarForm" runat="server" CssClass="btn btn-outline-secondary btn-sm" OnClick="btnCancelarForm_Click" CausesValidation="false">Cerrar</asp:LinkButton>
+            <!-- MODAL FLOTANTE NUEVO RECLAMO -->
+            <asp:Panel ID="pnlFormulario" runat="server" Visible="false" CssClass="modal-overlay">
+                <div class="modal-content-card modal-md-card">
+                    <div class="modal-header-dermo">
+                        <div>
+                            <span class="pill-badge" style="font-size: 10px; padding: 3px 10px;">CALIDAD Y PROVEEDORES</span>
+                            <h2 style="font-size: 22px; margin: 6px 0 2px 0; font-family: 'Playfair Display', Georgia, serif; color: var(--color-texto);">Registrar Reclamo / Devoluci&oacute;n a Proveedor</h2>
+                        </div>
+                        <asp:LinkButton ID="btnCerrarForm" runat="server" CssClass="btn btn-outline-secondary btn-sm modal-close-x" OnClick="btnCancelarForm_Click" CausesValidation="false" ToolTip="Cerrar ventana">&times;</asp:LinkButton>
                     </div>
 
-                    <div class="form-grid-2col" style="margin-bottom: 16px;">
-                        <div>
-                            <label class="form-label">1. Recepci&oacute;n / Orden de Compra Asociada *</label>
-                            <asp:DropDownList ID="ddlRecepcion" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlRecepcion_SelectedIndexChanged"></asp:DropDownList>
+                    <div class="modal-section-box" style="margin-bottom: 12px;">
+                        <div class="form-grid-2col" style="margin-bottom: 14px;">
+                            <div>
+                                <label class="form-label">1. Recepci&oacute;n / Orden de Compra *</label>
+                                <asp:DropDownList ID="ddlRecepcion" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlRecepcion_SelectedIndexChanged"></asp:DropDownList>
+                            </div>
+                            <div>
+                                <label class="form-label">Fecha del Reclamo *</label>
+                                <asp:TextBox ID="txtFecha" runat="server" TextMode="Date" CssClass="form-control"></asp:TextBox>
+                            </div>
                         </div>
+
+                        <div class="form-grid-3col" style="margin-bottom: 14px;">
+                            <div>
+                                <label class="form-label">2. Lote e Insumo Afectado *</label>
+                                <asp:DropDownList ID="ddlLote" runat="server" CssClass="form-select"></asp:DropDownList>
+                            </div>
+                            <div>
+                                <label class="form-label">Cantidad *</label>
+                                <asp:TextBox ID="txtCantidad" runat="server" TextMode="Number" CssClass="form-control" Text="1" min="1"></asp:TextBox>
+                            </div>
+                            <div>
+                                <label class="form-label">Motivo de No Conformidad *</label>
+                                <asp:DropDownList ID="ddlMotivoTipo" runat="server" CssClass="form-select">
+                                    <asp:ListItem Value="Rotura de empaque" Text="Rotura de empaque"></asp:ListItem>
+                                    <asp:ListItem Value="Producto dañado / envase defectuoso" Text="Producto da&#241;ado / envase defectuoso"></asp:ListItem>
+                                    <asp:ListItem Value="Sello de seguridad violado" Text="Sello de seguridad violado"></asp:ListItem>
+                                    <asp:ListItem Value="Discrepancia de lote / cantidad" Text="Discrepancia de lote / cantidad"></asp:ListItem>
+                                    <asp:ListItem Value="Fecha de vencimiento próxima" Text="Fecha de vencimiento pr&#243;xima"></asp:ListItem>
+                                    <asp:ListItem Value="Otro motivo" Text="Otro motivo"></asp:ListItem>
+                                </asp:DropDownList>
+                            </div>
+                        </div>
+
                         <div>
-                            <label class="form-label">Fecha del Reclamo *</label>
-                            <asp:TextBox ID="txtFecha" runat="server" TextMode="Date" CssClass="form-control"></asp:TextBox>
+                            <label class="form-label">Observaciones / Detalle del Reclamo</label>
+                            <asp:TextBox ID="txtObservaciones" runat="server" CssClass="form-control" MaxLength="130" placeholder="Ej: Envases golpeados en recepci&oacute;n, se solicita Nota de Cr&eacute;dito o reposici&oacute;n"></asp:TextBox>
                         </div>
                     </div>
 
-                    <div class="form-grid-3col" style="margin-bottom: 16px;">
-                        <div>
-                            <label class="form-label">2. Lote e Insumo Afectado *</label>
-                            <asp:DropDownList ID="ddlLote" runat="server" CssClass="form-select"></asp:DropDownList>
-                        </div>
-                        <div>
-                            <label class="form-label">Cantidad a Devolver *</label>
-                            <asp:TextBox ID="txtCantidad" runat="server" TextMode="Number" CssClass="form-control" Text="1" min="1"></asp:TextBox>
-                        </div>
-                        <div>
-                            <label class="form-label">Motivo de No Conformidad *</label>
-                            <asp:DropDownList ID="ddlMotivoTipo" runat="server" CssClass="form-select">
-                                <asp:ListItem Value="Rotura de empaque" Text="Rotura de empaque"></asp:ListItem>
-                                <asp:ListItem Value="Producto dañado / envase defectuoso" Text="Producto da&#241;ado / envase defectuoso"></asp:ListItem>
-                                <asp:ListItem Value="Sello de seguridad violado" Text="Sello de seguridad violado"></asp:ListItem>
-                                <asp:ListItem Value="Discrepancia de lote / cantidad" Text="Discrepancia de lote / cantidad"></asp:ListItem>
-                                <asp:ListItem Value="Fecha de vencimiento próxima" Text="Fecha de vencimiento pr&#243;xima"></asp:ListItem>
-                                <asp:ListItem Value="Otro motivo" Text="Otro motivo"></asp:ListItem>
-                            </asp:DropDownList>
-                        </div>
-                    </div>
-
-                    <div style="margin-bottom: 18px;">
-                        <label class="form-label">Observaciones / Detalle del Reclamo</label>
-                        <asp:TextBox ID="txtObservaciones" runat="server" CssClass="form-control" MaxLength="130" placeholder="Ej: Envases golpeados en recepci&oacute;n, se solicita Nota de Cr&eacute;dito o reposici&oacute;n"></asp:TextBox>
-                    </div>
-
-                    <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--color-borde-suave); padding-top: 14px;">
+                    <div class="modal-footer-dermo">
                         <asp:Button ID="btnCancelarForm" runat="server" Text="Cancelar" CssClass="btn btn-outline-secondary" OnClick="btnCancelarForm_Click" CausesValidation="false" />
                         <asp:Button ID="btnGuardar" runat="server" Text="Guardar Reclamo" CssClass="btn btn-primary" OnClick="btnGuardar_Click" />
                     </div>
@@ -231,16 +222,21 @@
             </asp:Panel>
 
             <!-- FILTROS -->
-            <div class="card-dermocosmetica" style="margin-bottom: 20px;">
-                <div class="filter-toolbar-row">
-                    <asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control" style="max-width: 300px;" placeholder="Buscar por OC, recepci&oacute;n, lote o laboratorio..." AutoPostBack="true" OnTextChanged="Filtro_Changed"></asp:TextBox>
-                    <asp:DropDownList ID="ddlFiltroEstado" runat="server" CssClass="form-select" style="max-width: 210px;" AutoPostBack="true" OnSelectedIndexChanged="Filtro_Changed">
+            <div class="filter-toolbar-row card-dermocosmetica">
+                <div style="position: relative; display: flex; align-items: center; width: 100%;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 14px; color: var(--color-texto-suave); pointer-events: none;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control" style="padding-left: 38px;" placeholder="Buscar por OC, recepci&oacute;n, lote o laboratorio..." AutoPostBack="true" OnTextChanged="Filtro_Changed"></asp:TextBox>
+                </div>
+                <div>
+                    <asp:DropDownList ID="ddlFiltroEstado" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="Filtro_Changed">
                         <asp:ListItem Value="" Text="Todos los Estados"></asp:ListItem>
                         <asp:ListItem Value="Pendiente" Text="Pendiente"></asp:ListItem>
                         <asp:ListItem Value="En Revisi&#243;n" Text="En Revisi&#243;n"></asp:ListItem>
                         <asp:ListItem Value="Aceptado" Text="Aceptado"></asp:ListItem>
                         <asp:ListItem Value="Rechazado" Text="Rechazado"></asp:ListItem>
                     </asp:DropDownList>
+                </div>
+                <div>
                     <asp:Button ID="btnLimpiarFiltros" runat="server" Text="Limpiar filtros" CssClass="btn btn-outline-secondary" OnClick="btnLimpiarFiltros_Click" CausesValidation="false" />
                 </div>
             </div>
@@ -316,31 +312,68 @@
 
     <!-- MODAL DETALLE -->
     <asp:Panel ID="pnlModalDetalle" runat="server" Visible="false" CssClass="modal-overlay">
-        <div class="modal-content-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--color-borde-suave); padding-bottom: 12px; margin-bottom: 18px;">
+        <div class="modal-content-card modal-md-card">
+            <div class="modal-header-dermo">
                 <div>
-                    <span class="pill-badge" style="font-size: 10px;">FICHA DE RECLAMO A PROVEEDOR</span>
-                    <h2 style="margin: 6px 0 0 0;"><asp:Label ID="lblModalCodigo" runat="server"></asp:Label></h2>
+                    <span class="pill-badge" style="font-size: 10px; padding: 3px 10px;">FICHA DE RECLAMO A PROVEEDOR</span>
+                    <h2 style="font-size: 22px; margin: 6px 0 2px 0; font-family: 'Playfair Display', Georgia, serif; color: var(--color-texto);">
+                        <asp:Label ID="lblModalCodigo" runat="server"></asp:Label>
+                    </h2>
+                    <div style="font-size: 12px; color: var(--color-texto-suave);">Antecedentes del reclamo, lote afectado y valorizaci&oacute;n estimada</div>
                 </div>
-                <asp:Button ID="btnCerrarModal" runat="server" Text="Cerrar" CssClass="btn btn-outline-secondary btn-sm" OnClick="btnCerrarModal_Click" CausesValidation="false" />
+                <asp:Button ID="btnCerrarModal" runat="server" Text="&#215;" CssClass="btn btn-outline-secondary btn-sm modal-close-x" OnClick="btnCerrarModal_Click" CausesValidation="false" ToolTip="Cerrar ventana" />
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; font-size: 13px; margin-bottom: 18px;">
-                <div><strong>Laboratorio:</strong> <asp:Label ID="lblModalLab" runat="server"></asp:Label></div>
-                <div><strong>Estado:</strong> <asp:Label ID="lblModalEstado" runat="server"></asp:Label></div>
-                <div><strong>Orden de Compra:</strong> <asp:Label ID="lblModalOC" runat="server"></asp:Label></div>
-                <div><strong>Recepci&oacute;n / Gu&iacute;a:</strong> <asp:Label ID="lblModalRec" runat="server"></asp:Label></div>
-                <div><strong>Insumo (SKU):</strong> <asp:Label ID="lblModalProducto" runat="server"></asp:Label></div>
-                <div><strong>Lote / Vencimiento:</strong> <asp:Label ID="lblModalLote" runat="server"></asp:Label></div>
-                <div><strong>Cantidad Devuelta:</strong> <asp:Label ID="lblModalCantidad" runat="server"></asp:Label></div>
-                <div><strong>Monto Reclamado:</strong> <asp:Label ID="lblModalMonto" runat="server"></asp:Label></div>
-                <div><strong>Fecha Reclamo:</strong> <asp:Label ID="lblModalFecha" runat="server"></asp:Label></div>
-                <div><strong>Registrado por:</strong> <asp:Label ID="lblModalUsuario" runat="server"></asp:Label></div>
+            <div class="modal-section-box" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px;">
+                <div>
+                    <div style="font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--color-texto-suave); font-weight: 700;">Laboratorio</div>
+                    <div style="font-size: 13.5px; font-weight: 600; color: var(--color-texto); margin-top: 2px;"><asp:Label ID="lblModalLab" runat="server"></asp:Label></div>
+                </div>
+                <div>
+                    <div style="font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--color-texto-suave); font-weight: 700;">Estado</div>
+                    <div style="margin-top: 2px;"><span class="pill-badge" style="font-size: 11px; padding: 3px 10px;"><asp:Label ID="lblModalEstado" runat="server"></asp:Label></span></div>
+                </div>
+                <div>
+                    <div style="font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--color-texto-suave); font-weight: 700;">Orden de Compra</div>
+                    <div style="font-size: 13.5px; font-weight: 600; color: var(--color-texto); margin-top: 2px;"><asp:Label ID="lblModalOC" runat="server"></asp:Label></div>
+                </div>
+                <div>
+                    <div style="font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--color-texto-suave); font-weight: 700;">Recepci&oacute;n / Gu&iacute;a</div>
+                    <div style="font-size: 13.5px; font-weight: 500; color: var(--color-texto); margin-top: 2px;"><asp:Label ID="lblModalRec" runat="server"></asp:Label></div>
+                </div>
+                <div>
+                    <div style="font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--color-texto-suave); font-weight: 700;">Insumo (SKU)</div>
+                    <div style="font-size: 13px; font-weight: 500; color: var(--color-texto); margin-top: 2px;"><asp:Label ID="lblModalProducto" runat="server"></asp:Label></div>
+                </div>
+                <div>
+                    <div style="font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--color-texto-suave); font-weight: 700;">Lote / Vencimiento</div>
+                    <div style="font-size: 13px; font-weight: 500; color: var(--color-texto); margin-top: 2px;"><asp:Label ID="lblModalLote" runat="server"></asp:Label></div>
+                </div>
+                <div>
+                    <div style="font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--color-texto-suave); font-weight: 700;">Cantidad Devuelta</div>
+                    <div style="font-size: 13.5px; font-weight: 700; color: var(--color-texto); margin-top: 2px;"><asp:Label ID="lblModalCantidad" runat="server"></asp:Label></div>
+                </div>
+                <div>
+                    <div style="font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--color-texto-suave); font-weight: 700;">Monto Reclamado</div>
+                    <div style="font-size: 15px; font-weight: 700; color: var(--color-acento); margin-top: 2px;"><asp:Label ID="lblModalMonto" runat="server"></asp:Label></div>
+                </div>
+                <div>
+                    <div style="font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--color-texto-suave); font-weight: 700;">Fecha Reclamo</div>
+                    <div style="font-size: 13px; color: var(--color-texto); margin-top: 2px;"><asp:Label ID="lblModalFecha" runat="server"></asp:Label></div>
+                </div>
+                <div>
+                    <div style="font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--color-texto-suave); font-weight: 700;">Registrado por</div>
+                    <div style="font-size: 13px; color: var(--color-texto); margin-top: 2px;"><asp:Label ID="lblModalUsuario" runat="server"></asp:Label></div>
+                </div>
             </div>
 
-            <div style="background: #FAF8F5; padding: 14px; border-radius: 12px; border: 1px solid var(--color-borde-suave); font-size: 13px;">
-                <strong>Motivo y Observaciones:</strong><br />
-                <asp:Label ID="lblModalMotivo" runat="server"></asp:Label>
+            <div style="background: #FFFFFF; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--color-borde-suave); font-size: 13px;">
+                <div style="font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--color-texto-suave); font-weight: 700; margin-bottom: 4px;">Motivo y Observaciones</div>
+                <div style="color: var(--color-texto); line-height: 1.5;"><asp:Label ID="lblModalMotivo" runat="server"></asp:Label></div>
+            </div>
+
+            <div class="modal-footer-dermo">
+                <asp:Button ID="btnCerrarModalPie" runat="server" Text="Cerrar" CssClass="btn btn-primary" OnClick="btnCerrarModal_Click" CausesValidation="false" />
             </div>
         </div>
     </asp:Panel>

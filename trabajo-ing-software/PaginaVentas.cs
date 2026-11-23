@@ -20,11 +20,18 @@ namespace trabajo_ing_software
             string pagina = System.IO.Path.GetFileNameWithoutExtension(AppRelativeVirtualPath);
             bool permitido = EsRol(rol, "Administrador") || EsRol(rol, "Vendedor")
                 || (pagina == "Despachos" && EsRol(rol, "Bodeguero"))
-                || (pagina == "ReporteVentas" && (EsRol(rol, "Contador") || EsRol(rol, "Bodeguero")));
+                || EsRol(rol, "Contador");
             if (!permitido) throw new HttpException(403, "Tu perfil no tiene acceso a esta pantalla de Ventas.");
             UsuarioVenta = usuario;
             ViewStateUserKey = Session.SessionID;
             base.OnInit(e);
+        }
+
+        protected void ExigirEscrituraVentas()
+        {
+            string rol = Convert.ToString(Session["RolUsuario"]);
+            if (!EsRol(rol, "Administrador") && !EsRol(rol, "Vendedor"))
+                throw new HttpException(403, "Tu perfil tiene acceso de consulta.");
         }
 
         private static bool EsRol(string actual, string esperado)

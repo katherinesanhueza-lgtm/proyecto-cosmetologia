@@ -8,11 +8,46 @@
         .table { font-size: 0.85rem; }
         .table th { font-size: 0.85rem; }
         .table td { font-size: 0.85rem; }
-        .resumen-totales-fila { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.875rem; color: #555; }
-        .resumen-totales-fila.destacado { font-weight: 700; color: #24211e; font-size: 1.25rem; border-top: 1px solid #e5e0d8; padding-top: 10px; margin-top: 8px; }
-        .badge-credito-ok { background-color: #E8F8F0; color: #27AE60; padding: 4px 10px; border-radius: 8px; font-weight: 600; font-size: 12px; }
-        .badge-credito-alerta { background-color: #FDEDEC; color: #C0392B; padding: 4px 10px; border-radius: 8px; font-weight: 600; font-size: 12px; }
-        .badge-stock { background-color: #EBF3FA; color: #2980B9; padding: 4px 10px; border-radius: 8px; font-weight: 600; font-size: 12px; }
+        .resumen-totales-fila { display: flex; justify-content: space-between; margin-bottom: 7px; font-size: 0.875rem; color: #555; }
+        .resumen-totales-fila.destacado { font-weight: 700; color: #24211e; font-size: 1.2rem; border-top: 1px solid #dfd7cc; padding-top: 10px; margin-top: 8px; margin-bottom: 0; }
+        .badge-credito-ok { background-color: #E8F8F0; color: #27AE60; padding: 4px 10px; border-radius: 8px; font-weight: 600; font-size: 12px; display: inline-block; }
+        .badge-credito-alerta { background-color: #FDEDEC; color: #C0392B; padding: 4px 10px; border-radius: 8px; font-weight: 600; font-size: 12px; display: inline-block; }
+        .badge-stock { background-color: #EBF3FA; color: #2980B9; padding: 4px 10px; border-radius: 8px; font-weight: 600; font-size: 12px; display: inline-block; }
+        .pos-section-box {
+            background-color: #FAF8F5;
+            border: 1px solid #E8E3DA;
+            border-radius: 14px;
+            padding: 16px 18px;
+            margin-bottom: 14px;
+        }
+        .pos-section-box h2 {
+            font-size: 1.05rem;
+            color: #7A5E47;
+            margin-bottom: 12px;
+            padding-bottom: 6px;
+            border-bottom: 1px dashed #D7C9B8;
+        }
+        .pos-item-grid {
+            display: grid;
+            grid-template-columns: minmax(180px, 1fr) 86px auto;
+            gap: 10px;
+            align-items: end;
+        }
+        .pos-descuento-grid {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 14px;
+            align-items: center;
+        }
+        .pos-totales-box {
+            background-color: #FAF8F5;
+            border: 1px solid #E8E3DA;
+            border-radius: 14px;
+            padding: 16px 18px;
+        }
+        @media (max-width: 680px) {
+            .pos-item-grid, .pos-descuento-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </asp:Content>
 
@@ -104,7 +139,7 @@
                     <p class="text-muted" style="margin-top: 4px;">Emisi&oacute;n de facturas y boletas, verificaci&oacute;n de stock en tiempo real, validaci&oacute;n de cr&eacute;dito y salida FEFO.</p>
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <a href="ReporteVentas.aspx?tipo=1&amp;origen=pos" class="btn btn-outline-secondary">
+                    <a href="ReporteVentas.aspx?tipo=7&amp;origen=pos" class="btn btn-outline-secondary">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                         Reporte Anal&iacute;tico
                     </a>
@@ -121,124 +156,131 @@
             <div class="compras-paneles">
                 <!-- TARJETA IZQUIERDA: FORMULARIO DE CARGA -->
                 <section class="card-dermocosmetica">
-                    <h2 style="margin-bottom: 16px;">1. Datos de la Operación y Cliente</h2>
-                    
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Tipo de Documento</label>
-                            <asp:DropDownList ID="ddlTipoDocumento" runat="server" CssClass="form-select">
-                                <asp:ListItem Text="Boleta Electrónica" Value="Boleta"></asp:ListItem>
-                                <asp:ListItem Text="Factura Electrónica" Value="Factura"></asp:ListItem>
-                            </asp:DropDownList>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Bodega de Salida</label>
-                            <asp:DropDownList ID="ddlBodega" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlBodega_SelectedIndexChanged" />
-                        </div>
-                    </div>
+                    <div class="pos-section-box">
+                        <h2>1. Datos de la Operaci&oacute;n y Cliente</h2>
 
-                    <div class="mb-3">
-                        <label class="form-label">Seleccionar Cliente</label>
-                        <asp:DropDownList ID="ddlClientes" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlClientes_SelectedIndexChanged"></asp:DropDownList>
-                        <div class="mt-2">
-                            <asp:Label ID="lblInfoCredito" runat="server" CssClass="d-block" style="font-size: 13px;"></asp:Label>
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Forma de Pago</label>
-                            <asp:DropDownList ID="ddlPago" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlPago_SelectedIndexChanged">
-                                <asp:ListItem Value="contado">Contado</asp:ListItem>
-                                <asp:ListItem Value="credito">Crédito</asp:ListItem>
-                            </asp:DropDownList>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Vencimiento si es a Crédito</label>
-                            <asp:TextBox ID="txtVence" runat="server" TextMode="Date" CssClass="form-control" />
-                        </div>
-                    </div>
-
-                    <hr style="border: 0; border-top: 1px solid #e5e0d8; margin: 24px 0;" />
-
-                    <h2 style="margin-bottom: 16px;">2. Buscar Producto y Validación de Stock</h2>
-                    
-                    <div class="row g-3">
-                        <div class="col-md-8">
-                            <label class="form-label">Producto / SKU</label>
-                            <asp:DropDownList ID="ddlProductos" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlProductos_SelectedIndexChanged"></asp:DropDownList>
-                            <div class="mt-1">
-                                <asp:Label ID="lblStockDisponible" runat="server" CssClass="badge-stock" Text="Selecciona bodega y producto para ver stock"></asp:Label>
+                        <div class="row g-3 mb-2">
+                            <div class="col-md-6">
+                                <label class="form-label">Tipo de Documento</label>
+                                <asp:DropDownList ID="ddlTipoDocumento" runat="server" CssClass="form-select">
+                                    <asp:ListItem Text="Boleta Electrónica" Value="Boleta"></asp:ListItem>
+                                    <asp:ListItem Text="Factura Electrónica" Value="Factura"></asp:ListItem>
+                                </asp:DropDownList>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Bodega de Salida</label>
+                                <asp:DropDownList ID="ddlBodega" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlBodega_SelectedIndexChanged" />
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Cantidad</label>
-                            <asp:TextBox ID="txtCantidad" runat="server" CssClass="form-control" TextMode="Number" Text="1"></asp:TextBox>
+
+                        <div class="mb-2">
+                            <label class="form-label">Seleccionar Cliente</label>
+                            <asp:DropDownList ID="ddlClientes" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlClientes_SelectedIndexChanged"></asp:DropDownList>
+                            <div class="mt-2">
+                                <asp:Label ID="lblInfoCredito" runat="server" CssClass="d-block" style="font-size: 12.5px;"></asp:Label>
+                            </div>
                         </div>
-                        <div class="col-12 mt-3 text-end">
-                            <asp:Button ID="btnAgregar" runat="server" Text="Añadir al Carrito +" CssClass="btn btn-outline-secondary" OnClick="btnAgregar_Click" />
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Forma de Pago</label>
+                                <asp:DropDownList ID="ddlPago" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlPago_SelectedIndexChanged">
+                                    <asp:ListItem Value="contado">Contado</asp:ListItem>
+                                    <asp:ListItem Value="credito">Crédito</asp:ListItem>
+                                </asp:DropDownList>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Vencimiento si es a Cr&eacute;dito</label>
+                                <asp:TextBox ID="txtVence" runat="server" TextMode="Date" CssClass="form-control" />
+                            </div>
                         </div>
                     </div>
 
-                    <hr style="border: 0; border-top: 1px solid #e5e0d8; margin: 24px 0;" />
+                    <div class="pos-section-box">
+                        <h2>2. Buscar Producto y Validaci&oacute;n de Stock</h2>
+                        <div class="pos-item-grid">
+                            <div>
+                                <label class="form-label">Producto / SKU</label>
+                                <asp:DropDownList ID="ddlProductos" runat="server" CssClass="form-select" AutoPostBack="true" OnSelectedIndexChanged="ddlProductos_SelectedIndexChanged"></asp:DropDownList>
+                            </div>
+                            <div>
+                                <label class="form-label">Cantidad</label>
+                                <asp:TextBox ID="txtCantidad" runat="server" CssClass="form-control" TextMode="Number" Text="1"></asp:TextBox>
+                            </div>
+                            <div>
+                                <asp:Button ID="btnAgregar" runat="server" Text="+ A&ntilde;adir" CssClass="btn btn-primary" style="height: 38px; white-space: nowrap;" OnClick="btnAgregar_Click" />
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <asp:Label ID="lblStockDisponible" runat="server" CssClass="badge-stock" Text="Selecciona bodega y producto para ver stock"></asp:Label>
+                        </div>
+                    </div>
 
-                    <h2 style="margin-bottom: 16px;">3. Descuentos Comerciales</h2>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Descuento Global ($)</label>
-                            <asp:TextBox ID="txtDescuento" runat="server" CssClass="form-control" TextMode="Number" Text="0" AutoPostBack="true" OnTextChanged="txtDescuento_TextChanged"></asp:TextBox>
-                            <small class="text-muted">Rebaja comercial directa al valor de la venta.</small>
+                    <div class="pos-section-box" style="margin-bottom: 0;">
+                        <h2>3. Descuentos Comerciales</h2>
+                        <div class="pos-descuento-grid">
+                            <div>
+                                <label class="form-label">Descuento Global ($)</label>
+                                <asp:TextBox ID="txtDescuento" runat="server" CssClass="form-control" TextMode="Number" Text="0" AutoPostBack="true" OnTextChanged="txtDescuento_TextChanged"></asp:TextBox>
+                            </div>
+                            <div style="font-size: 12.5px; color: #736E67; padding-top: 18px;">
+                                Rebaja comercial directa aplicada sobre el subtotal bruto antes de emitir el documento.
+                            </div>
                         </div>
                     </div>
                 </section>
 
                 <!-- TARJETA DERECHA: CARRITO Y TOTALES -->
-                <section class="card-dermocosmetica">
-                    <h2 style="margin-bottom: 6px;">Detalle de la Venta</h2>
-                    <p class="compras-nota" style="margin-bottom: 16px;">Productos agregados a la transacción actual (Descuento FEFO automático)</p>
-                    
-                    <div class="table-responsive">
-                        <asp:GridView ID="gvCarrito" runat="server" CssClass="table table-hover" AutoGenerateColumns="False" GridLines="None" OnRowCommand="gvCarrito_RowCommand" EmptyDataText="Aún no hay productos en el carrito.">
-                            <Columns>
-                                <asp:BoundField DataField="Nombre" HeaderText="Producto / SKU" />
-                                <asp:BoundField DataField="Precio" HeaderText="Precio" DataFormatString="${0:N0}" />
-                                <asp:BoundField DataField="Cantidad" HeaderText="Cant." />
-                                <asp:BoundField DataField="Subtotal" HeaderText="Subtotal" DataFormatString="${0:N0}" />
-                                <asp:TemplateField>
-                                    <ItemTemplate>
-                                        <asp:Button ID="btnQuitar" runat="server" CommandName="Quitar" CommandArgument='<%# Container.DataItemIndex %>' Text="Quitar" CssClass="btn btn-outline-danger btn-sm" />
-                                    </ItemTemplate>
-                                </asp:TemplateField>
-                            </Columns>
-                        </asp:GridView>
+                <section class="card-dermocosmetica" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <h2 style="margin-bottom: 4px;">Detalle de la Venta</h2>
+                        <p class="compras-nota" style="margin-bottom: 14px;">Productos agregados a la transacci&oacute;n actual (descuento FEFO autom&aacute;tico)</p>
+
+                        <div class="table-responsive" style="border: 1px solid #ece7e1; border-radius: 12px;">
+                            <asp:GridView ID="gvCarrito" runat="server" CssClass="table table-hover mb-0" AutoGenerateColumns="False" GridLines="None" OnRowCommand="gvCarrito_RowCommand" EmptyDataText="A&uacute;n no hay productos en el carrito.">
+                                <Columns>
+                                    <asp:BoundField DataField="Nombre" HeaderText="Producto / SKU" />
+                                    <asp:BoundField DataField="Precio" HeaderText="Precio" DataFormatString="${0:N0}" HeaderStyle-CssClass="text-end" ItemStyle-CssClass="text-end text-nowrap" />
+                                    <asp:BoundField DataField="Cantidad" HeaderText="Cant." HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center" />
+                                    <asp:BoundField DataField="Subtotal" HeaderText="Subtotal" DataFormatString="${0:N0}" HeaderStyle-CssClass="text-end" ItemStyle-CssClass="text-end text-nowrap fw-semibold" />
+                                    <asp:TemplateField>
+                                        <ItemTemplate>
+                                            <asp:Button ID="btnQuitar" runat="server" CommandName="Quitar" CommandArgument='<%# Container.DataItemIndex %>' Text="Quitar" CssClass="btn btn-outline-danger btn-sm" />
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                </Columns>
+                            </asp:GridView>
+                        </div>
                     </div>
 
-                    <div style="margin-top: 24px; border-top: 1px solid #e5e0d8; padding-top: 16px;">
-                        <div class="resumen-totales-fila">
-                            <span>Subtotal Bruto:</span>
-                            <asp:Label ID="lblSubtotalBruto" runat="server" Text="$0"></asp:Label>
-                        </div>
-                        <div class="resumen-totales-fila">
-                            <span>Descuento Aplicado:</span>
-                            <asp:Label ID="lblDescuento" runat="server" Text="-$0"></asp:Label>
-                        </div>
-                        <div class="resumen-totales-fila">
-                            <span>Monto Neto (Base Imponible):</span>
-                            <asp:Label ID="lblNeto" runat="server" Text="$0"></asp:Label>
-                        </div>
-                        <div class="resumen-totales-fila">
-                            <span>IVA Débito Fiscal (19%):</span>
-                            <asp:Label ID="lblIva" runat="server" Text="$0"></asp:Label>
-                        </div>
-                        <div class="resumen-totales-fila destacado">
-                            <span>Total a Facturar:</span>
-                            <asp:Label ID="lblTotal" runat="server" Text="$0"></asp:Label>
+                    <div style="margin-top: 18px;">
+                        <div class="pos-totales-box">
+                            <div class="resumen-totales-fila">
+                                <span>Subtotal Bruto:</span>
+                                <asp:Label ID="lblSubtotalBruto" runat="server" Text="$0"></asp:Label>
+                            </div>
+                            <div class="resumen-totales-fila">
+                                <span>Descuento Aplicado:</span>
+                                <asp:Label ID="lblDescuento" runat="server" Text="-$0"></asp:Label>
+                            </div>
+                            <div class="resumen-totales-fila">
+                                <span>Monto Neto (Base Imponible):</span>
+                                <asp:Label ID="lblNeto" runat="server" Text="$0"></asp:Label>
+                            </div>
+                            <div class="resumen-totales-fila">
+                                <span>IVA D&eacute;bito Fiscal (19%):</span>
+                                <asp:Label ID="lblIva" runat="server" Text="$0"></asp:Label>
+                            </div>
+                            <div class="resumen-totales-fila destacado">
+                                <span>Total a Facturar:</span>
+                                <asp:Label ID="lblTotal" runat="server" Text="$0"></asp:Label>
+                            </div>
                         </div>
 
-                        <div class="text-end mt-4">
-                            <asp:Button ID="btnFinalizarVenta" runat="server" Text="Emitir Documento de Venta" CssClass="btn btn-primary w-100" OnClick="btnFinalizarVenta_Click" />
+                        <div class="mt-3">
+                            <asp:Button ID="btnFinalizarVenta" runat="server" Text="Emitir Documento de Venta" CssClass="btn btn-primary w-100" style="padding: 11px 16px;" OnClick="btnFinalizarVenta_Click" />
                         </div>
-                        <asp:Label ID="lblMensajeVenta" runat="server" style="display:block; margin-top:12px; font-weight:600;"></asp:Label>
+                        <asp:Label ID="lblMensajeVenta" runat="server" style="display:block; margin-top:10px; font-weight:600;"></asp:Label>
                     </div>
                 </section>
             </div>

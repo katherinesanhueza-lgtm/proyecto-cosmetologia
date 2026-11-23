@@ -7,7 +7,7 @@ using System.Web.UI.WebControls;
 
 namespace trabajo_ing_software
 {
-    public partial class OrdenesCompra : System.Web.UI.Page
+    public partial class OrdenesCompra : PaginaCompras
     {
         private string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=;";
 
@@ -87,7 +87,7 @@ namespace trabajo_ing_software
             ddlFiltroLaboratorio.Items.Add(new ListItem("Todos los Laboratorios", ""));
 
             string query = "SELECT IdLaboratorio, RazonSocial FROM Laboratorio WHERE Activo = 1 ORDER BY RazonSocial ASC";
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
@@ -109,7 +109,7 @@ namespace trabajo_ing_software
             ddlLaboratorio.Items.Add(new ListItem("-- Seleccione un Laboratorio --", ""));
 
             string query = "SELECT IdLaboratorio, RazonSocial FROM Laboratorio WHERE Activo = 1 ORDER BY RazonSocial ASC";
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
@@ -136,7 +136,7 @@ namespace trabajo_ing_software
                              WHERE v.Activo = 1 AND p.Activo = 1
                              ORDER BY p.Nombre, v.NombreVariante";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
@@ -157,7 +157,7 @@ namespace trabajo_ing_software
         private string GenerarSiguienteNumeroOC()
         {
             string query = "SELECT IFNULL(MAX(IdOC), 0) + 1 AS SiguienteId FROM OrdenCompra";
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
@@ -177,7 +177,7 @@ namespace trabajo_ing_software
                 int idLab = Convert.ToInt32(ddlLaboratorio.SelectedValue);
                 string query = "SELECT Rut, DiasPago, Contacto, Pais FROM Laboratorio WHERE IdLaboratorio = @IdLab";
 
-                using (MySqlConnection con = new MySqlConnection(connectionString))
+                using (MySqlConnection con = ConexionErp.Crear(connectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, con))
                     {
@@ -219,7 +219,7 @@ namespace trabajo_ing_software
                 int idVariante = Convert.ToInt32(ddlProductoVariante.SelectedValue);
                 string query = "SELECT IFNULL(CostoPromedio, 0) AS Costo FROM VarianteProducto WHERE IdVariante = @IdVar";
 
-                using (MySqlConnection con = new MySqlConnection(connectionString))
+                using (MySqlConnection con = ConexionErp.Crear(connectionString))
                 {
                     using (MySqlCommand cmd = new MySqlCommand(query, con))
                     {
@@ -272,7 +272,7 @@ namespace trabajo_ing_software
                              INNER JOIN Producto p ON v.IdProducto = p.IdProducto
                              WHERE v.IdVariante = @IdVar";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
@@ -365,7 +365,8 @@ namespace trabajo_ing_software
 
         #region Guardar Orden de Compra (Transaccional ADO.NET)
         protected void btnGuardarOC_Click(object sender, EventArgs e)
-        {
+        {
+            ExigirEscrituraCompras();
             if (string.IsNullOrEmpty(ddlLaboratorio.SelectedValue))
             {
                 MostrarMensaje("Debe seleccionar un Laboratorio / Proveedor.", false);
@@ -411,7 +412,7 @@ namespace trabajo_ing_software
 
             int idUsuario = Convert.ToInt32(Session["IdUsuario"]);
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 con.Open();
                 using (MySqlTransaction trans = con.BeginTransaction())
@@ -470,7 +471,7 @@ namespace trabajo_ing_software
                     catch (Exception ex)
                     {
                         trans.Rollback();
-                        MostrarMensaje("Error al registrar la orden de compra: " + ex.Message, false);
+                        MostrarMensaje("Error al registrar la orden de compra: " + ConexionErp.MensajeError(ex), false);
                     }
                 }
             }
@@ -545,7 +546,7 @@ namespace trabajo_ing_software
 
             query += " ORDER BY oc.IdOC DESC";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
@@ -576,7 +577,7 @@ namespace trabajo_ing_software
                                 IFNULL(SUM(Total), 0) AS TotalMonto
                              FROM OrdenCompra";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
@@ -624,8 +625,9 @@ namespace trabajo_ing_software
         }
 
         private void ActualizarEstadoOrden(int idOC, string nuevoEstado)
-        {
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+        {
+            ExigirEscrituraCompras();
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 con.Open();
                 using (MySqlTransaction trans = con.BeginTransaction())
@@ -649,7 +651,7 @@ namespace trabajo_ing_software
                     catch (Exception ex)
                     {
                         trans.Rollback();
-                        MostrarMensaje("Error al actualizar estado: " + ex.Message, false);
+                        MostrarMensaje("Error al actualizar estado: " + ConexionErp.MensajeError(ex), false);
                     }
                 }
             }
@@ -662,7 +664,7 @@ namespace trabajo_ing_software
                                 INNER JOIN Laboratorio l ON oc.IdLaboratorio = l.IdLaboratorio
                                 WHERE oc.IdOC = @IdOC";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 using (MySqlCommand cmd = new MySqlCommand(queryCab, con))
                 {
@@ -712,7 +714,7 @@ namespace trabajo_ing_software
                                 INNER JOIN Producto p ON v.IdProducto = p.IdProducto
                                 WHERE doc.IdOC = @IdOC";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 using (MySqlCommand cmd = new MySqlCommand(queryDet, con))
                 {
@@ -818,6 +820,7 @@ namespace trabajo_ing_software
 
         protected void btnGuardarConfig_Click(object sender, EventArgs e)
         {
+            ExigirEscrituraCompras();
             string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
             if (!rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase) && !rolUsuario.Equals("Contador", StringComparison.OrdinalIgnoreCase))
             {
@@ -839,7 +842,7 @@ namespace trabajo_ing_software
                 tasaDecimal = tasaDecimal / 100m;
             }
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 con.Open();
                 string sql = @"

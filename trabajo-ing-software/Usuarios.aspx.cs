@@ -83,7 +83,7 @@ namespace trabajo_ing_software
             }
             query += " ORDER BY IdUsuario DESC";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
@@ -137,7 +137,7 @@ namespace trabajo_ing_software
             // ¿Estamos creando o editando?
             bool esEdicion = !string.IsNullOrEmpty(hfIdUsuario.Value);
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 string query = "";
 
@@ -181,7 +181,7 @@ namespace trabajo_ing_software
 
                     if (!string.IsNullOrEmpty(password))
                     {
-                        cmd.Parameters.AddWithValue("@Password", password);
+                        cmd.Parameters.AddWithValue("@Password", ClaveUsuario.Crear(password));
                     }
 
                     if (esEdicion)
@@ -194,15 +194,23 @@ namespace trabajo_ing_software
                         con.Open();
                         cmd.ExecuteNonQuery();
 
+                        if (esEdicion && Session["IdUsuario"] != null &&
+                            string.Equals(hfIdUsuario.Value, Session["IdUsuario"].ToString(), StringComparison.Ordinal))
+                        {
+                            Session["NombreUsuario"] = nombre;
+                            Session["RolUsuario"] = rol;
+                            lblBienvenida.Text = nombre;
+                        }
+
                         lblMensaje.Text = esEdicion ? "Usuario modificado con éxito." : "Usuario creado con éxito.";
                         lblMensaje.ForeColor = System.Drawing.Color.Green;
 
                         LimpiarFormulario();
-                        CargarUsuarios();
+                        CargarUsuarios(txtBuscarUsuario != null ? txtBuscarUsuario.Text.Trim() : "");
                     }
                     catch (MySqlException ex)
                     {
-                        lblMensaje.Text = (ex.Number == 1062) ? "Ya existe un usuario con ese correo." : "Error: " + ex.Message;
+                        lblMensaje.Text = (ex.Number == 1062) ? "Ya existe un usuario con ese correo." : "Error: " + ConexionErp.MensajeError(ex);
                         lblMensaje.ForeColor = System.Drawing.Color.Red;
                     }
                 }
@@ -237,7 +245,7 @@ namespace trabajo_ing_software
         {
             string query = "SELECT IdUsuario, Nombre, Correo, Rol FROM Usuario WHERE IdUsuario = @Id";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
@@ -250,7 +258,11 @@ namespace trabajo_ing_software
                             hfIdUsuario.Value = reader["IdUsuario"].ToString();
                             txtNombre.Text = reader["Nombre"].ToString();
                             txtCorreo.Text = reader["Correo"].ToString();
-                            ddlRol.SelectedValue = reader["Rol"].ToString();
+                            string rolActual = Convert.ToString(reader["Rol"]);
+                            if (!string.IsNullOrEmpty(rolActual) && ddlRol.Items.FindByValue(rolActual) == null)
+                                ddlRol.Items.Add(new ListItem(rolActual, rolActual));
+                            if (ddlRol.Items.FindByValue(rolActual) != null)
+                                ddlRol.SelectedValue = rolActual;
                             txtPassword.Text = ""; // Por seguridad se deja en blanco
 
                             // Cambiar textos a modo edicion
@@ -267,7 +279,7 @@ namespace trabajo_ing_software
         private void CambiarEstadoUsuario(int idUsuario, bool nuevoEstado)
         {
             string query = "UPDATE Usuario SET Activo = @NuevoEstado WHERE IdUsuario = @IdUsuario";
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
@@ -292,7 +304,7 @@ namespace trabajo_ing_software
 
             string query = "DELETE FROM Usuario WHERE IdUsuario = @IdUsuario";
 
-            using (MySqlConnection con = new MySqlConnection(connectionString))
+            using (MySqlConnection con = ConexionErp.Crear(connectionString))
             {
                 using (MySqlCommand cmd = new MySqlCommand(query, con))
                 {
@@ -369,13 +381,19 @@ namespace trabajo_ing_software
 
             try
             {
-                using (MySqlConnection con = new MySqlConnection(connectionString))
+                using (MySqlConnection con = ConexionErp.Crear(connectionString))
                 {
                     con.Open();
                     string sql = @"
-                        UPDATE ConfiguracionGlobal SET Valor = @JefeCompras WHERE Clave = 'NombreJefeCompras';
-                        UPDATE ConfiguracionGlobal SET Valor = @JefeVentas WHERE Clave = 'NombreJefeVentas';
-                        UPDATE ConfiguracionGlobal SET Valor = @JefeInventario WHERE Clave = 'NombreJefeInventario';
+                        INSERT INTO ConfiguracionGlobal (Clave, Valor, Descripcion)
+                        VALUES ('NombreJefeCompras', @JefeCompras, 'Firma oficial Jefatura de Compras')
+                        ON DUPLICATE KEY UPDATE Valor = VALUES(Valor);
+                        INSERT INTO ConfiguracionGlobal (Clave, Valor, Descripcion)
+                        VALUES ('NombreJefeVentas', @JefeVentas, 'Firma oficial Jefatura de Ventas')
+                        ON DUPLICATE KEY UPDATE Valor = VALUES(Valor);
+                        INSERT INTO ConfiguracionGlobal (Clave, Valor, Descripcion)
+                        VALUES ('NombreJefeInventario', @JefeInventario, 'Firma oficial Jefatura de Inventario')
+                        ON DUPLICATE KEY UPDATE Valor = VALUES(Valor);
                         INSERT INTO ConfiguracionGlobal (Clave, Valor, Descripcion)
                         VALUES ('NombreContador', @NombreContador, 'Firma oficial Contabilidad y Comprobantes de Pago')
                         ON DUPLICATE KEY UPDATE Valor = VALUES(Valor);";
@@ -398,7 +416,7 @@ namespace trabajo_ing_software
             }
             catch (Exception ex)
             {
-                lblMensajeJefaturas.Text = "Error al guardar firmas: " + ex.Message;
+                lblMensajeJefaturas.Text = "Error al guardar firmas: " + ConexionErp.MensajeError(ex);
                 lblMensajeJefaturas.ForeColor = System.Drawing.Color.Red;
             }
         }

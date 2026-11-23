@@ -8,7 +8,7 @@ using System.Web.UI.WebControls;
 
 namespace trabajo_ing_software
 {
-    public partial class ReporteOrdenesCompra : System.Web.UI.Page
+    public partial class ReporteOrdenesCompra : PaginaCompras
     {
         private string connectionString = ConfigurationManager.ConnectionStrings["DefaultConnection"] != null ? ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString : "Server=localhost;Port=3306;Database=ERP_Dermocosmetica;Uid=root;Pwd=;";
 
@@ -234,35 +234,38 @@ namespace trabajo_ing_software
                         decimal tasa = ConfiguracionGlobal.TasaIva;
                         string pctStr = (tasa * 100m).ToString("0.#");
 
-                        StringBuilder sb = new StringBuilder();
-                        sb.AppendLine(string.Format("N° Orden;Proveedor;RUT;Fecha Emisión;Fecha Entrega;Estado;Ítems;Neto ($);IVA {0}% ($);Total ($)", pctStr));
+                        DataTable limpio = new DataTable();
+                        limpio.Columns.Add("N° OC", typeof(string));
+                        limpio.Columns.Add("Proveedor", typeof(string));
+                        limpio.Columns.Add("RUT", typeof(string));
+                        limpio.Columns.Add("Fecha Emisión", typeof(DateTime));
+                        limpio.Columns.Add("Fecha Entrega", typeof(string));
+                        limpio.Columns.Add("Estado", typeof(string));
+                        limpio.Columns.Add("Ítems", typeof(int));
+                        limpio.Columns.Add("Neto (CLP)", typeof(decimal));
+                        limpio.Columns.Add("IVA " + pctStr + "% (CLP)", typeof(decimal));
+                        limpio.Columns.Add("Total Compra (CLP)", typeof(decimal));
 
-                        foreach (DataRow dr in dt.Rows)
+                        foreach (DataRow r in dt.Rows)
                         {
-                            sb.AppendLine(string.Format("{0};\"{1}\";{2};{3:dd/MM/yyyy};{4:dd/MM/yyyy};{5};{6};{7};{8};{9}",
-                                dr["NumeroOC"],
-                                dr["RazonSocial"],
-                                dr["Rut"],
-                                dr["Fecha"],
-                                dr["FechaEsperada"],
-                                dr["Estado"],
-                                dr["ItemsTotales"],
-                                dr["Neto"],
-                                dr["Iva"],
-                                dr["Total"]
-                            ));
+                            string entrega = r["FechaEsperada"] != DBNull.Value
+                                ? Convert.ToDateTime(r["FechaEsperada"]).ToString("dd/MM/yyyy")
+                                : "";
+                            limpio.Rows.Add(
+                                Convert.ToString(r["NumeroOC"]),
+                                Convert.ToString(r["RazonSocial"]),
+                                Convert.ToString(r["Rut"]),
+                                Convert.ToDateTime(r["Fecha"]),
+                                entrega,
+                                Convert.ToString(r["Estado"]),
+                                Convert.ToInt32(r["ItemsTotales"]),
+                                Convert.ToDecimal(r["Neto"]),
+                                Convert.ToDecimal(r["Iva"]),
+                                Convert.ToDecimal(r["Total"])
+                            );
                         }
 
-                        Response.Clear();
-                        Response.Buffer = true;
-                        Response.AddHeader("content-disposition", "attachment;filename=Reporte_Estado_Ordenes_Compra.csv");
-                        Response.Charset = "utf-8";
-                        Response.ContentType = "text/csv";
-                        Response.ContentEncoding = Encoding.UTF8;
-                        Response.BinaryWrite(Encoding.UTF8.GetPreamble());
-                        Response.Output.Write(sb.ToString());
-                        Response.Flush();
-                        Response.End();
+                        ContabilidadExportacion.DescargarExcel(Response, limpio, "Reporte_Estado_Ordenes_Compra");
                     }
                 }
             }

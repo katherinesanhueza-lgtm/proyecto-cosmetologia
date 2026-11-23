@@ -176,36 +176,34 @@ namespace trabajo_ing_software
 
         protected void btnExportarExcel_Click(object sender, EventArgs e)
         {
-            DataTable dt = ConsultarProyeccionSQL();
+            DataTable raw = ConsultarProyeccionSQL();
+            DataTable limpio = new DataTable();
+            limpio.Columns.Add("Laboratorio Proveedor", typeof(string));
+            limpio.Columns.Add("RUT", typeof(string));
+            limpio.Columns.Add("Plazo Crédito (Días)", typeof(int));
+            limpio.Columns.Add("Documentos Pendientes", typeof(int));
+            limpio.Columns.Add("Deuda Vencida (CLP)", typeof(decimal));
+            limpio.Columns.Add("A Pagar 30 Días (CLP)", typeof(decimal));
+            limpio.Columns.Add("A Pagar 60 Días (CLP)", typeof(decimal));
+            limpio.Columns.Add("A Pagar 90+ Días (CLP)", typeof(decimal));
+            limpio.Columns.Add("Total Pendiente (CLP)", typeof(decimal));
 
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine("Laboratorio;RUT;Plazo Pago (días);Documentos;Deuda Vencida ($);A Pagar 30 Días ($);A Pagar 60 Días ($);90+ Días ($);Total Pendiente ($)");
-
-            foreach (DataRow dr in dt.Rows)
+            foreach (DataRow r in raw.Rows)
             {
-                sb.AppendLine(string.Format("\"{0}\";{1};{2};{3};{4};{5};{6};{7};{8}",
-                    dr["Laboratorio"],
-                    dr["Rut"],
-                    dr["DiasPago"],
-                    dr["CuentasPendientes"],
-                    dr["DeudaVencida"],
-                    dr["Pagar30Dias"],
-                    dr["Pagar60Dias"],
-                    dr["Pagar90MasDias"],
-                    dr["TotalPendiente"]
-                ));
+                limpio.Rows.Add(
+                    Convert.ToString(r["Laboratorio"]),
+                    Convert.ToString(r["Rut"]),
+                    Convert.ToInt32(r["DiasPago"]),
+                    Convert.ToInt32(r["CuentasPendientes"]),
+                    Convert.ToDecimal(r["DeudaVencida"]),
+                    Convert.ToDecimal(r["Pagar30Dias"]),
+                    Convert.ToDecimal(r["Pagar60Dias"]),
+                    Convert.ToDecimal(r["Pagar90MasDias"]),
+                    Convert.ToDecimal(r["TotalPendiente"])
+                );
             }
 
-            Response.Clear();
-            Response.Buffer = true;
-            Response.AddHeader("content-disposition", "attachment;filename=Reporte_Flujo_Caja_Laboratorios.csv");
-            Response.Charset = "utf-8";
-            Response.ContentType = "text/csv";
-            Response.ContentEncoding = Encoding.UTF8;
-            Response.BinaryWrite(Encoding.UTF8.GetPreamble());
-            Response.Output.Write(sb.ToString());
-            Response.Flush();
-            Response.End();
+            ContabilidadExportacion.DescargarExcel(Response, limpio, "Reporte_Flujo_Caja_Laboratorios");
         }
 
         protected void btnLogout_Click(object sender, EventArgs e)

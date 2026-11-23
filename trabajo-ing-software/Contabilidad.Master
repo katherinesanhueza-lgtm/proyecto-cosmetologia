@@ -2,6 +2,7 @@
 <script runat="server">
     private static readonly string[][] VistasCompras = {
         new[] { "Compras", "Resumen de Compras", "M18 20V10 M12 20V4 M6 20v-6", "Compras.aspx" },
+        new[] { "Marcas", "Marcas", "M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z M7 7h.01", "Marcas.aspx" },
         new[] { "Laboratorios", "Laboratorios y proveedores", "M4 21h16 M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16 M10 9h4 M10 13h4 M10 21v-4h4v4", "Laboratorios.aspx" },
         new[] { "CotizacionesImportacion", "Cotizaciones de importación", "M12 2a10 10 0 1 0 0 20 10 10 0 1 0 0-20z M2 12h20 M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z", "CotizacionesImportacion.aspx" },
         new[] { "OrdenesCompra", "Órdenes de compra", "M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2 M9 3h6v4H9z M9 12h6 M9 16h4", "OrdenesCompra.aspx" },
@@ -32,8 +33,10 @@
 
     private static readonly string[][] VistasAdmin = {
         new[] { "Usuarios", "Gestión de usuarios", "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2 M12 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0-8 0", "Usuarios.aspx" },
+        new[] { "Auditoria", "Auditoría", "M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2 M9 3h6v4H9z M9 14l2 2 4-4", "Auditoria.aspx" },
         new[] { "Accesos", "Asignación de accesos", "M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4", "Accesos.aspx" },
-        new[] { "Perfiles", "Perfiles y roles", "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z", "Perfiles.aspx" }
+        new[] { "Perfiles", "Perfiles y roles", "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z", "Perfiles.aspx" },
+        new[] { "Privacidad", "Privacidad y datos", "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z M9 12l2 2 4-4", "Privacidad.aspx" }
     };
 
     protected bool EsInventario => PaginaActual == "Inventario" || PaginaActual == "Gestion" || PaginaActual == "ReporteInventario";
@@ -104,6 +107,36 @@
                 || Array.Exists(ReportesCompras, r => r == PaginaActual);
         }
     }
+
+    protected override void OnPreRender(EventArgs e)
+    {
+        base.OnPreRender(e);
+        if (Session["IdUsuario"] != null && int.TryParse(Convert.ToString(Session["IdUsuario"]), out int idUsr) && idUsr > 0)
+        {
+            try
+            {
+                var entry = System.Configuration.ConfigurationManager.ConnectionStrings["DefaultConnection"];
+                if (entry != null)
+                {
+                    using (var con = new MySql.Data.MySqlClient.MySqlConnection(entry.ConnectionString))
+                    using (var cmd = new MySql.Data.MySqlClient.MySqlCommand("SELECT Nombre, Rol FROM usuario WHERE IdUsuario=@id LIMIT 1", con))
+                    {
+                        cmd.Parameters.AddWithValue("@id", idUsr);
+                        con.Open();
+                        using (var r = cmd.ExecuteReader())
+                        {
+                            if (r.Read())
+                            {
+                                Session["NombreUsuario"] = Convert.ToString(r["Nombre"]);
+                                Session["RolUsuario"] = Convert.ToString(r["Rol"]);
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
+        }
+    }
 </script>
 <!DOCTYPE html>
 <html lang="es">
@@ -114,7 +147,7 @@
     <link href="~/Content/bootstrap.min.css" rel="stylesheet" runat="server" />
     <link href="<%: ResolveUrl("~/Content/Estilos.css?v=2") %>" rel="stylesheet" />
     <link href="<%: ResolveUrl("~/Content/ComprasResumen.css?v=4") %>" rel="stylesheet" />
-    <link href="<%: ResolveUrl("~/Content/Contabilidad.css?v=9") %>" rel="stylesheet" />
+    <link href="<%: ResolveUrl("~/Content/Contabilidad.css?v=15") %>" rel="stylesheet" />
     <asp:ContentPlaceHolder ID="EstilosPagina" runat="server" />
 </head>
 <body>
@@ -156,6 +189,10 @@
                         }
                         foreach (var modulo in modulosLista)
                         {
+                            string rol = Convert.ToString(Session["RolUsuario"]);
+                            if (!EsRolAdmin && ((modulo[0]=="Compras" && rol!="Comprador" && rol!="Contador") ||
+                                (modulo[0]=="Contabilidad" && rol!="Contador") || (modulo[0]=="Ventas" && rol=="Comprador"))) continue;
+                            if (modulo[0]=="Ventas" && rol=="Bodeguero") modulo[1]="Despachos.aspx";
                             bool activo = NombreModulo == modulo[0];
                     %>
                     <a class="menu-item<%: activo ? " principal-activo" : "" %>"
@@ -210,6 +247,8 @@
                             new[] { "resultados", "Estado de resultados", "Contabilidad.aspx?vista=resultados", "M3 3v18h18 M19 9l-5 5-4-4-3 3" },
                             new[] { "ReporteFlujoCaja", "Flujo de caja (BI)", "ReporteFlujoCaja.aspx", "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8 M16 17H8" },
                             new[] { "pagos", "Proyección de pagos", "Contabilidad.aspx?vista=pagos", "M12 1v22 M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" },
+                            new[] { "tesoreria", "Registrar cobros", "Contabilidad.aspx?vista=tesoreria", "M22 11.08V12a10 10 0 1 1-5.93-9.14 M22 4L12 14.01l-3-3" },
+                            new[] { "iva", "IVA por período", "Contabilidad.aspx?vista=iva", "M19 5L5 19 M6.5 6.5m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0 M17.5 17.5m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 1 0-5 0" },
                             new[] { "cobros", "Antigüedad de saldos", "Contabilidad.aspx?vista=cobros", "M12 2a10 10 0 1 0 0 20 10 10 0 1 0 0-20z M12 6v6l4 2" },
                             new[] { "perdidas", "Pérdidas por mermas", "Contabilidad.aspx?vista=perdidas", "M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z M12 9v4 M12 17h.01" },
                             new[] { "inventario", "Inventario valorizado", "Contabilidad.aspx?vista=inventario", "M3 4h18v5H3z M5 9v11h14V9 M10 13h4" }
@@ -227,7 +266,7 @@
                 </nav>
                 <div class="sidebar-footer">
                     <span>Dermo ERP</span>
-                    <small>Sistema de Gestión</small>
+                    <small><a href="<%: ResolveUrl("~/Privacidad.aspx") %>" style="color: inherit; text-decoration: none;">Privacidad y datos</a></small>
                 </div>
             </aside>
             <main class="erp-contenido">
