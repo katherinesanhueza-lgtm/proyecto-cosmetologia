@@ -41,14 +41,24 @@
             </div>
         </div>
 
-        <div class="card-dermocosmetica">
-            <h2 style="font-size: 18px; margin-bottom: 14px;">Perfiles Registrados</h2>
+        <div class="table-dermo-container">
+            <div class="dermo-table-headbar">
+                <div class="dermo-table-headbar-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7A5E47" stroke-width="2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    <h2>Perfiles Registrados</h2>
+                </div>
+                <span class="dermo-pill-ok">Roles activos</span>
+            </div>
             <div class="table-responsive">
                 <asp:GridView ID="gvPerfiles" runat="server" CssClass="table table-hover align-middle" GridLines="None" AutoGenerateColumns="False" DataKeyNames="IdRol" OnRowDeleting="gvPerfiles_RowDeleting">
                     <Columns>
-                        <asp:BoundField DataField="IdRol" HeaderText="ID" ReadOnly="True" />
-                        <asp:BoundField DataField="Nombre" HeaderText="Nombre" />
-                        <asp:CommandField ShowDeleteButton="True" DeleteText="Eliminar" ControlStyle-CssClass="btn btn-outline-danger btn-sm" />
+                        <asp:BoundField DataField="IdRol" HeaderText="ID" ReadOnly="True" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center" />
+                        <asp:TemplateField HeaderText="Nombre del Perfil">
+                            <ItemTemplate>
+                                <span class="dermo-pill-neutral"><%# Eval("Nombre") %></span>
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                        <asp:CommandField ShowDeleteButton="True" DeleteText="Eliminar" HeaderText="Acci&oacute;n" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center" ControlStyle-CssClass="btn btn-outline-danger btn-sm" />
                     </Columns>
                 </asp:GridView>
             </div>

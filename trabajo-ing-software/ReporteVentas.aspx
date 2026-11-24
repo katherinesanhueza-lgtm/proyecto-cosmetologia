@@ -11,18 +11,28 @@
 
         .filter-card {
             background-color: var(--color-blanco);
-            border: 1px solid var(--color-borde-suave);
-            border-radius: 20px;
-            padding: 20px 24px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            border: 1px solid var(--color-primario);
+            border-radius: 16px;
+            padding: 16px 20px !important;
+            margin-bottom: 22px;
+            box-shadow: 0 3px 12px rgba(50, 38, 27, 0.04);
         }
 
         .filter-grid-5col {
-            display: grid;
-            grid-template-columns: 180px 180px 1.5fr 180px auto;
-            gap: 14px;
+            display: grid !important;
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+            gap: 12px 16px;
             align-items: end;
+        }
+        .filter-grid-5col > .compras-acciones {
+            grid-column: 2 / -1 !important;
+            display: flex !important;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .filter-grid-5col > .compras-acciones .btn {
+            height: 38px;
+            min-width: 140px;
         }
 
         .kpi-grid-4col {
@@ -74,10 +84,10 @@
             margin-bottom: 25px;
         }
 
-        .badge-bol { background-color: #EBF3FA; color: #2980B9; padding: 4px 10px; border-radius: 15px; font-weight: 600; font-size: 11px; display: inline-block; }
-        .badge-fac { background-color: #E8F8F0; color: #27AE60; padding: 4px 10px; border-radius: 15px; font-weight: 600; font-size: 11px; display: inline-block; }
-        .badge-nc { background-color: #FDEDEC; color: #C0392B; padding: 4px 10px; border-radius: 15px; font-weight: 600; font-size: 11px; display: inline-block; }
-        .badge-warn { background-color: #FEF9E7; color: #B7950B; padding: 4px 10px; border-radius: 15px; font-weight: 600; font-size: 11px; display: inline-block; }
+        .badge-bol { background-color: #EBF3FA; color: #2980B9; padding: 4px 10px; border-radius: 15px; font-weight: 600; font-size: 11px; display: inline-block; white-space: nowrap; }
+        .badge-fac { background-color: #E8F8F0; color: #27AE60; padding: 4px 10px; border-radius: 15px; font-weight: 600; font-size: 11px; display: inline-block; white-space: nowrap; }
+        .badge-nc { background-color: #FDEDEC; color: #C0392B; padding: 4px 10px; border-radius: 15px; font-weight: 600; font-size: 11px; display: inline-block; white-space: nowrap; }
+        .badge-warn { background-color: #FEF9E7; color: #B7950B; padding: 4px 10px; border-radius: 15px; font-weight: 600; font-size: 11px; display: inline-block; white-space: nowrap; }
 
         .share-bar-wrap {
             width: 100%;
@@ -100,12 +110,21 @@
             font-size: 12.5px;
         }
 
-        @media (max-width: 1024px) {
+        @media (max-width: 960px) {
             .filter-grid-5col {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            }
+            .filter-grid-5col > .compras-acciones {
+                grid-column: 1 / -1 !important;
+                justify-content: flex-start;
             }
             .kpi-grid-4col {
                 grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 600px) {
+            .filter-grid-5col {
+                grid-template-columns: 1fr !important;
             }
         }
     </style>

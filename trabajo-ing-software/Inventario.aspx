@@ -170,24 +170,39 @@
                     </asp:Label>
 
                     <!-- TABLA DE INVENTARIO -->
-                    <div class="table-responsive">
-                        <asp:GridView
-                            ID="gvInventario"
-                            runat="server"
-                            AutoGenerateColumns="False"
-                            CssClass="table table-hover"
-                            GridLines="None"
-                            EmptyDataText="No se encontraron productos.">
-                            <Columns>
-                                <asp:BoundField DataField="Producto" HeaderText="Producto" />
-                                <asp:BoundField DataField="SKU" HeaderText="SKU" />
-                                <asp:BoundField DataField="Presentacion" HeaderText="Presentación" />
-                                <asp:BoundField DataField="Bodega" HeaderText="Bodega" />
-                                <asp:BoundField DataField="StockActual" HeaderText="Stock actual" />
-                                <asp:BoundField DataField="StockMinimo" HeaderText="Stock mínimo" />
-                                <asp:BoundField DataField="EstadoStock" HeaderText="Estado" />
-                            </Columns>
-                        </asp:GridView>
+                    <div class="table-dermo-container" style="box-shadow: none;">
+                        <div class="dermo-table-headbar">
+                            <div class="dermo-table-headbar-title">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7A5E47" stroke-width="2" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                                <h3>Detalle de Existencias por Bodega</h3>
+                            </div>
+                            <span class="dermo-pill-ok">Control de stock</span>
+                        </div>
+                        <div class="table-responsive">
+                            <asp:GridView
+                                ID="gvInventario"
+                                runat="server"
+                                AutoGenerateColumns="False"
+                                CssClass="table table-hover align-middle"
+                                GridLines="None"
+                                EmptyDataText="No se encontraron productos.">
+                                <Columns>
+                                    <asp:BoundField DataField="Producto" HeaderText="Producto" ItemStyle-CssClass="fw-semibold" />
+                                    <asp:BoundField DataField="SKU" HeaderText="SKU" ItemStyle-CssClass="text-nowrap" />
+                                    <asp:BoundField DataField="Presentacion" HeaderText="Presentaci&oacute;n" HtmlEncode="false" />
+                                    <asp:BoundField DataField="Bodega" HeaderText="Bodega" />
+                                    <asp:BoundField DataField="StockActual" HeaderText="Stock actual" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center fw-semibold" />
+                                    <asp:BoundField DataField="StockMinimo" HeaderText="Stock m&iacute;nimo" HtmlEncode="false" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center" />
+                                    <asp:TemplateField HeaderText="Estado" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center">
+                                        <ItemTemplate>
+                                            <span class='<%# Convert.ToString(Eval("EstadoStock")) == "Sin stock" ? "dermo-pill-danger" : Convert.ToString(Eval("EstadoStock")) == "Stock bajo" ? "dermo-pill-warn" : "dermo-pill-ok" %>'>
+                                                <%#: Eval("EstadoStock") %>
+                                            </span>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                </Columns>
+                            </asp:GridView>
+                        </div>
                     </div>
                 </div>
             </section>

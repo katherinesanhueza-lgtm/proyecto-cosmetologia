@@ -101,43 +101,32 @@
                     runat="server"
                     EnableViewState="false" />
 
-                <div class="table-responsive">
+                <div class="table-dermo-container" style="box-shadow: none;">
+                    <div class="table-responsive">
+                        <asp:GridView ID="gvReporte"
+                            runat="server"
+                            AutoGenerateColumns="False"
+                            CssClass="table table-hover align-middle"
+                            GridLines="None"
+                            EmptyDataText="No hay registros.">
 
-                    <asp:GridView ID="gvReporte"
-                        runat="server"
-                        AutoGenerateColumns="False"
-                        CssClass="table table-hover"
-                        GridLines="None"
-                        EmptyDataText="No hay registros.">
+                            <Columns>
+                                <asp:BoundField DataField="Producto" HeaderText="Producto" ItemStyle-CssClass="fw-semibold" />
+                                <asp:BoundField DataField="SKU" HeaderText="SKU" ItemStyle-CssClass="text-nowrap" />
+                                <asp:BoundField DataField="Bodega" HeaderText="Bodega" />
+                                <asp:BoundField DataField="StockActual" HeaderText="Stock actual" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center fw-semibold" />
+                                <asp:BoundField DataField="StockMinimo" HeaderText="Stock m&#237;nimo" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center" />
+                                <asp:TemplateField HeaderText="Estado" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center">
+                                    <ItemTemplate>
+                                        <span class='<%# Convert.ToString(Eval("EstadoStock")) == "Sin stock" ? "dermo-pill-danger" : Convert.ToString(Eval("EstadoStock")) == "Stock bajo" ? "dermo-pill-warn" : "dermo-pill-ok" %>'>
+                                            <%#: Eval("EstadoStock") %>
+                                        </span>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                            </Columns>
 
-                        <Columns>
-                            <asp:BoundField
-                                DataField="Producto"
-                                HeaderText="Producto" />
-
-                            <asp:BoundField
-                                DataField="SKU"
-                                HeaderText="SKU" />
-
-                            <asp:BoundField
-                                DataField="Bodega"
-                                HeaderText="Bodega" />
-
-                            <asp:BoundField
-                                DataField="StockActual"
-                                HeaderText="Stock actual" />
-
-                            <asp:BoundField
-                                DataField="StockMinimo"
-                                HeaderText="Stock m&#237;nimo" />
-
-                            <asp:BoundField
-                                DataField="EstadoStock"
-                                HeaderText="Estado" />
-                        </Columns>
-
-                    </asp:GridView>
-
+                        </asp:GridView>
+                    </div>
                 </div>
             </div>
 

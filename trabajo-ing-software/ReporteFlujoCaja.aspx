@@ -90,6 +90,9 @@
 
         @media (max-width: 1050px) {
             .kpi-row-4col { grid-template-columns: repeat(2, 1fr); }
+            .flujo-filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 600px) {
             .flujo-filter-grid { grid-template-columns: 1fr; }
         }
     </style>
@@ -156,7 +159,10 @@
                 </div>
                 <div>
                     <label class="form-label fw-bold">B&uacute;squeda por Nombre o RUT</label>
-                    <asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control" placeholder="Ej: L'Or&eacute;al, ISDIN o RUT..."></asp:TextBox>
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 12px; color: #736E67; pointer-events: none;" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <asp:TextBox ID="txtBuscar" runat="server" CssClass="form-control" style="padding-left: 36px;" placeholder="Ej: L'Or&eacute;al, ISDIN o RUT..."></asp:TextBox>
+                    </div>
                 </div>
                 <div>
                     <label class="form-label fw-bold">Enfoque de Tramo</label>
@@ -197,19 +203,20 @@
                 </div>
             </div>
 
-            <div class="table-responsive">
+            <div class="table-dermo-container" style="box-shadow: none;">
+                <div class="table-responsive">
                 <asp:GridView ID="gvFlujo" runat="server" AutoGenerateColumns="False" CssClass="table table-hover align-middle" GridLines="None" EmptyDataText="No existen saldos pendientes con proveedores para los filtros seleccionados.">
                     <Columns>
                         <asp:TemplateField HeaderText="Laboratorio Proveedor">
                             <ItemTemplate>
                                 <div style="font-weight: 600;"><%# Eval("Laboratorio") %></div>
-                                <div style="font-size: 10px; color: #777;"><%# Eval("Rut") %> &bull; Cr&eacute;dito <%# Eval("DiasPago") %> d.</div>
+                                <div style="font-size: 10.5px; color: #777;"><%# Eval("Rut") %> &bull; Cr&eacute;dito <%# Eval("DiasPago") %> d.</div>
                             </ItemTemplate>
                         </asp:TemplateField>
 
-                        <asp:BoundField DataField="CuentasPendientes" HeaderText="Docs." />
+                        <asp:BoundField DataField="CuentasPendientes" HeaderText="Docs." HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center fw-semibold" />
 
-                        <asp:TemplateField HeaderText="Deuda Vencida">
+                        <asp:TemplateField HeaderText="Deuda Vencida" HeaderStyle-CssClass="text-end" ItemStyle-CssClass="text-end text-nowrap">
                             <ItemTemplate>
                                 <span style='color: <%# Convert.ToDecimal(Eval("DeudaVencida")) > 0 ? "#C0392B; font-weight:700;" : "#777;" %>'>
                                     <%# string.Format("{0:C0}", Eval("DeudaVencida")) %>
@@ -217,7 +224,7 @@
                             </ItemTemplate>
                         </asp:TemplateField>
 
-                        <asp:TemplateField HeaderText="A Pagar 30 D&iacute;as">
+                        <asp:TemplateField HeaderText="A Pagar 30 D&iacute;as" HeaderStyle-CssClass="text-end" ItemStyle-CssClass="text-end text-nowrap">
                             <ItemTemplate>
                                 <span style='color: <%# Convert.ToDecimal(Eval("Pagar30Dias")) > 0 ? "#D35400; font-weight:700;" : "#777;" %>'>
                                     <%# string.Format("{0:C0}", Eval("Pagar30Dias")) %>
@@ -225,7 +232,7 @@
                             </ItemTemplate>
                         </asp:TemplateField>
 
-                        <asp:TemplateField HeaderText="A Pagar 60 D&iacute;as">
+                        <asp:TemplateField HeaderText="A Pagar 60 D&iacute;as" HeaderStyle-CssClass="text-end" ItemStyle-CssClass="text-end text-nowrap">
                             <ItemTemplate>
                                 <span style='color: <%# Convert.ToDecimal(Eval("Pagar60Dias")) > 0 ? "#2980B9; font-weight:700;" : "#777;" %>'>
                                     <%# string.Format("{0:C0}", Eval("Pagar60Dias")) %>
@@ -233,7 +240,7 @@
                             </ItemTemplate>
                         </asp:TemplateField>
 
-                        <asp:TemplateField HeaderText="90+ D&iacute;as">
+                        <asp:TemplateField HeaderText="90+ D&iacute;as" HeaderStyle-CssClass="text-end" ItemStyle-CssClass="text-end text-nowrap">
                             <ItemTemplate>
                                 <span style='color: <%# Convert.ToDecimal(Eval("Pagar90MasDias")) > 0 ? "#27AE60; font-weight:700;" : "#777;" %>'>
                                     <%# string.Format("{0:C0}", Eval("Pagar90MasDias")) %>
@@ -241,13 +248,15 @@
                             </ItemTemplate>
                         </asp:TemplateField>
 
-                        <asp:TemplateField HeaderText="Total Pendiente">
+                        <asp:TemplateField HeaderText="Total Pendiente" HeaderStyle-CssClass="text-end" ItemStyle-CssClass="text-end text-nowrap">
                             <ItemTemplate>
                                 <strong style="color: var(--color-acento);"><%# string.Format("{0:C0}", Eval("TotalPendiente")) %></strong>
                             </ItemTemplate>
                         </asp:TemplateField>
                     </Columns>
                 </asp:GridView>
+                </div>
+            </div>
             </div>
 
             <!-- PIE DE REPORTE -->

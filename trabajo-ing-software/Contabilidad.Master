@@ -147,7 +147,7 @@
     <link href="~/Content/bootstrap.min.css" rel="stylesheet" runat="server" />
     <link href="<%: ResolveUrl("~/Content/Estilos.css?v=2") %>" rel="stylesheet" />
     <link href="<%: ResolveUrl("~/Content/ComprasResumen.css?v=4") %>" rel="stylesheet" />
-    <link href="<%: ResolveUrl("~/Content/Contabilidad.css?v=17") %>" rel="stylesheet" />
+    <link href="<%: ResolveUrl("~/Content/Contabilidad.css?v=18") %>" rel="stylesheet" />
     <asp:ContentPlaceHolder ID="EstilosPagina" runat="server" />
 </head>
 <body>

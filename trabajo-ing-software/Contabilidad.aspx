@@ -86,15 +86,25 @@
                 </div>
             </header>
 
-            <section class="card-dermocosmetica">
-                <h2 style="margin-bottom: 14px;"><asp:Literal ID="Titulo" runat="server" Mode="Encode" /></h2>
-                <asp:Label ID="Mensaje" runat="server" EnableViewState="false" role="status" />
-                <div class="contabilidad-formulario" style="margin-top: 6px;">
-                    <asp:PlaceHolder ID="Formulario" runat="server" />
+            <section class="table-dermo-container">
+                <div class="dermo-table-headbar">
+                    <div class="dermo-table-headbar-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7A5E47" stroke-width="2" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                        <h2><asp:Literal ID="Titulo" runat="server" Mode="Encode" /></h2>
+                    </div>
+                    <span class="dermo-pill-neutral">Gesti&oacute;n contable</span>
                 </div>
-                <div class="table-responsive mt-4">
-                    <asp:GridView ID="Registros" runat="server" CssClass="table table-hover"
-                        GridLines="None" EmptyDataText="No hay registros para esta consulta." EnableViewState="false" />
+                <div style="padding: 18px 22px 22px 22px;">
+                    <asp:Label ID="Mensaje" runat="server" EnableViewState="false" role="status" />
+                    <div class="contabilidad-formulario">
+                        <asp:PlaceHolder ID="Formulario" runat="server" />
+                    </div>
+                    <div class="table-dermo-container mt-4" style="box-shadow: none;">
+                        <div class="table-responsive">
+                            <asp:GridView ID="Registros" runat="server" CssClass="table table-hover align-middle"
+                                GridLines="None" EmptyDataText="No hay registros para esta consulta." EnableViewState="false" />
+                        </div>
+                    </div>
                 </div>
             </section>
             <script>

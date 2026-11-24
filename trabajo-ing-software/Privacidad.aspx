@@ -139,32 +139,39 @@
             </section>
         </div>
 
-        <asp:Panel runat="server" ID="pnlArcoAdmin" CssClass="card-dermocosmetica" Visible="false">
-            <h2 style="font-size: 1.15rem; font-weight: 600; margin-bottom: 6px;">Gesti&oacute;n administrativa de derechos ARCO (Clientes)</h2>
-            <p class="compras-nota" style="margin-bottom: 16px;">Exporta la ficha personal en JSON (Derecho de Acceso) o anonimiza datos de contacto de clientes inactivos preservando la integridad tributaria (Derecho de Cancelaci&oacute;n). Cada acci&oacute;n queda registrada en Auditor&iacute;a.</p>
-
-            <asp:Label runat="server" ID="lblMensajeArco" Visible="false" />
+        <asp:Panel runat="server" ID="pnlArcoAdmin" CssClass="table-dermo-container" Visible="false">
+            <div class="dermo-table-headbar">
+                <div class="dermo-table-headbar-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7A5E47" stroke-width="2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="M9 12l2 2 4-4"></path></svg>
+                    <h2>Gesti&oacute;n Administrativa de Derechos ARCO (Clientes)</h2>
+                </div>
+                <span class="dermo-pill-info">Ley 19.628 / 21.719</span>
+            </div>
+            <div style="padding: 12px 22px 0 22px;">
+                <p class="compras-nota" style="margin-bottom: 12px;">Exporta la ficha personal en JSON (Derecho de Acceso) o anonimiza datos de contacto de clientes inactivos preservando la integridad tributaria (Derecho de Cancelaci&oacute;n). Cada acci&oacute;n queda registrada en Auditor&iacute;a.</p>
+                <asp:Label runat="server" ID="lblMensajeArco" Visible="false" />
+            </div>
 
             <div class="table-responsive">
                 <asp:GridView runat="server" ID="gvClientesPrivacidad" CssClass="table table-hover align-middle" GridLines="None"
                     AutoGenerateColumns="False" OnRowCommand="gvClientesPrivacidad_RowCommand"
                     EmptyDataText="No existen clientes registrados.">
                     <Columns>
-                        <asp:BoundField DataField="IdCliente" HeaderText="ID" />
-                        <asp:BoundField DataField="Rut" HeaderText="RUT" />
-                        <asp:BoundField DataField="Nombre" HeaderText="Titular / Cliente" />
+                        <asp:BoundField DataField="IdCliente" HeaderText="ID" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center" />
+                        <asp:BoundField DataField="Rut" HeaderText="RUT" ItemStyle-CssClass="text-nowrap" />
+                        <asp:BoundField DataField="Nombre" HeaderText="Titular / Cliente" ItemStyle-CssClass="fw-semibold" />
                         <asp:BoundField DataField="Correo" HeaderText="Correo" />
-                        <asp:BoundField DataField="Telefono" HeaderText="Tel&eacute;fono" />
-                        <asp:TemplateField HeaderText="Estado">
+                        <asp:BoundField DataField="Telefono" HeaderText="Tel&eacute;fono" ItemStyle-CssClass="text-nowrap" />
+                        <asp:TemplateField HeaderText="Estado" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center">
                             <ItemTemplate>
                                 <span class='<%# Convert.ToInt32(Eval("Activo")) == 1 ? "badge-estado-activo" : "badge-estado-inactivo" %>'>
                                     <%#: Eval("Estado") %>
                                 </span>
                             </ItemTemplate>
                         </asp:TemplateField>
-                        <asp:TemplateField HeaderText="Acciones ARCO">
+                        <asp:TemplateField HeaderText="Acciones ARCO" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center text-nowrap">
                             <ItemTemplate>
-                                <div class="d-flex gap-2 flex-wrap">
+                                <div class="d-inline-flex gap-2 flex-nowrap">
                                     <asp:Button runat="server" Text="Exportar JSON" CommandName="ExportarJson"
                                         CommandArgument='<%# Eval("IdCliente") %>' CssClass="btn btn-outline-secondary btn-sm" />
                                     <asp:Button runat="server" Text="Anonimizar" CommandName="Anonimizar"
