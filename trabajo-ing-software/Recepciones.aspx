@@ -106,6 +106,48 @@
                 grid-column: 1 / -1;
             }
         }
+        @media print {
+            @page { size: A4 landscape; margin: 10mm; }
+            body.imprimiendo-comprobante-entrada * { visibility: hidden !important; }
+            body.imprimiendo-comprobante-entrada #pnlModalDetalle,
+            body.imprimiendo-comprobante-entrada #pnlModalDetalle * { visibility: visible !important; }
+            body.imprimiendo-comprobante-entrada #pnlModalDetalle {
+                position: static !important;
+                top: auto !important;
+                left: auto !important;
+                display: block !important;
+                width: 100% !important;
+                min-height: 0 !important;
+                height: auto !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: visible !important;
+                background: #fff !important;
+                backdrop-filter: none !important;
+                animation: none !important;
+            }
+            body.imprimiendo-comprobante-entrada #pnlModalDetalle .modal-content-card {
+                width: 100% !important;
+                max-width: none !important;
+                max-height: none !important;
+                height: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: visible !important;
+                border: 0 !important;
+                box-shadow: none !important;
+                animation: none !important;
+            }
+            body.imprimiendo-comprobante-entrada #pnlModalDetalle .modal-close-x,
+            body.imprimiendo-comprobante-entrada #pnlModalDetalle .modal-footer-dermo,
+            body.imprimiendo-comprobante-entrada .erp-header,
+            body.imprimiendo-comprobante-entrada .erp-sidebar { display: none !important; }
+            body.imprimiendo-comprobante-entrada #pnlModalDetalle .table-dermo-container,
+            body.imprimiendo-comprobante-entrada #pnlModalDetalle .table-responsive {
+                max-height: none !important;
+                overflow: visible !important;
+            }
+        }
     </style>
 </asp:Content>
 <asp:Content ID="Acciones" ContentPlaceHolderID="AccionesUsuario" runat="server">
@@ -361,7 +403,7 @@
         </div>
 
         <!-- MODAL DE CONSULTA DE LOTES RECIBIDOS (SOLO LECTURA) -->
-        <asp:Panel ID="pnlModalDetalle" runat="server" Visible="false" CssClass="modal-overlay">
+        <asp:Panel ID="pnlModalDetalle" runat="server" ClientIDMode="Static" Visible="false" CssClass="modal-overlay">
             <div class="modal-content-card modal-lg-card">
                 <div class="modal-header-dermo">
                     <div>
@@ -413,7 +455,7 @@
                 </div>
 
                 <div class="modal-footer-dermo">
-                    <button type="button" onclick="window.print();" class="btn btn-outline-secondary">
+                    <button type="button" onclick="imprimirComprobanteEntrada();" class="btn btn-outline-secondary">
                         Imprimir Comprobante de Entrada
                     </button>
                     <asp:Button ID="btnCerrarModal2" runat="server" Text="Aceptar y Salir" CssClass="btn btn-primary" OnClick="btnCerrarModal_Click" />
@@ -422,4 +464,33 @@
         </asp:Panel>
         
     </div>
+    <script>
+        function imprimirComprobanteEntrada() {
+            var modal = document.getElementById('pnlModalDetalle');
+            if (!modal) return;
+            var elementosOcultos = [];
+            var actual = modal;
+            while (actual && actual !== document.body) {
+                var padre = actual.parentElement;
+                if (!padre) break;
+                Array.prototype.forEach.call(padre.children, function (hermano) {
+                    if (hermano !== actual) {
+                        elementosOcultos.push({ elemento: hermano, display: hermano.style.display });
+                        hermano.style.display = 'none';
+                    }
+                });
+                actual = padre;
+            }
+            document.body.classList.add('imprimiendo-comprobante-entrada');
+            var limpiar = function () {
+                elementosOcultos.forEach(function (registro) {
+                    registro.elemento.style.display = registro.display;
+                });
+                document.body.classList.remove('imprimiendo-comprobante-entrada');
+                window.removeEventListener('afterprint', limpiar);
+            };
+            window.addEventListener('afterprint', limpiar);
+            window.print();
+        }
+    </script>
 </asp:Content>

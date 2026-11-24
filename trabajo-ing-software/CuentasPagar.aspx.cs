@@ -92,14 +92,16 @@ namespace trabajo_ing_software
             ddlCuentaPago.Items.Add(new ListItem("-- Seleccionar Cuenta por Pagar --", ""));
 
             string sql = @"SELECT cp.IdCuentaPagar, l.RazonSocial, oc.NumeroOC,
-                                  (cp.Monto - IFNULL(p.Pagado, 0)) AS Saldo
+                                  GREATEST(cp.Monto - IFNULL(p.Pagado, 0) - IFNULL(dpc.Credito,0),0) AS Saldo
                            FROM cuentaporpagar cp
                            INNER JOIN recepcioncompra r ON r.IdRecepcion = cp.IdRecepcion
                            INNER JOIN ordencompra oc ON oc.IdOC = r.IdOC
                            INNER JOIN laboratorio l ON l.IdLaboratorio = cp.IdLaboratorio
                            LEFT JOIN (SELECT IdCuentaPagar, SUM(Monto) AS Pagado FROM pagoproveedor GROUP BY IdCuentaPagar) p
                                   ON p.IdCuentaPagar = cp.IdCuentaPagar
-                           WHERE (cp.Monto - IFNULL(p.Pagado, 0)) > 0
+                           LEFT JOIN (SELECT IdRecepcion,SUM(MontoAplicado) AS Credito FROM devolucionproveedor WHERE Estado='Aceptado' GROUP BY IdRecepcion) dpc
+                                  ON dpc.IdRecepcion=cp.IdRecepcion
+                           WHERE (cp.Monto - IFNULL(p.Pagado, 0) - IFNULL(dpc.Credito,0)) > 0
                            ORDER BY DATE_ADD(r.FechaRecepcion, INTERVAL IFNULL(l.DiasPago, 30) DAY) ASC";
 
             using (MySqlConnection con = ConexionErp.Crear(connectionString))
@@ -134,7 +136,7 @@ namespace trabajo_ing_software
                 return;
             }
 
-            string sql = @"SELECT cp.Monto, IFNULL(p.Pagado, 0) AS Pagado,
+            string sql = @"SELECT cp.Monto, IFNULL(p.Pagado, 0) AS Pagado,IFNULL(dpc.Credito,0) AS CreditoAplicado,
                                   DATE_ADD(r.FechaRecepcion, INTERVAL IFNULL(l.DiasPago, 30) DAY) AS Vencimiento,
                                   oc.NumeroOC, l.RazonSocial
                            FROM cuentaporpagar cp
@@ -143,6 +145,8 @@ namespace trabajo_ing_software
                            INNER JOIN laboratorio l ON l.IdLaboratorio = cp.IdLaboratorio
                            LEFT JOIN (SELECT IdCuentaPagar, SUM(Monto) AS Pagado FROM pagoproveedor GROUP BY IdCuentaPagar) p
                                   ON p.IdCuentaPagar = cp.IdCuentaPagar
+                           LEFT JOIN (SELECT IdRecepcion,SUM(MontoAplicado) AS Credito FROM devolucionproveedor WHERE Estado='Aceptado' GROUP BY IdRecepcion) dpc
+                                  ON dpc.IdRecepcion=cp.IdRecepcion
                            WHERE cp.IdCuentaPagar = @Id";
 
             using (MySqlConnection con = ConexionErp.Crear(connectionString))
@@ -156,11 +160,12 @@ namespace trabajo_ing_software
                     {
                         decimal total = Convert.ToDecimal(dr["Monto"]);
                         decimal pagado = Convert.ToDecimal(dr["Pagado"]);
-                        decimal saldo = Math.Max(0m, total - pagado);
+                        decimal creditoAplicado = Convert.ToDecimal(dr["CreditoAplicado"]);
+                        decimal saldo = Math.Max(0m, total - pagado - creditoAplicado);
                         DateTime vence = Convert.ToDateTime(dr["Vencimiento"]);
 
-                        lblDetalleCuentaSel.Text = string.Format("{0} · {1} · Vence {2:dd/MM/yyyy} · Total: {3:C0} · Pagado: {4:C0} · Saldo: {5:C0}",
-                            dr["RazonSocial"], dr["NumeroOC"], vence, total, pagado, saldo);
+                        lblDetalleCuentaSel.Text = string.Format("{0} · {1} · Vence {2:dd/MM/yyyy} · Total: {3:C0} · Pagado: {4:C0} · Crédito aplicado: {5:C0} · Saldo: {6:C0}",
+                            dr["RazonSocial"], dr["NumeroOC"], vence, total, pagado, creditoAplicado, saldo);
 
                         if (rblTipoPago.SelectedValue == "Total")
                         {
@@ -213,11 +218,12 @@ namespace trabajo_ing_software
                                       DATEDIFF(DATE_ADD(r.FechaRecepcion, INTERVAL IFNULL(l.DiasPago, 30) DAY), CURDATE()) AS DiasRestantes,
                                       cp.Monto AS MontoTotal,
                                       IFNULL(p.Pagado, 0) AS MontoPagado,
-                                      GREATEST(cp.Monto - IFNULL(p.Pagado, 0), 0) AS SaldoPendiente,
+                                      IFNULL(dpc.Credito,0) AS MontoCreditoAplicado,
+                                      GREATEST(cp.Monto - IFNULL(p.Pagado, 0) - IFNULL(dpc.Credito,0), 0) AS SaldoPendiente,
                                       CASE
-                                          WHEN (cp.Monto - IFNULL(p.Pagado, 0)) <= 0 THEN 'Pagada'
+                                          WHEN (cp.Monto - IFNULL(p.Pagado, 0) - IFNULL(dpc.Credito,0)) <= 0 THEN 'Pagada'
                                           WHEN DATEDIFF(DATE_ADD(r.FechaRecepcion, INTERVAL IFNULL(l.DiasPago, 30) DAY), CURDATE()) < 0 THEN 'Vencida'
-                                          WHEN IFNULL(p.Pagado, 0) > 0 THEN 'Parcial'
+                                          WHEN IFNULL(p.Pagado, 0) + IFNULL(dpc.Credito,0) > 0 THEN 'Parcial'
                                           ELSE 'Pendiente'
                                       END AS EstadoEfectivo
                                FROM cuentaporpagar cp
@@ -226,6 +232,8 @@ namespace trabajo_ing_software
                                INNER JOIN laboratorio l ON l.IdLaboratorio = cp.IdLaboratorio
                                LEFT JOIN (SELECT IdCuentaPagar, SUM(Monto) AS Pagado FROM pagoproveedor GROUP BY IdCuentaPagar) p
                                       ON p.IdCuentaPagar = cp.IdCuentaPagar
+                               LEFT JOIN (SELECT IdRecepcion,SUM(MontoAplicado) AS Credito FROM devolucionproveedor WHERE Estado='Aceptado' GROUP BY IdRecepcion) dpc
+                                      ON dpc.IdRecepcion=cp.IdRecepcion
                            ) t
                            WHERE 1=1";
 
@@ -296,13 +304,15 @@ namespace trabajo_ing_software
                                IFNULL(SUM(CASE WHEN Saldo > 0 AND DiasRestantes < 0 THEN Saldo ELSE 0 END), 0) AS DeudaVencida,
                                IFNULL(SUM(CASE WHEN Saldo > 0 AND DiasRestantes BETWEEN 0 AND 30 THEN Saldo ELSE 0 END), 0) AS PorVencer30
                            FROM (
-                               SELECT (cp.Monto - IFNULL(p.Pagado, 0)) AS Saldo,
+                               SELECT GREATEST(cp.Monto - IFNULL(p.Pagado, 0) - IFNULL(dpc.Credito,0),0) AS Saldo,
                                       DATEDIFF(DATE_ADD(r.FechaRecepcion, INTERVAL IFNULL(l.DiasPago, 30) DAY), CURDATE()) AS DiasRestantes
                                FROM cuentaporpagar cp
                                INNER JOIN recepcioncompra r ON r.IdRecepcion = cp.IdRecepcion
                                INNER JOIN laboratorio l ON l.IdLaboratorio = cp.IdLaboratorio
                                LEFT JOIN (SELECT IdCuentaPagar, SUM(Monto) AS Pagado FROM pagoproveedor GROUP BY IdCuentaPagar) p
                                       ON p.IdCuentaPagar = cp.IdCuentaPagar
+                               LEFT JOIN (SELECT IdRecepcion,SUM(MontoAplicado) AS Credito FROM devolucionproveedor WHERE Estado='Aceptado' GROUP BY IdRecepcion) dpc
+                                      ON dpc.IdRecepcion=cp.IdRecepcion
                            ) q";
 
             using (MySqlConnection con = ConexionErp.Crear(connectionString))
@@ -395,9 +405,12 @@ namespace trabajo_ing_software
                     {
                         decimal montoCuenta = 0m;
                         decimal pagadoPrevio = 0m;
+                        decimal creditoAplicadoPrevio = 0m;
 
                         using (MySqlCommand cmdLock = new MySqlCommand(@"
-                            SELECT cp.Monto, IFNULL((SELECT SUM(Monto) FROM pagoproveedor WHERE IdCuentaPagar = cp.IdCuentaPagar), 0) AS Pagado
+                            SELECT cp.Monto,
+                                IFNULL((SELECT SUM(Monto) FROM pagoproveedor WHERE IdCuentaPagar = cp.IdCuentaPagar), 0) AS Pagado,
+                                IFNULL((SELECT SUM(MontoAplicado) FROM devolucionproveedor WHERE IdRecepcion=cp.IdRecepcion AND Estado='Aceptado'),0) AS CreditoAplicado
                             FROM cuentaporpagar cp
                             WHERE cp.IdCuentaPagar = @Id FOR UPDATE", con, trans))
                         {
@@ -408,10 +421,11 @@ namespace trabajo_ing_software
                                     throw new InvalidOperationException("La cuenta por pagar seleccionada ya no existe.");
                                 montoCuenta = Convert.ToDecimal(dr["Monto"]);
                                 pagadoPrevio = Convert.ToDecimal(dr["Pagado"]);
+                                creditoAplicadoPrevio = Convert.ToDecimal(dr["CreditoAplicado"]);
                             }
                         }
 
-                        decimal saldoPendiente = montoCuenta - pagadoPrevio;
+                        decimal saldoPendiente = Math.Max(0m,montoCuenta - pagadoPrevio - creditoAplicadoPrevio);
                         if (saldoPendiente <= 0)
                             throw new InvalidOperationException("Esta cuenta ya se encuentra completamente saldada.");
 
@@ -477,7 +491,7 @@ namespace trabajo_ing_software
                         }
 
                         // 4. Actualizar estado de CuentaPorPagar (Pagada / Parcial)
-                        string nuevoEstado = (pagadoPrevio + montoPago >= montoCuenta) ? "Pagada" : "Parcial";
+                        string nuevoEstado = (pagadoPrevio + montoPago + creditoAplicadoPrevio >= montoCuenta) ? "Pagada" : "Parcial";
                         using (MySqlCommand cmdUpd = new MySqlCommand("UPDATE cuentaporpagar SET Estado = @Estado WHERE IdCuentaPagar = @Id", con, trans))
                         {
                             cmdUpd.Parameters.AddWithValue("@Estado", nuevoEstado);
@@ -564,6 +578,7 @@ namespace trabajo_ing_software
                                   cp.IdCuentaPagar, cp.Monto AS TotalCuenta, cp.IdRecepcion,
                                   oc.NumeroOC, l.RazonSocial AS Laboratorio, l.Rut, u.Nombre AS Usuario,
                                   IFNULL((SELECT SUM(Monto) FROM pagoproveedor p2 WHERE p2.IdCuentaPagar = cp.IdCuentaPagar AND p2.IdPagoProveedor <= pp.IdPagoProveedor), 0) AS PagadoAcumulado
+                                  ,IFNULL((SELECT SUM(MontoAplicado) FROM devolucionproveedor dp WHERE dp.IdRecepcion=cp.IdRecepcion AND dp.Estado='Aceptado'),0) AS CreditoAplicado
                            FROM pagoproveedor pp
                            INNER JOIN cuentaporpagar cp ON cp.IdCuentaPagar = pp.IdCuentaPagar
                            INNER JOIN recepcioncompra r ON r.IdRecepcion = cp.IdRecepcion
@@ -585,7 +600,8 @@ namespace trabajo_ing_software
                         decimal montoPago = Convert.ToDecimal(dr["Monto"]);
                         decimal totalCuenta = Convert.ToDecimal(dr["TotalCuenta"]);
                         decimal pagadoAcum = Convert.ToDecimal(dr["PagadoAcumulado"]);
-                        decimal saldoRem = Math.Max(0m, totalCuenta - pagadoAcum);
+                        decimal creditoAplicado = Convert.ToDecimal(dr["CreditoAplicado"]);
+                        decimal saldoRem = Math.Max(0m, totalCuenta - pagadoAcum - creditoAplicado);
 
                         lblRecFolio.Text = string.Format("PAG-{0:D4}", idPago);
                         lblRecFecha.Text = Convert.ToDateTime(dr["Fecha"]).ToString("dd/MM/yyyy");

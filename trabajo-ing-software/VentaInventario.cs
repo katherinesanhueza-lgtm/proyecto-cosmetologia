@@ -239,9 +239,8 @@ namespace trabajo_ing_software
             decimal totalCostoVenta = 0;
             foreach (var articulo in carrito)
             {
-                DescontarFEFO(conexion, transaccion, ventaId, usuario, bodega, articulo.Key, articulo.Value, precios[articulo.Key]);
-                using (var cmd = Comando(conexion, transaccion, "SELECT CostoPromedio FROM varianteproducto WHERE IdVariante=@p0", articulo.Key))
-                    totalCostoVenta += Math.Round(Convert.ToDecimal(cmd.ExecuteScalar()) * articulo.Value, 2);
+                totalCostoVenta += DescontarFEFO(conexion, transaccion, ventaId, usuario, bodega,
+                    articulo.Key, articulo.Value, precios[articulo.Key]);
             }
 
             // 6. Integración Contable: Cuentas por Cobrar (RF-VEN-06)

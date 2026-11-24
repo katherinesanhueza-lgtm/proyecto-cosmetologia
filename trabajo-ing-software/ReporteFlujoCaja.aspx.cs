@@ -81,17 +81,17 @@ namespace trabajo_ing_software
                        COUNT(*) AS CuentasPendientes,
                        ROUND(SUM(CASE
                            WHEN DATEDIFF(DATE_ADD(r.FechaRecepcion, INTERVAL COALESCE(l.DiasPago, 30) DAY), CURDATE()) < 0
-                           THEN (cp.Monto - COALESCE(p.Pagado, 0)) ELSE 0 END), 0) AS DeudaVencida,
+                           THEN GREATEST(cp.Monto - COALESCE(p.Pagado, 0) - COALESCE(dpc.Credito,0),0) ELSE 0 END), 0) AS DeudaVencida,
                        ROUND(SUM(CASE
                            WHEN DATEDIFF(DATE_ADD(r.FechaRecepcion, INTERVAL COALESCE(l.DiasPago, 30) DAY), CURDATE()) BETWEEN 0 AND 30
-                           THEN (cp.Monto - COALESCE(p.Pagado, 0)) ELSE 0 END), 0) AS Pagar30Dias,
+                           THEN GREATEST(cp.Monto - COALESCE(p.Pagado, 0) - COALESCE(dpc.Credito,0),0) ELSE 0 END), 0) AS Pagar30Dias,
                        ROUND(SUM(CASE
                            WHEN DATEDIFF(DATE_ADD(r.FechaRecepcion, INTERVAL COALESCE(l.DiasPago, 30) DAY), CURDATE()) BETWEEN 31 AND 60
-                           THEN (cp.Monto - COALESCE(p.Pagado, 0)) ELSE 0 END), 0) AS Pagar60Dias,
+                           THEN GREATEST(cp.Monto - COALESCE(p.Pagado, 0) - COALESCE(dpc.Credito,0),0) ELSE 0 END), 0) AS Pagar60Dias,
                        ROUND(SUM(CASE
                            WHEN DATEDIFF(DATE_ADD(r.FechaRecepcion, INTERVAL COALESCE(l.DiasPago, 30) DAY), CURDATE()) > 60
-                           THEN (cp.Monto - COALESCE(p.Pagado, 0)) ELSE 0 END), 0) AS Pagar90MasDias,
-                       ROUND(SUM(cp.Monto - COALESCE(p.Pagado, 0)), 0) AS TotalPendiente
+                           THEN GREATEST(cp.Monto - COALESCE(p.Pagado, 0) - COALESCE(dpc.Credito,0),0) ELSE 0 END), 0) AS Pagar90MasDias,
+                       ROUND(SUM(GREATEST(cp.Monto - COALESCE(p.Pagado, 0) - COALESCE(dpc.Credito,0),0)), 0) AS TotalPendiente
                 FROM cuentaporpagar cp
                 INNER JOIN recepcioncompra r ON r.IdRecepcion = cp.IdRecepcion
                 INNER JOIN laboratorio l ON l.IdLaboratorio = cp.IdLaboratorio
@@ -100,7 +100,11 @@ namespace trabajo_ing_software
                     FROM pagoproveedor
                     GROUP BY IdCuentaPagar
                 ) p ON p.IdCuentaPagar = cp.IdCuentaPagar
-                WHERE (cp.Monto - COALESCE(p.Pagado, 0)) > 0";
+                LEFT JOIN (
+                    SELECT IdRecepcion,SUM(MontoAplicado) AS Credito
+                    FROM devolucionproveedor WHERE Estado='Aceptado' GROUP BY IdRecepcion
+                ) dpc ON dpc.IdRecepcion=cp.IdRecepcion
+                WHERE (cp.Monto - COALESCE(p.Pagado, 0) - COALESCE(dpc.Credito,0)) > 0";
 
             if (!string.IsNullOrEmpty(idLab))
                 query += " AND l.IdLaboratorio = @IdLab";

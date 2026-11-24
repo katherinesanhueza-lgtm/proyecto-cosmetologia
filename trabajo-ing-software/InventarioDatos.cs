@@ -33,12 +33,12 @@ namespace trabajo_ing_software
             {
                 try
                 {
-                    int variante; int disponible; string estado; DateTime? vencimiento;
-                    using (var cmd = Comando(c,t,"SELECT IdVariante,COALESCE(CantidadDisponible,0),Estado,FechaVencimiento FROM lote WHERE IdLote=@p0 AND IdBodega=@p1 FOR UPDATE",lote,bodega))
+                    int variante; int disponible; string estado; DateTime? vencimiento; decimal costoUnitario;
+                    using (var cmd = Comando(c,t,"SELECT IdVariante,COALESCE(CantidadDisponible,0),Estado,FechaVencimiento,COALESCE(CostoUnitario,0) FROM lote WHERE IdLote=@p0 AND IdBodega=@p1 FOR UPDATE",lote,bodega))
                     using (var r = cmd.ExecuteReader())
                     {
                         if (!r.Read()) throw new ArgumentException("El lote no pertenece a la bodega seleccionada.");
-                        variante=r.GetInt32(0); disponible=r.GetInt32(1); estado=r.GetString(2); vencimiento=r.IsDBNull(3)?(DateTime?)null:r.GetDateTime(3);
+                        variante=r.GetInt32(0); disponible=r.GetInt32(1); estado=r.GetString(2); vencimiento=r.IsDBNull(3)?(DateTime?)null:r.GetDateTime(3); costoUnitario=r.GetDecimal(4);
                     }
                     // La variante serializa todas las operaciones sobre sus existencias.
                     using(var cmd=Comando(c,t,"SELECT v.IdVariante FROM varianteproducto v JOIN producto p ON p.IdProducto=v.IdProducto WHERE v.IdVariante=@p0 AND v.Activo=1 AND p.Activo=1 FOR UPDATE",variante))
@@ -72,7 +72,27 @@ namespace trabajo_ing_software
                     int idTipo;
                     using(var cmd=Comando(c,t,"SELECT IdTipoMovimiento FROM tipomovimiento WHERE Nombre=@p0 LIMIT 1",tipo))
                     { var id=cmd.ExecuteScalar(); if(id==null)throw new ArgumentException("Falta configurar el tipo de movimiento."); idTipo=Convert.ToInt32(id); }
-                    using(var cmd=Comando(c,t,"INSERT INTO movimientoinventario(IdLote,IdBodega,IdTipoMovimiento,IdUsuario,Cantidad,StockAnterior,StockPosterior,Referencia,Observacion,Origen,IdDetalleOrigen) VALUES(@p0,@p1,@p2,@p3,@p4,@p5,@p6,@p7,@p8,@p9,@p10)",lote,bodega,idTipo,usuario,cantidad,anterior,posterior,documento>0?tipo+" #"+documento:"Ajuste manual",motivo,documento>0?tipo:null,documento>0?(object)documento:null))cmd.ExecuteNonQuery();
+                    decimal valorAjuste=Math.Round(costoUnitario*cantidad,2);
+                    if((tipo=="Ajuste negativo" || tipo=="Ajuste positivo") && valorAjuste<=0)
+                        throw new ArgumentException("El lote necesita un costo unitario mayor que cero para contabilizar el ajuste.");
+                    int idMovimiento;
+                    using(var cmd=Comando(c,t,"INSERT INTO movimientoinventario(IdLote,IdBodega,IdTipoMovimiento,IdUsuario,Cantidad,StockAnterior,StockPosterior,Referencia,Observacion,Origen,IdDetalleOrigen) VALUES(@p0,@p1,@p2,@p3,@p4,@p5,@p6,@p7,@p8,@p9,@p10)",lote,bodega,idTipo,usuario,cantidad,anterior,posterior,documento>0?tipo+" #"+documento:"Ajuste manual",motivo,documento>0?tipo:null,documento>0?(object)documento:null))
+                    { cmd.ExecuteNonQuery(); idMovimiento=Convert.ToInt32(cmd.LastInsertedId); }
+
+                    if(tipo=="Ajuste negativo")
+                    {
+                        string motivoCorto=motivo.Trim();
+                        if(motivoCorto.Length>200)motivoCorto=motivoCorto.Substring(0,200);
+                        using(var cmd=Comando(c,t,"INSERT INTO merma(IdLote,IdUsuario,Cantidad,Motivo,Fecha,CostoPerdida,Observacion) VALUES(@p0,@p1,@p2,@p3,CURDATE(),@p4,@p5)",lote,usuario,cantidad,motivoCorto,valorAjuste,motivo.Trim()))cmd.ExecuteNonQuery();
+                        if(valorAjuste>0)
+                            VentaInventario.Contabilizar(c,t,"Ajuste",idMovimiento,"Pérdida de inventario #"+idMovimiento,usuario,
+                                new[]{"5102","1105"},new[]{valorAjuste,-valorAjuste});
+                    }
+                    else if(tipo=="Ajuste positivo" && valorAjuste>0)
+                    {
+                        VentaInventario.Contabilizar(c,t,"Ajuste",idMovimiento,"Recuperación de inventario #"+idMovimiento,usuario,
+                            new[]{"1105","4901"},new[]{valorAjuste,-valorAjuste});
+                    }
                     t.Commit();
                 }
                 catch { t.Rollback(); throw; }

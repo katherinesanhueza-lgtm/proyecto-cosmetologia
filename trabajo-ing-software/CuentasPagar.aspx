@@ -284,6 +284,7 @@
 
                         <asp:BoundField DataField="MontoTotal" HeaderText="Monto ($)" DataFormatString="{0:C0}" />
                         <asp:BoundField DataField="MontoPagado" HeaderText="Pagado ($)" DataFormatString="{0:C0}" />
+                        <asp:BoundField DataField="MontoCreditoAplicado" HeaderText="Cr&eacute;dito aplicado ($)" DataFormatString="{0:C0}" />
 
                         <asp:TemplateField HeaderText="Saldo Pendiente">
                             <ItemTemplate>
