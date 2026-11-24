@@ -137,40 +137,48 @@
         </script>
 
         <!-- TARJETA 2: HISTORIAL Y CONVERSIÓN A VENTAS -->
-        <section class="card-dermocosmetica">
-            <h2 style="margin-bottom: 16px;">Historial de Cotizaciones y Conversión</h2>
+        <section class="table-dermo-container">
+            <div class="dermo-table-headbar">
+                <div class="dermo-table-headbar-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7A5E47" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                    <h2>Historial de Cotizaciones y Conversi&oacute;n</h2>
+                </div>
+                <span class="dermo-pill-neutral">Presupuestos comerciales</span>
+            </div>
             <div class="table-responsive">
-                <asp:GridView ID="gvHistorialCotizaciones" runat="server" CssClass="table table-hover" AutoGenerateColumns="False" GridLines="None" OnRowCommand="gvHistorialCotizaciones_RowCommand" EmptyDataText="No hay cotizaciones registradas.">
+                <asp:GridView ID="gvHistorialCotizaciones" runat="server" CssClass="table table-hover align-middle" AutoGenerateColumns="False" GridLines="None" OnRowCommand="gvHistorialCotizaciones_RowCommand" EmptyDataText="No hay cotizaciones registradas.">
                     <Columns>
-                        <asp:BoundField DataField="IdCotizacion" HeaderText="N° Cot." />
-                        <asp:BoundField DataField="Cliente" HeaderText="Cliente" />
-                        <asp:BoundField DataField="FechaEmision" HeaderText="Emisión" DataFormatString="{0:dd/MM/yyyy}" />
-                        <asp:BoundField DataField="FechaVencimiento" HeaderText="Vencimiento" DataFormatString="{0:dd/MM/yyyy}" NullDisplayText="Sin plazo" />
-                        <asp:TemplateField HeaderText="Estado">
+                        <asp:BoundField DataField="IdCotizacion" HeaderText="N&deg; Cot." HtmlEncode="false" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center fw-semibold" />
+                        <asp:BoundField DataField="Cliente" HeaderText="Cliente" ItemStyle-CssClass="fw-semibold" />
+                        <asp:BoundField DataField="FechaEmision" HeaderText="Emisi&oacute;n" HtmlEncode="false" DataFormatString="{0:dd/MM/yyyy}" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center text-nowrap" />
+                        <asp:BoundField DataField="FechaVencimiento" HeaderText="Vencimiento" DataFormatString="{0:dd/MM/yyyy}" NullDisplayText="Sin plazo" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center text-nowrap" />
+                        <asp:TemplateField HeaderText="Estado" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center">
                             <ItemTemplate>
                                 <span class='<%# GetClaseEstado(Eval("Estado").ToString()) %>'>
                                     <%# Eval("Estado") %>
                                 </span>
                             </ItemTemplate>
                         </asp:TemplateField>
-                        <asp:BoundField DataField="Total" HeaderText="Total" DataFormatString="${0:N0}" />
-                        <asp:TemplateField HeaderText="Acciones">
+                        <asp:BoundField DataField="Total" HeaderText="Total" DataFormatString="${0:N0}" HeaderStyle-CssClass="text-end" ItemStyle-CssClass="text-end text-nowrap fw-semibold" />
+                        <asp:TemplateField HeaderText="Acciones" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center text-nowrap">
                             <ItemTemplate>
-                                <asp:LinkButton ID="btnConvertir" runat="server" CssClass="btn btn-primary btn-sm me-1" 
-                                    CommandName="ConvertirVenta" CommandArgument='<%# Eval("IdCotizacion") %>'
-                                    Visible='<%# Eval("Estado").ToString() == "Vigente" || Eval("Estado").ToString() == "Aceptado" %>'>
-                                    Convertir a Venta
-                                </asp:LinkButton>
-                                <asp:LinkButton ID="btnAceptar" runat="server" CssClass="btn btn-outline-success btn-sm me-1" 
-                                    CommandName="MarcarAceptado" CommandArgument='<%# Eval("IdCotizacion") %>'
-                                    Visible='<%# Eval("Estado").ToString() == "Vigente" %>'>
-                                    Aceptar
-                                </asp:LinkButton>
-                                <asp:LinkButton ID="btnRechazar" runat="server" CssClass="btn btn-outline-danger btn-sm" 
-                                    CommandName="MarcarRechazado" CommandArgument='<%# Eval("IdCotizacion") %>'
-                                    Visible='<%# Eval("Estado").ToString() == "Vigente" %>'>
-                                    Rechazar
-                                </asp:LinkButton>
+                                <div class="d-inline-flex align-items-center gap-1 flex-nowrap">
+                                    <asp:LinkButton ID="btnConvertir" runat="server" CssClass="btn btn-primary btn-sm"
+                                        CommandName="ConvertirVenta" CommandArgument='<%# Eval("IdCotizacion") %>'
+                                        Visible='<%# Eval("Estado").ToString() == "Vigente" || Eval("Estado").ToString() == "Aceptado" %>'>
+                                        Convertir a Venta
+                                    </asp:LinkButton>
+                                    <asp:LinkButton ID="btnAceptar" runat="server" CssClass="btn btn-outline-secondary btn-sm"
+                                        CommandName="MarcarAceptado" CommandArgument='<%# Eval("IdCotizacion") %>'
+                                        Visible='<%# Eval("Estado").ToString() == "Vigente" %>'>
+                                        Aceptar
+                                    </asp:LinkButton>
+                                    <asp:LinkButton ID="btnRechazar" runat="server" CssClass="btn btn-outline-danger btn-sm"
+                                        CommandName="MarcarRechazado" CommandArgument='<%# Eval("IdCotizacion") %>'
+                                        Visible='<%# Eval("Estado").ToString() == "Vigente" %>'>
+                                        Rechazar
+                                    </asp:LinkButton>
+                                </div>
                             </ItemTemplate>
                         </asp:TemplateField>
                     </Columns>

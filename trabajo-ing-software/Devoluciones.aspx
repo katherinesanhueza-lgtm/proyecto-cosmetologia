@@ -170,20 +170,26 @@
         </script>
 
         <!-- TARJETA 2: HISTORIAL -->
-        <section class="card-dermocosmetica">
-            <h2 style="margin-bottom: 16px;">Historial de Notas de Crédito Registradas</h2>
+        <section class="table-dermo-container">
+            <div class="dermo-table-headbar">
+                <div class="dermo-table-headbar-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7A5E47" stroke-width="2" aria-hidden="true"><path d="M9 14L4 9l5-5"></path><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"></path></svg>
+                    <h2>Historial de Notas de Cr&eacute;dito Registradas</h2>
+                </div>
+                <span class="dermo-pill-danger">Postventa y NC</span>
+            </div>
             <div class="table-responsive">
-                <asp:GridView ID="gvDevoluciones" runat="server" CssClass="table table-hover" AutoGenerateColumns="False" GridLines="None" EmptyDataText="No hay devoluciones registradas.">
+                <asp:GridView ID="gvDevoluciones" runat="server" CssClass="table table-hover align-middle" AutoGenerateColumns="False" GridLines="None" EmptyDataText="No hay devoluciones registradas.">
                     <Columns>
-                        <asp:BoundField DataField="IdNotaCredito" HeaderText="ID N.C." />
-                        <asp:BoundField DataField="Folio" HeaderText="Folio N.C." NullDisplayText="—" />
-                        <asp:BoundField DataField="VentaRef" HeaderText="Doc. Original" />
-                        <asp:BoundField DataField="Cliente" HeaderText="Cliente" />
-                        <asp:BoundField DataField="Fecha" HeaderText="Fecha Emisión" DataFormatString="{0:dd/MM/yyyy}" />
-                        <asp:BoundField DataField="TotalDevuelto" HeaderText="Total Devuelto" DataFormatString="${0:N0}" />
-                        <asp:TemplateField HeaderText="Tipo">
+                        <asp:BoundField DataField="IdNotaCredito" HeaderText="ID N.C." HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center" />
+                        <asp:BoundField DataField="Folio" HeaderText="Folio N.C." NullDisplayText="—" ItemStyle-CssClass="fw-semibold text-nowrap" />
+                        <asp:BoundField DataField="VentaRef" HeaderText="Doc. Original" ItemStyle-CssClass="text-nowrap" />
+                        <asp:BoundField DataField="Cliente" HeaderText="Cliente" ItemStyle-CssClass="fw-semibold" />
+                        <asp:BoundField DataField="Fecha" HeaderText="Fecha Emisi&oacute;n" HtmlEncode="false" DataFormatString="{0:dd/MM/yyyy}" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center text-nowrap" />
+                        <asp:BoundField DataField="TotalDevuelto" HeaderText="Total Devuelto" DataFormatString="${0:N0}" HeaderStyle-CssClass="text-end" ItemStyle-CssClass="text-end text-nowrap fw-semibold" />
+                        <asp:TemplateField HeaderText="Tipo" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center">
                             <ItemTemplate>
-                                <span class="badge-nc">Nota de Crédito</span>
+                                <span class="badge-nc">Nota de Cr&eacute;dito</span>
                             </ItemTemplate>
                         </asp:TemplateField>
                     </Columns>

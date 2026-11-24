@@ -57,11 +57,11 @@
             </div>
         </header>
 
-        <section class="card-dermocosmetica mb-4">
-            <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 14px;">
-                <div style="min-width: 240px;">
-                    <asp:Label runat="server" AssociatedControlID="modulo" CssClass="form-label" Text="Filtrar por m&oacute;dulo" />
-                    <asp:DropDownList runat="server" ID="modulo" AutoPostBack="true" CssClass="form-select">
+        <section class="card-dermocosmetica mb-4" style="padding: 14px 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <asp:Label runat="server" AssociatedControlID="modulo" CssClass="form-label mb-0 fw-semibold" Text="Filtrar por m&oacute;dulo:" />
+                    <asp:DropDownList runat="server" ID="modulo" AutoPostBack="true" CssClass="form-select" style="min-width: 220px; width: auto;">
                         <asp:ListItem Value="">Todos los m&oacute;dulos</asp:ListItem>
                         <asp:ListItem Value="Compras">Compras</asp:ListItem>
                         <asp:ListItem Value="Ventas">Ventas</asp:ListItem>
@@ -69,28 +69,38 @@
                         <asp:ListItem Value="Seguridad">Seguridad</asp:ListItem>
                     </asp:DropDownList>
                 </div>
-                <div style="font-size: 0.85rem; color: #7a756c;">
-                    Mostrando <strong style="color: #24211e;"><asp:Literal runat="server" ID="lblTotalEventos" Text="0" /></strong> eventos recientes (m&aacute;x. 500)
-                </div>
+                <span class="pill-badge" style="background-color: #FAF8F5; font-size: 11px;">
+                    &bull; <asp:Literal runat="server" ID="lblTotalEventos" Text="0" /> Eventos recientes (m&aacute;x. 500)
+                </span>
             </div>
         </section>
 
-        <section class="card-dermocosmetica">
-            <h2 style="font-size: 1.15rem; font-weight: 600; margin-bottom: 14px;">Registro de eventos</h2>
+        <section class="table-dermo-container">
+            <div class="dermo-table-headbar">
+                <div class="dermo-table-headbar-title">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7A5E47" stroke-width="2" aria-hidden="true"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"></path><rect x="9" y="3" width="6" height="4" rx="1"></rect><path d="M9 14l2 2 4-4"></path></svg>
+                    <h2>Registro de Eventos</h2>
+                </div>
+                <span class="dermo-pill-info">Solo lectura</span>
+            </div>
             <div class="table-responsive">
                 <asp:GridView runat="server" ID="eventos" CssClass="table table-hover align-middle" GridLines="None"
                     AutoGenerateColumns="False" EmptyDataText="Sin operaciones registradas para el filtro seleccionado.">
                     <Columns>
-                        <asp:BoundField DataField="Fecha" HeaderText="Fecha y hora" DataFormatString="{0:dd/MM/yyyy HH:mm:ss}" />
-                        <asp:BoundField DataField="Responsable" HeaderText="Responsable" />
-                        <asp:BoundField DataField="Modulo" HeaderText="M&oacute;dulo" />
+                        <asp:BoundField DataField="Fecha" HeaderText="Fecha y hora" DataFormatString="{0:dd/MM/yyyy HH:mm:ss}" ItemStyle-CssClass="text-nowrap" />
+                        <asp:BoundField DataField="Responsable" HeaderText="Responsable" ItemStyle-CssClass="fw-semibold" />
+                        <asp:TemplateField HeaderText="M&oacute;dulo" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center">
+                            <ItemTemplate>
+                                <span class="dermo-pill-neutral"><%#: Eval("Modulo") %></span>
+                            </ItemTemplate>
+                        </asp:TemplateField>
                         <asp:BoundField DataField="Entidad" HeaderText="Entidad" />
-                        <asp:TemplateField HeaderText="Acci&oacute;n">
+                        <asp:TemplateField HeaderText="Acci&oacute;n" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center">
                             <ItemTemplate>
                                 <span class='<%# ClaseAccion(Eval("Accion")) %>'><%#: Eval("Accion") %></span>
                             </ItemTemplate>
                         </asp:TemplateField>
-                        <asp:BoundField DataField="Registro" HeaderText="ID Registro" />
+                        <asp:BoundField DataField="Registro" HeaderText="ID Registro" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center text-nowrap" />
                     </Columns>
                 </asp:GridView>
             </div>

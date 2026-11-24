@@ -294,11 +294,16 @@ h1, h2, h3, .titulo-elegante {
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;
-    gap: 16px;
+    gap: 14px;
+    background-color: #FAF8F5;
+    border: 1px solid #E8E3DA;
+    border-radius: 14px;
+    padding: 16px 18px;
 }
 .contabilidad-campo { flex: 1 1 190px; min-width: 0; }
-.contabilidad-campo-ancho, .contabilidad-formulario > .form-text { flex-basis: 100%; }
-.contabilidad-accion { max-width: 100%; white-space: normal; }
+.contabilidad-campo .form-label { font-size: 0.8rem; font-weight: 600; color: #514435; margin-bottom: 5px; display: block; }
+.contabilidad-campo-ancho, .contabilidad-formulario > .form-text { flex-basis: 100%; margin: 2px 0 0; font-size: 0.8rem; color: #736E67; }
+.contabilidad-accion { max-width: 100%; white-space: nowrap; height: 38px; }
 .card-dermocosmetica .table { --bs-table-hover-bg: var(--color-fondo); }
 .card-dermocosmetica .table thead th {
     background-color: var(--color-fondo);
@@ -471,15 +476,51 @@ h1, h2, h3, .titulo-elegante {
     line-height: 1.5;
     max-width: 780px;
 }
-.erp-contenido :is(.card-dermocosmetica,.inicio-modulo,.kpi-card,.kpi-card-luxury,.card-dermo-luxury,.form-oc-card,.form-rec-card,.printable-sheet,.filter-card) {
+.erp-contenido :is(.card-dermocosmetica,.inicio-modulo,.kpi-card,.kpi-card-luxury,.kpi-card-cont,.card-dermo-luxury,.form-oc-card,.form-rec-card,.printable-sheet,.filter-card,.table-dermo-container) {
     border: 1px solid var(--color-primario);
-    border-radius: 14px;
+    border-radius: 18px;
     background-color: var(--color-blanco);
-    box-shadow: 0 3px 12px rgba(50,38,27,.04);
+    box-shadow: 0 4px 18px rgba(122, 94, 71, 0.05);
 }
-.erp-contenido .card-dermocosmetica { padding: clamp(16px, 2vw, 24px); }
-.erp-contenido .inicio-indicador { padding: 16px 18px; }
-.erp-contenido :is(.inicio-indicador,.kpi-card,.kpi-card-luxury) :is(.inicio-valor,.kpi-valor) { color: #29231e; }
+.erp-contenido :is(.kpi-card,.kpi-card-luxury,.kpi-card-cont,.compras-kpi,.inicio-indicador) {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.erp-contenido :is(.kpi-card,.kpi-card-luxury,.kpi-card-cont,.compras-kpi,.inicio-indicador):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(122, 94, 71, 0.09);
+}
+.erp-contenido .card-dermocosmetica { padding: clamp(18px, 2vw, 24px); }
+.erp-contenido .inicio-indicador { padding: 18px 20px; }
+.erp-contenido :is(.inicio-indicador,.kpi-card,.kpi-card-luxury,.kpi-card-cont) :is(.inicio-valor,.kpi-valor) { color: #29231e; }
+.dermo-table-headbar {
+    padding: 15px 22px;
+    border-bottom: 1px solid #E8E3DA;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    background-color: #FCFBF9;
+    border-radius: 18px 18px 0 0;
+}
+.dermo-table-headbar-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.dermo-table-headbar-title h2,
+.dermo-table-headbar-title h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #2E2E2E;
+    margin: 0 !important;
+}
+.dermo-pill-ok { background: #E8F8F0; color: #27AE60; padding: 4px 11px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-block; white-space: nowrap; }
+.dermo-pill-warn { background: #FEF9E7; color: #B7950B; padding: 4px 11px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-block; white-space: nowrap; }
+.dermo-pill-danger { background: #FDEDEC; color: #C0392B; padding: 4px 11px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-block; white-space: nowrap; }
+.dermo-pill-info { background: #EBF3FA; color: #2980B9; padding: 4px 11px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-block; white-space: nowrap; }
+.dermo-pill-neutral { background: #F5EFEB; color: #5C4533; border: 1px solid #E4DDD3; padding: 4px 11px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-block; white-space: nowrap; }
 
 /* Unificación de botones en todos los módulos (forma, tipografía y color Dermo ERP) */
 :is(.erp-contenido, .erp-header) :is(.btn, .btn-dermo-primary, .btn-dermo-outline, .btn-tabla-editar, .btn-tabla-desactivar) {
@@ -574,9 +615,20 @@ h1, h2, h3, .titulo-elegante {
     overflow-x: auto;
 }
 .erp-contenido :is(.form-control,.form-select):focus { border-color: #a88b70; box-shadow: 0 0 0 .2rem rgba(121,96,71,.15); }
-.erp-contenido .table { --bs-table-hover-bg: #f4f0eb; --bs-table-border-color: #ece7e1; font-family: 'Plus Jakarta Sans', sans-serif; }
-.erp-contenido .table th { background-color: #f8f6f3; color: #514435; font-size: .82rem; font-weight: 600; }
-.erp-contenido .table td { vertical-align: middle; font-size: .85rem; }
+.erp-contenido .table { --bs-table-hover-bg: #FAF8F5; --bs-table-border-color: #EFEAE3; font-family: 'Plus Jakarta Sans', sans-serif; margin-bottom: 0; }
+.erp-contenido .table th {
+    background-color: #FAF8F5;
+    color: #6B5B4E;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 12px 10px;
+    white-space: nowrap;
+    vertical-align: middle;
+    border-bottom: 1px solid #E8E3DA;
+}
+.erp-contenido .table td { vertical-align: middle; font-size: 0.83rem; padding: 11px 10px; color: #2E2E2E; }
 
 @media (max-width: 900px) {
     .erp-header { padding-inline: 14px; }
