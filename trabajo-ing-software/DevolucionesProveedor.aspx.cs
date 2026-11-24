@@ -140,7 +140,10 @@ namespace trabajo_ing_software
                                   lab.RazonSocial AS Laboratorio, v.Sku,
                                   CONCAT(p.Nombre, ' - ', IFNULL(v.NombreVariante, '')) AS Producto,
                                   l.NumeroLote, dp.Cantidad,
-                                  ROUND(dp.Cantidad * IFNULL(l.CostoUnitario, 0), 0) AS MontoReclamado,
+                                  COALESCE(NULLIF(dp.MontoCredito,0),ROUND(dp.Cantidad * IFNULL(l.CostoUnitario, 0) *
+                                      (1+COALESCE(oc.Iva/NULLIF(oc.Neto,0),0)),2)) AS MontoReclamado,
+                                  COALESCE(dp.MontoAplicado,0) AS MontoAplicado,
+                                  GREATEST(COALESCE(dp.MontoCredito,0)-COALESCE(dp.MontoAplicado,0),0) AS CreditoNoAplicado,
                                   IFNULL(dp.Motivo, '') AS Motivo,
                                   IFNULL(dp.Estado, 'Pendiente') AS Estado
                            FROM DevolucionProveedor dp
@@ -193,9 +196,13 @@ namespace trabajo_ing_software
             string sql = @"SELECT COUNT(*) AS Total,
                                   SUM(CASE WHEN IFNULL(dp.Estado, 'Pendiente') IN ('Pendiente', 'En Revisión') THEN 1 ELSE 0 END) AS Pendientes,
                                   SUM(CASE WHEN dp.Estado = 'Aceptado' THEN 1 ELSE 0 END) AS Aceptados,
-                                  IFNULL(SUM(CASE WHEN IFNULL(dp.Estado, 'Pendiente') <> 'Rechazado' THEN dp.Cantidad * IFNULL(l.CostoUnitario, 0) ELSE 0 END), 0) AS MontoTotal
+                                  IFNULL(SUM(CASE WHEN IFNULL(dp.Estado, 'Pendiente') <> 'Rechazado'
+                                      THEN COALESCE(NULLIF(dp.MontoCredito,0),dp.Cantidad*IFNULL(l.CostoUnitario,0)*(1+COALESCE(oc.Iva/NULLIF(oc.Neto,0),0)))
+                                      ELSE 0 END), 0) AS MontoTotal
                            FROM DevolucionProveedor dp
-                           INNER JOIN Lote l ON l.IdLote = dp.IdLote";
+                           INNER JOIN Lote l ON l.IdLote = dp.IdLote
+                           INNER JOIN RecepcionCompra r ON r.IdRecepcion=dp.IdRecepcion
+                           INNER JOIN OrdenCompra oc ON oc.IdOC=r.IdOC";
 
             using (MySqlConnection con = ConexionErp.Crear(connectionString))
             using (MySqlCommand cmd = new MySqlCommand(sql, con))

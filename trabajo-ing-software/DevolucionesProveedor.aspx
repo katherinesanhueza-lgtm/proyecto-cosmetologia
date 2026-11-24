@@ -113,9 +113,8 @@
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <a href="ReporteComprasLaboratorio.aspx" class="btn btn-outline-secondary">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                        Reporte Lab. y Marca
+                        Reporte de Compras y Reclamos
                     </a>
-                    <a href="Recepciones.aspx" class="btn btn-outline-secondary">Ir a Recepciones</a>
                     <asp:Button ID="btnToggleForm" runat="server" Text="+ Nuevo Reclamo / Devoluci&oacute;n" CssClass="btn btn-primary" OnClick="btnToggleForm_Click" />
                 </div>
             </div>
@@ -278,9 +277,11 @@
                                 </ItemTemplate>
                             </asp:TemplateField>
 
-                            <asp:TemplateField HeaderText="Valor Est.">
+                            <asp:TemplateField HeaderText="Cr&eacute;dito est. / aprobado">
                                 <ItemTemplate>
                                     <strong><%# string.Format("{0:C0}", Eval("MontoReclamado")) %></strong>
+                                    <div style="font-size: 11px; color: var(--color-texto-suave);">Aplicado a CxP: <%# string.Format("{0:C0}", Eval("MontoAplicado")) %></div>
+                                    <div runat="server" visible='<%# Eval("Estado").ToString() == "Aceptado" %>' style="font-size: 11px; color: var(--color-acento);">Cr&eacute;dito a favor: <%# string.Format("{0:C0}", Eval("CreditoNoAplicado")) %></div>
                                 </ItemTemplate>
                             </asp:TemplateField>
 
@@ -297,7 +298,7 @@
                                     <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                                         <asp:LinkButton ID="btnVer" runat="server" CommandName="VerDetalle" CommandArgument='<%# Eval("IdDevolucion") %>' CssClass="btn btn-outline-secondary btn-sm">Detalle</asp:LinkButton>
                                         <asp:LinkButton ID="btnRevisar" runat="server" CommandName="Revisar" CommandArgument='<%# Eval("IdDevolucion") %>' Visible='<%# PuedeEditar && Eval("Estado").ToString() == "Pendiente" %>' CssClass="btn btn-outline-secondary btn-sm">En Revisi&oacute;n</asp:LinkButton>
-                                        <asp:LinkButton ID="btnAceptar" runat="server" CommandName="Aceptar" CommandArgument='<%# Eval("IdDevolucion") %>' Visible='<%# PuedeEditar && (Eval("Estado").ToString() == "Pendiente" || Eval("Estado").ToString() == "En Revisi\u00f3n") %>' CssClass="btn btn-primary btn-sm" OnClientClick="return confirm('&iquest;Aceptar devoluci&oacute;n y rebajar las unidades devueltas del lote en Kardex?');">Aceptar</asp:LinkButton>
+                                        <asp:LinkButton ID="btnAceptar" runat="server" CommandName="Aceptar" CommandArgument='<%# Eval("IdDevolucion") %>' Visible='<%# PuedeEditar && (Eval("Estado").ToString() == "Pendiente" || Eval("Estado").ToString() == "En Revisi\u00f3n") %>' CssClass="btn btn-primary btn-sm" OnClientClick="return confirm('&iquest;Aceptar devoluci&oacute;n, rebajar existencias y contabilizar el cr&eacute;dito del proveedor?');">Aceptar</asp:LinkButton>
                                         <asp:LinkButton ID="btnRechazar" runat="server" CommandName="Rechazar" CommandArgument='<%# Eval("IdDevolucion") %>' Visible='<%# PuedeEditar && (Eval("Estado").ToString() == "Pendiente" || Eval("Estado").ToString() == "En Revisi\u00f3n") %>' CssClass="btn btn-outline-danger btn-sm">Rechazar</asp:LinkButton>
                                     </div>
                                 </ItemTemplate>

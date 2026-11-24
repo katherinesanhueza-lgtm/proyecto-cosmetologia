@@ -39,10 +39,15 @@ namespace trabajo_ing_software
             SELECT IF(v.TipoDocumento='Nota de Credito','Devolución','Venta'),v.IdVenta,v.Fecha,
                 CONCAT(v.TipoDocumento,' #',v.IdVenta),v.Total FROM venta v
             UNION ALL
+            SELECT 'DevProveedor',dp.IdDevolucion,dp.Fecha,
+                CONCAT('Devolución a proveedor DEV-',LPAD(dp.IdDevolucion,4,'0')),dp.MontoCredito
+            FROM devolucionproveedor dp WHERE dp.Estado='Aceptado'
+            UNION ALL
             SELECT 'Ajuste',m.IdMovimiento,DATE(m.FechaMovimiento),CONCAT(t.Nombre,' #',m.IdMovimiento),
                 ROUND(m.Cantidad*l.CostoUnitario,2)
             FROM movimientoinventario m JOIN tipomovimiento t ON t.IdTipoMovimiento=m.IdTipoMovimiento
-            JOIN lote l ON l.IdLote=m.IdLote WHERE t.Nombre IN ('Ajuste positivo','Ajuste negativo')";
+            JOIN lote l ON l.IdLote=m.IdLote
+            WHERE t.Nombre IN ('Ajuste positivo','Ajuste negativo') AND COALESCE(m.Origen,'')<>'DevProveedor'";
 
         internal static int Ejecutar(string sql, params MySqlParameter[] parametros)
         {

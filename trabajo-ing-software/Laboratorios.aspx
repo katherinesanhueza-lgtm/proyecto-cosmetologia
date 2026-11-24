@@ -402,7 +402,7 @@
                             <h2 id="lblTituloForm" runat="server" style="font-size: 22px; margin: 6px 0 2px 0; font-family: 'Playfair Display', Georgia, serif; color: var(--color-texto);">Registrar Nuevo Laboratorio</h2>
                             <div style="font-size: 12px; color: var(--color-texto-suave);">Gesti&oacute;n de condiciones comerciales y cat&aacute;logo de marcas cosmec&eacute;uticas</div>
                         </div>
-                        <asp:LinkButton ID="btnCerrarModalX" runat="server" CssClass="btn btn-outline-secondary btn-sm" OnClick="btnCancelar_Click" ToolTip="Cerrar ventana" style="border-radius: 50%; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; padding: 0; font-size: 18px; line-height: 1;">&times;</asp:LinkButton>
+                        <asp:LinkButton ID="btnCerrarModalX" runat="server" CssClass="btn btn-outline-secondary btn-sm modal-close-x" OnClick="btnCancelar_Click" ToolTip="Cerrar ventana">&times;</asp:LinkButton>
                     </div>
 
                     <asp:Panel ID="pnlMensajeModal" runat="server" Visible="false" CssClass="alerta-dermo-notificacion alerta-dermo-error" style="margin-bottom: 18px;">

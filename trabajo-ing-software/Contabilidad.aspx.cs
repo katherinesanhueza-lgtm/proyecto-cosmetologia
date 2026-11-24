@@ -41,14 +41,19 @@ namespace trabajo_ing_software
             if (!string.IsNullOrEmpty(Request.QueryString["cuenta"]))
                 vista = "cuentas";
             else
-                vista = Request.QueryString["vista"] ?? "resumen";
+            {
+                vista = Request.QueryString["vista"] ?? "cuentas";
+                if (string.Equals(vista, "resumen", StringComparison.OrdinalIgnoreCase))
+                    vista = "cuentas";
+            }
 
-            bool esResumen = string.Equals(vista, "resumen", StringComparison.OrdinalIgnoreCase);
-            pnlResumenContabilidad.Visible = esResumen;
-            pnlVistaContabilidad.Visible = !esResumen;
-            Page.Title = esResumen ? "Resumen de Contabilidad" : "Gestión de Contabilidad";
+            string[] vistasHabilitadas = { "cuentas", "periodos", "diario", "balance", "resultados", "pagos", "tesoreria", "iva", "cobros", "perdidas" };
+            if (!vistasHabilitadas.Contains(vista, StringComparer.OrdinalIgnoreCase))
+                vista = "cuentas";
 
-            if (esResumen) return;
+            pnlResumenContabilidad.Visible = false;
+            pnlVistaContabilidad.Visible = true;
+            Page.Title = "Contabilidad";
 
             try
             {
@@ -130,8 +135,8 @@ namespace trabajo_ing_software
                 case "iva":
                     Titulo.Text = "Declaración de IVA";
                     Periodos(false);
+                    Boton("Consultar", delegate { });
                     Boton("Registrar declaración y cerrar período", CerrarPeriodo);
-                    AccionesReporte();
                     break;
                 case "cobros":
                     Titulo.Text = "Antigüedad de saldos y morosidad";
@@ -140,7 +145,7 @@ namespace trabajo_ing_software
                     AccionesReporte();
                     break;
                 case "perdidas":
-                    Titulo.Text = "Pérdidas por vencimiento y daño";
+                    Titulo.Text = "Pérdidas por vencimiento, daño y ajustes negativos";
                     Texto("Buscar", "SKU, producto o motivo", 100);
                     Periodos(true);
                     AccionesReporte();
@@ -452,7 +457,10 @@ namespace trabajo_ing_software
                     SELECT
                         COALESCE((SELECT COUNT(*) FROM cuentacontable), 0) AS Cuentas,
                         COALESCE((SELECT COUNT(*) FROM asientocontable), 0) AS Asientos,
-                        COALESCE((SELECT SUM(cp.Monto - COALESCE((SELECT SUM(p.Monto) FROM pagoproveedor p WHERE p.IdCuentaPagar = cp.IdCuentaPagar), 0)) FROM cuentaporpagar cp WHERE COALESCE(cp.Estado,'Pendiente') <> 'Pagada'), 0) AS TotalCxP,
+                        COALESCE((SELECT SUM(GREATEST(cp.Monto
+                            - COALESCE((SELECT SUM(p.Monto) FROM pagoproveedor p WHERE p.IdCuentaPagar = cp.IdCuentaPagar), 0)
+                            - COALESCE((SELECT SUM(dp.MontoAplicado) FROM devolucionproveedor dp WHERE dp.IdRecepcion=cp.IdRecepcion AND dp.Estado='Aceptado'), 0),0))
+                            FROM cuentaporpagar cp WHERE COALESCE(cp.Estado,'Pendiente') <> 'Pagada'), 0) AS TotalCxP,
                         COALESCE((SELECT SUM(MontoPendiente) FROM cuentascobrar WHERE COALESCE(EstadoPago,'Pendiente') <> 'Pagado'), 0) AS TotalCxC");
                 if (dt.Rows.Count > 0)
                 {
@@ -568,10 +576,11 @@ namespace trabajo_ing_software
                         WITH Pendientes AS (
                             SELECT l.RazonSocial AS Laboratorio, cp.IdCuentaPagar AS Documento, cp.Estado,
                                 DATE_ADD(r.FechaRecepcion,INTERVAL COALESCE(l.DiasPago,30) DAY) AS Vencimiento,
-                                cp.Monto-COALESCE(p.Pagado,0) AS Saldo
+                                GREATEST(cp.Monto-COALESCE(p.Pagado,0)-COALESCE(dpc.Credito,0),0) AS Saldo
                             FROM cuentaporpagar cp JOIN recepcioncompra r ON r.IdRecepcion=cp.IdRecepcion
                             JOIN laboratorio l ON l.IdLaboratorio=cp.IdLaboratorio
                             LEFT JOIN (SELECT IdCuentaPagar,SUM(Monto) AS Pagado FROM pagoproveedor GROUP BY IdCuentaPagar) p ON p.IdCuentaPagar=cp.IdCuentaPagar
+                            LEFT JOIN (SELECT IdRecepcion,SUM(MontoAplicado) AS Credito FROM devolucionproveedor WHERE Estado='Aceptado' GROUP BY IdRecepcion) dpc ON dpc.IdRecepcion=cp.IdRecepcion
                             WHERE l.RazonSocial LIKE @Buscar
                         )
                         SELECT Laboratorio, Documento, Estado, DATE_FORMAT(Vencimiento,'%d/%m/%Y') AS Vence, Saldo,
@@ -600,8 +609,7 @@ namespace trabajo_ing_software
                         FROM merma m JOIN lote l ON l.IdLote=m.IdLote
                         JOIN varianteproducto v ON v.IdVariante=l.IdVariante
                         JOIN producto p ON p.IdProducto=v.IdProducto
-                        WHERE (m.Motivo LIKE N'%venc%' OR m.Motivo LIKE N'%dañ%' OR m.Motivo LIKE N'%danio%')
-                          AND (p.Nombre LIKE @Buscar OR v.Sku LIKE @Buscar OR m.Motivo LIKE @Buscar)
+                        WHERE (p.Nombre LIKE @Buscar OR v.Sku LIKE @Buscar OR m.Motivo LIKE @Buscar)
                           AND (@Periodo IS NULL OR EXISTS (SELECT 1 FROM periodocontable pc
                                WHERE pc.IdPeriodo=@Periodo AND m.Fecha BETWEEN pc.FechaInicio AND pc.FechaFin))
                         ORDER BY m.Fecha DESC,m.IdMerma DESC", Buscar(),

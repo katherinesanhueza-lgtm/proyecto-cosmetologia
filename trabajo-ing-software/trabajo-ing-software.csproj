@@ -325,6 +325,7 @@
     <Compile Include="PaginaCompras.cs" />
     <Content Include="Marcas.aspx" />
     <Content Include="App_Data\007_integracion_erp.sql" />
+    <Content Include="App_Data\008_integracion_devoluciones_ajustes.sql" />
     <Content Include="App_Data\actualizacion_bd_compras.sql" />
     <Compile Include="ClaveUsuario.cs" />
     <Compile Include="ConfiguracionGlobal.cs" />

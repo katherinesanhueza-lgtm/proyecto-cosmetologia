@@ -1,4 +1,4 @@
-﻿<%@ Page Title="Resumen de Contabilidad" Language="C#" MasterPageFile="~/Contabilidad.Master" CodeBehind="Contabilidad.aspx.cs" Inherits="trabajo_ing_software.Contabilidad" ResponseEncoding="utf-8" %>
+<%@ Page Title="Contabilidad" Language="C#" MasterPageFile="~/Contabilidad.Master" CodeBehind="Contabilidad.aspx.cs" Inherits="trabajo_ing_software.Contabilidad" ResponseEncoding="utf-8" %>
 <asp:Content ID="Contenido" ContentPlaceHolderID="MainContent" runat="server">
     <div class="dashboard compras-resumen">
 

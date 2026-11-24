@@ -331,12 +331,17 @@ namespace trabajo_ing_software
                                     SUM(vd.Cantidad) AS UnidadesVendidas, 
                                     ROUND(AVG(vd.PrecioUnitario), 0) AS PrecioPromedio,
                                     SUM(vd.Subtotal) AS IngresoTotal,
-                                    ROUND(SUM(vd.Cantidad * COALESCE(v.CostoPromedio, 0)), 0) AS CostoTotal,
-                                    ROUND(SUM(vd.Subtotal) - SUM(vd.Cantidad * COALESCE(v.CostoPromedio, 0)), 0) AS MargenBruto
+                                    ROUND(SUM(COALESCE(cv.CostoDetalle,vd.Cantidad * COALESCE(v.CostoPromedio, 0))), 0) AS CostoTotal,
+                                    ROUND(SUM(vd.Subtotal) - SUM(COALESCE(cv.CostoDetalle,vd.Cantidad * COALESCE(v.CostoPromedio, 0))), 0) AS MargenBruto
                              FROM ventadetalle vd
                              INNER JOIN varianteproducto v ON vd.IdVariante = v.IdVariante
                              INNER JOIN producto p ON v.IdProducto = p.IdProducto
                              INNER JOIN venta vt ON vd.IdVenta = vt.IdVenta
+                             LEFT JOIN (
+                                 SELECT m.IdDetalleOrigen,SUM(m.Cantidad * COALESCE(l.CostoUnitario,0)) AS CostoDetalle
+                                 FROM movimientoinventario m JOIN lote l ON l.IdLote=m.IdLote
+                                 WHERE m.Origen='Salida' GROUP BY m.IdDetalleOrigen
+                             ) cv ON cv.IdDetalleOrigen=vd.IdVentaDetalle
                              WHERE vt.Fecha BETWEEN @Desde AND @Hasta {filtroExtra}
                              GROUP BY p.IdProducto, p.Nombre, v.IdVariante, v.Sku
                              ORDER BY UnidadesVendidas DESC";
