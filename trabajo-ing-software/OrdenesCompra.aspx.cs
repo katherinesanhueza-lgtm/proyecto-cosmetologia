@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Configuration;
 using MySql.Data.MySqlClient;
@@ -24,8 +24,12 @@ namespace trabajo_ing_software
 
             // Control de acceso por perfil (RBAC): Sólo Administrador y Contador pueden gestionar parámetros legales
             string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
-            btnAbrirConfig.Visible = rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase) || 
-                                     rolUsuario.Equals("Contador", StringComparison.OrdinalIgnoreCase);
+            btnAbrirConfig.Visible = rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase) ||
+                                     rolUsuario.Equals("Administrador General", StringComparison.OrdinalIgnoreCase) ||
+                                     rolUsuario.Equals("Contador", StringComparison.OrdinalIgnoreCase);
+            btnToggleForm.Visible = PuedeGuardarCompras;
+            if (!PuedeGuardarCompras)
+                pnlFormularioOC.Visible = false;
 
             if (!IsPostBack)
             {
@@ -820,7 +824,6 @@ namespace trabajo_ing_software
 
         protected void btnGuardarConfig_Click(object sender, EventArgs e)
         {
-            ExigirEscrituraCompras();
             string rolUsuario = Session["RolUsuario"] != null ? Session["RolUsuario"].ToString() : "";
             if (!rolUsuario.Equals("Administrador", StringComparison.OrdinalIgnoreCase) && !rolUsuario.Equals("Contador", StringComparison.OrdinalIgnoreCase))
             {

@@ -15,6 +15,12 @@ namespace trabajo_ing_software
             bool esPos = string.Equals(Request.QueryString["vista"], "pos", StringComparison.OrdinalIgnoreCase)
                 || !string.IsNullOrEmpty(Request.QueryString["idCotizacion"]);
 
+            if (esPos && !PuedeGuardarVentas)
+            {
+                Response.Redirect("Ventas.aspx?vista=resumen");
+                return;
+            }
+
             pnlResumenVentas.Visible = !esPos;
             pnlPuntoVenta.Visible = esPos;
             Page.Title = esPos ? "Punto de Venta" : "Resumen de Ventas";

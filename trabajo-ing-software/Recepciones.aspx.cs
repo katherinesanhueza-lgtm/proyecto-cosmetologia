@@ -28,6 +28,10 @@ namespace trabajo_ing_software
                 return;
             }
 
+            btnToggleForm.Visible = PuedeGuardarCompras;
+            if (!PuedeGuardarCompras)
+                pnlFormularioRec.Visible = false;
+
             if (!IsPostBack)
             {
                 lblBienvenida.Text = Session["NombreUsuario"] != null ? Session["NombreUsuario"].ToString() : "Usuario";
@@ -38,7 +42,7 @@ namespace trabajo_ing_software
                 CargarLaboratoriosFiltro();
                 CargarRecepciones();
                 CalcularKPIs();
-                if (int.TryParse(Request.QueryString["orden"], out int orden)
+                if (PuedeGuardarCompras && int.TryParse(Request.QueryString["orden"], out int orden)
                     && ddlOrdenCompra.Items.FindByValue(orden.ToString()) != null)
                 {
                     ddlOrdenCompra.SelectedValue = orden.ToString();

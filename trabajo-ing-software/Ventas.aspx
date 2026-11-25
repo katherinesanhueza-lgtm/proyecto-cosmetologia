@@ -125,7 +125,11 @@
                             </Columns>
                         </asp:GridView>
                     </div>
+                    <% if (PuedeGuardarVentas) { %>
                     <a class="btn btn-outline-secondary" href="<%: ResolveUrl("~/Ventas.aspx?vista=pos") %>">Ir a Punto de Venta</a>
+                    <% } else { %>
+                    <a class="btn btn-outline-secondary" href="<%: ResolveUrl("~/ReporteVentas.aspx?origen=resumen") %>">Ver Reporte de Ventas</a>
+                    <% } %>
                 </section>
             </div>
         </asp:Panel>

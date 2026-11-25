@@ -19,6 +19,12 @@ namespace trabajo_ing_software
                 return;
             }
 
+            btnNuevoLaboratorio.Visible = PuedeGuardarCompras;
+            if (gvLaboratorios.Columns.Count > 4)
+                gvLaboratorios.Columns[4].Visible = PuedeGuardarCompras;
+            if (!PuedeGuardarCompras)
+                pnlModalForm.Visible = false;
+
             if (!IsPostBack)
             {
                 lblBienvenida.Text = Session["NombreUsuario"].ToString();

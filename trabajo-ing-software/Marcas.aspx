@@ -15,6 +15,7 @@
         base.OnPreRender(e);
         btnNuevaMarca.Visible = PuedeGuardarCompras;
         if (!PuedeGuardarCompras) formulario.Visible = false;
+        if (lista.Columns.Count > 4) lista.Columns[4].Visible = PuedeGuardarCompras;
         if (lista.HeaderRow != null)
             lista.HeaderRow.TableSection = TableRowSection.TableHeader;
     }
@@ -54,6 +55,7 @@
     {
         if (e.CommandName == "EditarMarca")
         {
+            ExigirEscrituraCompras();
             int id;
             if (!int.TryParse(Convert.ToString(e.CommandArgument), out id))
                 return;
