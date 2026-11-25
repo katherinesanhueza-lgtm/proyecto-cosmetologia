@@ -184,7 +184,7 @@
                             new[] { "Compras", "Compras.aspx", "M5 7h14v14H5z M9 8V6a3 3 0 0 1 6 0v2" },
                             new[] { "Ventas", "Ventas.aspx?vista=resumen", "M5 9h14l2 4v7H3v-7z M7 9V4h10v5 M7 15h3 M15 15h2" },
                             new[] { "Inventario", "Inventario.aspx?vista=resumen", "M3 4h18v5H3z M5 9v11h14V9 M10 13h4" },
-                            new[] { "Contabilidad", "Contabilidad.aspx?vista=cuentas", "M3 9l9-6 9 6H3z M5 20h14 M7 10v7 M12 10v7 M17 10v7" }
+                            new[] { "Contabilidad", "Contabilidad.aspx?vista=diario", "M3 9l9-6 9 6H3z M5 20h14 M7 10v7 M12 10v7 M17 10v7" }
                         };
                         if (EsRolAdmin)
                         {
@@ -247,20 +247,16 @@
                     </a>
                     <% } } else if (!EsInicio) {
                         var secciones = new[] {
-                            new[] { "cuentas", "Plan de cuentas", "Contabilidad.aspx?vista=cuentas", "M8 6h13 M8 12h13 M8 18h13 M3 6h.01 M3 12h.01 M3 18h.01" },
-                            new[] { "periodos", "Períodos contables", "Contabilidad.aspx?vista=periodos", "M3 4h18v18H3z M16 2v4 M8 2v4 M3 10h18" },
-                            new[] { "balance", "Balance de comprobación y saldos", "Contabilidad.aspx?vista=balance", "M12 3v18 M3 7h18 M5 7l-2 6h4l-2-6z M19 7l-2 6h4l-2-6z" },
                             new[] { "diario", "Asientos contables / Libro diario", "Contabilidad.aspx?vista=diario", "M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" },
-                            new[] { "resultados", "Estado de resultados", "Contabilidad.aspx?vista=resultados", "M3 3v18h18 M19 9l-5 5-4-4-3 3" },
                             new[] { "CuentasPagar", "Cuentas por pagar", "CuentasPagar.aspx", "M1 4h22v16H1z M1 10h22" },
-                            new[] { "pagos", "Proyección de pagos a laboratorios (30/60/90 días)", "Contabilidad.aspx?vista=pagos", "M12 1v22 M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" },
                             new[] { "tesoreria", "Cuentas por cobrar y cobros", "Contabilidad.aspx?vista=tesoreria", "M22 11.08V12a10 10 0 1 1-5.93-9.14 M22 4L12 14.01l-3-3" },
-                            new[] { "cobros", "Antigüedad de saldos y morosidad", "Contabilidad.aspx?vista=cobros", "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M12 6v6l4 2" },
-                            new[] { "iva", "Control de IVA y cierre de período", "Contabilidad.aspx?vista=iva", "M19 5L5 19 M6.5 6.5m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 0 0-5 0 M17.5 17.5m-2.5 0a2.5 2.5 0 1 0 5 0a2.5 2.5 0 0 0-5 0" },
                             new[] { "perdidas", "Pérdidas financieras por productos vencidos o dañados", "Contabilidad.aspx?vista=perdidas", "M10.29 3.86L1.82 18a2 2 0 0 1 1.71 3h16.94a2 2 0 0 1-1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z M12 9v4 M12 17h.01" }
                         };
-                        string actual = PaginaActual == "Contabilidad" ? (Request.QueryString["vista"] ?? "cuentas") : PaginaActual;
-                        if (string.Equals(actual, "resumen", StringComparison.OrdinalIgnoreCase)) actual = "cuentas";
+                        string actual = PaginaActual == "Contabilidad"
+                            ? (Request.QueryString["vista"] ?? "diario")
+                            : (PaginaActual == "ReporteFlujoCaja" ? "CuentasPagar" : PaginaActual);
+                        if (!Array.Exists(secciones, s => string.Equals(s[0], actual, StringComparison.OrdinalIgnoreCase)))
+                            actual = "diario";
                         foreach (var seccion in secciones)
                         {
                     %>

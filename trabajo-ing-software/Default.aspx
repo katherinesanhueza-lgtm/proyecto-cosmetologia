@@ -157,12 +157,12 @@
                     <p>Consulta y actualiza el estado de preparación, ruta y entrega de despachos asignados.</p>
                     <span class="inicio-enlace">Ir a despachos</span>
                 </a><% } %>
-                <% if (VerArea("Contador")) { %><a href="<%: ResolveUrl("~/Contabilidad.aspx") %>" class="inicio-modulo">
+                <% if (VerArea("Contador")) { %><a href="<%: ResolveUrl("~/Contabilidad.aspx?vista=diario") %>" class="inicio-modulo">
                     <span class="inicio-icono" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-6 9 6H3z M5 20h14 M7 10v7 M12 10v7 M17 10v7" /></svg>
                     </span>
                     <h3>Contabilidad</h3>
-                    <p>Consulta plan de cuentas, libro diario, cuentas por pagar y por cobrar y flujo de caja.</p>
+                    <p>Consulta libro diario, cuentas por pagar y flujo de caja, cobros a clientes y pérdidas de inventario.</p>
                     <span class="inicio-enlace">Ir a contabilidad</span>
                 </a><% } %>
             </div>
