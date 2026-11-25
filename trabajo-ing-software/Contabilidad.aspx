@@ -82,7 +82,7 @@
                 <div>
                     <p class="dashboard-etiqueta">MÓDULO DE CONTABILIDAD</p>
                     <h1>Gestión de Contabilidad</h1>
-                    <p class="dashboard-descripcion">Administra tus cuentas, períodos y asientos. Consulta los reportes financieros del módulo.</p>
+                    <p class="dashboard-descripcion">Consulta y registra asientos del libro diario, cobros a clientes y pérdidas financieras conectadas con Compras, Ventas e Inventario.</p>
                 </div>
             </header>
 

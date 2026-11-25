@@ -62,7 +62,7 @@ namespace trabajo_ing_software
                            FROM RecepcionCompra r
                            INNER JOIN OrdenCompra oc ON oc.IdOC = r.IdOC
                            INNER JOIN Laboratorio l ON l.IdLaboratorio = oc.IdLaboratorio
-                           WHERE IFNULL(r.Estado, 'Aprobada') = 'Aprobada'
+                           WHERE IFNULL(r.Estado, 'Aprobada') IN ('Aprobada', 'Completa', 'Parcial')
                            ORDER BY r.FechaRecepcion DESC, r.IdRecepcion DESC";
 
             using (MySqlConnection con = ConexionErp.Crear(connectionString))

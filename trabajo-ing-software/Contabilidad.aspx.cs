@@ -38,18 +38,10 @@ namespace trabajo_ing_software
             }
 
             ViewStateUserKey = Session.SessionID;
-            if (!string.IsNullOrEmpty(Request.QueryString["cuenta"]))
-                vista = "cuentas";
-            else
-            {
-                vista = Request.QueryString["vista"] ?? "cuentas";
-                if (string.Equals(vista, "resumen", StringComparison.OrdinalIgnoreCase))
-                    vista = "cuentas";
-            }
-
-            string[] vistasHabilitadas = { "cuentas", "periodos", "diario", "balance", "resultados", "pagos", "tesoreria", "iva", "cobros", "perdidas" };
+            vista = (Request.QueryString["vista"] ?? "diario").Trim().ToLowerInvariant();
+            string[] vistasHabilitadas = { "diario", "tesoreria", "perdidas" };
             if (!vistasHabilitadas.Contains(vista, StringComparer.OrdinalIgnoreCase))
-                vista = "cuentas";
+                vista = "diario";
 
             pnlResumenContabilidad.Visible = false;
             pnlVistaContabilidad.Visible = true;
@@ -93,12 +85,15 @@ namespace trabajo_ing_software
                     origen.DataBind();
                     origen.Items.Insert(0, new ListItem("Asiento manual sin documento", ""));
                     Texto("Fecha", "Fecha del asiento", 10, TextBoxMode.Date);
+                    ((TextBox)campos["Fecha"]).Text = DateTime.Today.ToString("yyyy-MM-dd");
                     Texto("Glosa", "Glosa", 255);
                     Texto("Lineas", "Una línea por cuenta: código;debe;haber", 8000, TextBoxMode.MultiLine);
                     Formulario.Controls.Add(new LiteralControl("<p class='form-text'>Ejemplo: 1101;1000;0 y, en otra línea, 2101;0;1000. Usa coma o punto decimal sin separador de miles.</p>"));
                     Boton("Contabilizar asiento", Registrar);
                     Texto("Reverso", "Número del asiento original para revertir", 10, TextBoxMode.Number);
                     Boton("Contabilizar reverso", Revertir);
+                    Boton("Exportar PDF", () => Exportar(true), false);
+                    Boton("Exportar Excel", () => Exportar(false), false);
                     break;
                 case "operaciones":
                     Titulo.Text = "Operaciones del ERP";
@@ -131,6 +126,8 @@ namespace trabajo_ing_software
                     foreach (string m in new[]{"Transferencia","Efectivo","Tarjeta"}) medio.Items.Add(m);
 
                     Boton("Registrar cobro", RegistrarCobro);
+                    Boton("Exportar PDF", () => Exportar(true), false);
+                    Boton("Exportar Excel", () => Exportar(false), false);
                     break;
                 case "iva":
                     Titulo.Text = "Declaración de IVA";
@@ -217,8 +214,8 @@ namespace trabajo_ing_software
         private void AccionesReporte()
         {
             Boton("Consultar", delegate { });
-            Boton("Exportar PDF", () => Exportar(true));
-            Boton("Exportar Excel", () => Exportar(false));
+            Boton("Exportar PDF", () => Exportar(true), false);
+            Boton("Exportar Excel", () => Exportar(false), false);
         }
 
         private void Agregar(WebControl control, string id, string etiqueta)
@@ -245,9 +242,9 @@ namespace trabajo_ing_software
             return lista;
         }
 
-        private void Boton(string titulo, Action accion)
+        private void Boton(string titulo, Action accion, bool primario = true)
         {
-            var boton = new Button { Text = titulo, CssClass = "btn btn-primary contabilidad-accion" };
+            var boton = new Button { Text = titulo, CssClass = primario ? "btn btn-primary contabilidad-accion" : "btn btn-outline-secondary contabilidad-accion" };
             boton.Click += delegate
             {
                 if (!autorizado) return;
