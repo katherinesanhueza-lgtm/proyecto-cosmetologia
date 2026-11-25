@@ -12,6 +12,9 @@ namespace trabajo_ing_software
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (gvClientes.Columns.Count > 10)
+                gvClientes.Columns[10].Visible = PuedeGuardarVentas;
+
             if (!IsPostBack)
             {
                 lblBienvenida.Text = Convert.ToString(Session["NombreUsuario"]) ?? "Vendedor";

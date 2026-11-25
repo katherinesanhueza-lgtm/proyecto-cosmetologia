@@ -705,15 +705,15 @@
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                                         Detalle
                                     </asp:LinkButton>
-                                    <asp:LinkButton ID="btnAprobar" runat="server" CommandName="AprobarOC" CommandArgument='<%# Eval("IdOC") %>' Visible='<%# Eval("Estado").ToString() == "Borrador" %>' CssClass="btn btn-primary btn-sm oc-btn-accion" ToolTip="Emitir a Laboratorio">
+                                    <asp:LinkButton ID="btnAprobar" runat="server" CommandName="AprobarOC" CommandArgument='<%# Eval("IdOC") %>' Visible='<%# PuedeGuardarCompras && Eval("Estado").ToString() == "Borrador" %>' CssClass="btn btn-primary btn-sm oc-btn-accion" ToolTip="Emitir a Laboratorio">
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                                         Emitir
                                     </asp:LinkButton>
-                                    <asp:LinkButton ID="btnRecibir" runat="server" CommandName="RecibirOC" CommandArgument='<%# Eval("IdOC") %>' Visible='<%# Eval("Estado").ToString() == "Emitida" || Eval("Estado").ToString() == "Parcial" %>' CssClass="btn btn-primary btn-sm oc-btn-accion" ToolTip="Registrar Recepci&oacute;n">
+                                    <asp:LinkButton ID="btnRecibir" runat="server" CommandName="RecibirOC" CommandArgument='<%# Eval("IdOC") %>' Visible='<%# PuedeGuardarCompras && (Eval("Estado").ToString() == "Emitida" || Eval("Estado").ToString() == "Parcial") %>' CssClass="btn btn-primary btn-sm oc-btn-accion" ToolTip="Registrar Recepci&oacute;n">
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                         Recibir
                                     </asp:LinkButton>
-                                    <asp:LinkButton ID="btnAnular" runat="server" CommandName="AnularOC" CommandArgument='<%# Eval("IdOC") %>' Visible='<%# Eval("Estado").ToString() != "Anulada" && Eval("Estado").ToString() != "Recibida" %>' OnClientClick="return confirm('¿Seguro que deseas anular esta orden de compra?');" CssClass="btn btn-outline-danger btn-sm oc-btn-accion" ToolTip="Anular Orden">
+                                    <asp:LinkButton ID="btnAnular" runat="server" CommandName="AnularOC" CommandArgument='<%# Eval("IdOC") %>' Visible='<%# PuedeGuardarCompras && Eval("Estado").ToString() != "Anulada" && Eval("Estado").ToString() != "Recibida" %>' OnClientClick="return confirm('¿Seguro que deseas anular esta orden de compra?');" CssClass="btn btn-outline-danger btn-sm oc-btn-accion" ToolTip="Anular Orden">
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                                         Anular
                                     </asp:LinkButton>

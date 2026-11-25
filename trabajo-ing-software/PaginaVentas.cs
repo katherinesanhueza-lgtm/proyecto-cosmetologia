@@ -8,6 +8,19 @@ namespace trabajo_ing_software
     {
         protected int UsuarioVenta { get; private set; }
 
+        protected bool PuedeGuardarVentas
+        {
+            get
+            {
+                string rol = (Convert.ToString(Session["RolUsuario"]) ?? "").Trim();
+                return EsRol(rol, "Administrador")
+                    || EsRol(rol, "Administrador General")
+                    || EsRol(rol, "Vendedor");
+            }
+        }
+
+        protected bool EsBodegueroVentas => EsRol((Convert.ToString(Session["RolUsuario"]) ?? "").Trim(), "Bodeguero");
+
         protected override void OnInit(EventArgs e)
         {
             if (!int.TryParse(Convert.ToString(Session["IdUsuario"]), out int usuario) || usuario <= 0)
@@ -18,7 +31,7 @@ namespace trabajo_ing_software
 
             string rol = Convert.ToString(Session["RolUsuario"]).Trim();
             string pagina = System.IO.Path.GetFileNameWithoutExtension(AppRelativeVirtualPath);
-            bool permitido = EsRol(rol, "Administrador") || EsRol(rol, "Vendedor")
+            bool permitido = PuedeGuardarVentas
                 || (pagina == "Despachos" && EsRol(rol, "Bodeguero"))
                 || EsRol(rol, "Contador");
             if (!permitido) throw new HttpException(403, "Tu perfil no tiene acceso a esta pantalla de Ventas.");
@@ -29,8 +42,7 @@ namespace trabajo_ing_software
 
         protected void ExigirEscrituraVentas()
         {
-            string rol = Convert.ToString(Session["RolUsuario"]);
-            if (!EsRol(rol, "Administrador") && !EsRol(rol, "Vendedor"))
+            if (!PuedeGuardarVentas)
                 throw new HttpException(403, "Tu perfil tiene acceso de consulta.");
         }
 

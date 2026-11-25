@@ -13,6 +13,9 @@ namespace trabajo_ing_software
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (gvDespachos.Columns.Count > 8)
+                gvDespachos.Columns[8].Visible = PuedeGuardarVentas;
+
             ddlDocumentoOrigen.SelectedIndexChanged += new EventHandler(ddlDocumentoOrigen_SelectedIndexChanged);
 
             if (!IsPostBack)

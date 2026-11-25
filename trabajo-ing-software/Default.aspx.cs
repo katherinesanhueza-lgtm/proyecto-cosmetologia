@@ -11,8 +11,59 @@ namespace trabajo_ing_software
 
         protected bool VerArea(string area)
         {
-            string rol = Convert.ToString(Session["RolUsuario"]);
-            return rol == "Administrador" || rol == area || (rol == "Contador" && area != "Administrador");
+            string rol = (Convert.ToString(Session["RolUsuario"]) ?? "").Trim();
+            bool esAdmin = string.Equals(rol, "Administrador", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(rol, "Administrador General", StringComparison.OrdinalIgnoreCase);
+            bool esContador = string.Equals(rol, "Contador", StringComparison.OrdinalIgnoreCase);
+            return esAdmin
+                || string.Equals(rol, area, StringComparison.OrdinalIgnoreCase)
+                || (esContador && !string.Equals(area, "Administrador", StringComparison.OrdinalIgnoreCase));
+        }
+
+        protected bool EsBodeguero
+        {
+            get
+            {
+                string rol = (Convert.ToString(Session["RolUsuario"]) ?? "").Trim();
+                return string.Equals(rol, "Bodeguero", StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        protected bool PuedeGestionarInventario
+        {
+            get
+            {
+                string rol = (Convert.ToString(Session["RolUsuario"]) ?? "").Trim();
+                return string.Equals(rol, "Administrador", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(rol, "Administrador General", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(rol, "Bodeguero", StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        protected bool EsVistaCompleta
+        {
+            get
+            {
+                string rol = (Convert.ToString(Session["RolUsuario"]) ?? "").Trim();
+                return string.Equals(rol, "Administrador", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(rol, "Administrador General", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(rol, "Contador", StringComparison.OrdinalIgnoreCase);
+            }
+        }
+
+        protected string DescripcionInicio
+        {
+            get
+            {
+                string rol = (Convert.ToString(Session["RolUsuario"]) ?? "").Trim();
+                if (string.Equals(rol, "Comprador", StringComparison.OrdinalIgnoreCase))
+                    return "Resumen consolidado de compras, proveedores y consulta de inventario FEFO en tiempo real.";
+                if (string.Equals(rol, "Vendedor", StringComparison.OrdinalIgnoreCase))
+                    return "Resumen consolidado de ventas, clientes y consulta de inventario FEFO en tiempo real.";
+                if (string.Equals(rol, "Bodeguero", StringComparison.OrdinalIgnoreCase))
+                    return "Resumen consolidado de inventario FEFO, bodegas y despachos en tiempo real.";
+                return "Resumen consolidado de compras, ventas, inventario FEFO y contabilidad general en tiempo real.";
+            }
         }
 
         protected void Page_Load(object sender, EventArgs e)

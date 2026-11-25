@@ -1,4 +1,4 @@
-﻿<%@ Master Language="C#" %>
+<%@ Master Language="C#" %>
 <script runat="server">
     private static readonly string[][] VistasCompras = {
         new[] { "Compras", "Resumen de Compras", "M18 20V10 M12 20V4 M6 20v-6", "Compras.aspx" },
@@ -45,8 +45,11 @@
         || Array.Exists(VistasVentas, vista => vista[0] == PaginaActual)
         || Array.Exists(ReportesVentas, r => r == PaginaActual);
     protected bool EsAdminVista => Array.Exists(VistasAdmin, vista => vista[0] == PaginaActual);
-    protected bool EsRolAdmin => string.Equals(Convert.ToString(Session["RolUsuario"]), "Administrador", StringComparison.OrdinalIgnoreCase);
-    protected string NombreModulo => EsCompras ? "Compras" : EsVentas ? "Ventas" : EsInventario ? "Inventario" : EsAdminVista ? "Usuarios" : EsInicio ? "Inicio" : "Contabilidad";
+    protected string RolActual => (Convert.ToString(Session["RolUsuario"]) ?? "").Trim();
+    protected bool EsRolAdmin => string.Equals(RolActual, "Administrador", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(RolActual, "Administrador General", StringComparison.OrdinalIgnoreCase);
+    protected bool PuedeGestionarInventario => EsRolAdmin || string.Equals(RolActual, "Bodeguero", StringComparison.OrdinalIgnoreCase);
+    protected string NombreModulo => EsCompras ? "Compras" : EsVentas ? "Ventas" : EsInventario ? "Inventario" : EsAdminVista ? (EsRolAdmin ? "Usuarios" : "Privacidad") : EsInicio ? "Inicio" : "Contabilidad";
 
     protected string InicialUsuario
     {
@@ -189,10 +192,13 @@
                         }
                         foreach (var modulo in modulosLista)
                         {
-                            string rol = Convert.ToString(Session["RolUsuario"]);
-                            if (!EsRolAdmin && ((modulo[0]=="Compras" && rol!="Comprador" && rol!="Contador") ||
-                                (modulo[0]=="Contabilidad" && rol!="Contador") || (modulo[0]=="Ventas" && rol=="Comprador"))) continue;
-                            if (modulo[0]=="Ventas" && rol=="Bodeguero") modulo[1]="Despachos.aspx";
+                            string rol = RolActual;
+                            bool esComprador = string.Equals(rol, "Comprador", StringComparison.OrdinalIgnoreCase);
+                            bool esContador = string.Equals(rol, "Contador", StringComparison.OrdinalIgnoreCase);
+                            bool esBodeguero = string.Equals(rol, "Bodeguero", StringComparison.OrdinalIgnoreCase);
+                            if (!EsRolAdmin && ((modulo[0] == "Compras" && !esComprador && !esContador) ||
+                                (modulo[0] == "Contabilidad" && !esContador) || (modulo[0] == "Ventas" && esComprador))) continue;
+                            if (modulo[0] == "Ventas" && esBodeguero) modulo[1] = "Despachos.aspx";
                             bool activo = NombreModulo == modulo[0];
                     %>
                     <a class="menu-item<%: activo ? " principal-activo" : "" %>"
@@ -211,16 +217,17 @@
                     <% } %>
                     <% if (EsInventario) {
                         foreach (var entrada in new[] {
-                            new[] { "InventarioResumen", "Inventario.aspx?vista=resumen", "Resumen de Inventario", "M18 20V10 M12 20V4 M6 20v-6" },
-                            new[] { "InventarioExistencias", "Inventario.aspx?vista=existencias", "Existencias", "M3 4h18v5H3z M5 9v11h14V9 M10 13h4" },
-                            new[] { "Gestion_productos", "Gestion.aspx?m=productos", "Productos", "M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z M7 7h.01" },
-                            new[] { "Gestion_variantes", "Gestion.aspx?m=variantes", "Variantes", "M12 2L2 7l10 5 10-5-10-5z M2 17l10 5 10-5 M2 12l10 5 10-5" },
-                            new[] { "Gestion_lotes", "Gestion.aspx?m=lotes", "Lotes", "M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z M3.27 6.96L12 12.01l8.73-5.05 M12 22.08V12" },
-                            new[] { "Gestion_movimientos", "Gestion.aspx?m=movimientos", "Movimientos", "M7 16V4m0 0L3 8m4-4l4 4 M17 8v12m0 0l4-4m-4 4l-4-4" },
-                            new[] { "Gestion_historial", "Gestion.aspx?m=historial", "Historial", "M12 2a10 10 0 1 0 0 20 10 10 0 1 0 0-20z M12 6v6l4 2" },
-                            new[] { "Gestion_alertas", "Gestion.aspx?m=alertas", "Alertas", "M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z M12 9v4 M12 17h.01" },
-                            new[] { "ReporteInventario", "ReporteInventario.aspx", "Reporte de inventario", "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8 M16 17H8" }
-                        }) { %>
+                            new[] { "InventarioResumen", "Inventario.aspx?vista=resumen", "Resumen de Inventario", "M18 20V10 M12 20V4 M6 20v-6", "consulta" },
+                            new[] { "InventarioExistencias", "Inventario.aspx?vista=existencias", "Existencias", "M3 4h18v5H3z M5 9v11h14V9 M10 13h4", "consulta" },
+                            new[] { "Gestion_productos", "Gestion.aspx?m=productos", "Productos", "M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z M7 7h.01", "gestion" },
+                            new[] { "Gestion_variantes", "Gestion.aspx?m=variantes", "Variantes", "M12 2L2 7l10 5 10-5-10-5z M2 17l10 5 10-5 M2 12l10 5 10-5", "gestion" },
+                            new[] { "Gestion_lotes", "Gestion.aspx?m=lotes", "Lotes", "M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z M3.27 6.96L12 12.01l8.73-5.05 M12 22.08V12", "gestion" },
+                            new[] { "Gestion_movimientos", "Gestion.aspx?m=movimientos", "Movimientos", "M7 16V4m0 0L3 8m4-4l4 4 M17 8v12m0 0l4-4m-4 4l-4-4", "gestion" },
+                            new[] { "Gestion_historial", "Gestion.aspx?m=historial", "Historial", "M12 2a10 10 0 1 0 0 20 10 10 0 1 0 0-20z M12 6v6l4 2", "consulta" },
+                            new[] { "Gestion_alertas", "Gestion.aspx?m=alertas", "Alertas", "M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z M12 9v4 M12 17h.01", "consulta" },
+                            new[] { "ReporteInventario", "ReporteInventario.aspx", "Reporte de inventario", "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M16 13H8 M16 17H8", "consulta" }
+                        }) {
+                            if (entrada[4] == "gestion" && !PuedeGestionarInventario) continue; %>
                     <a class="menu-item" aria-current="<%: ClaveSeccionActual == entrada[0] ? "page" : "false" %>" href="<%: ResolveUrl("~/" + entrada[1]) %>">
                         <span class="menu-icono" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="<%: entrada[3] %>" /></svg></span>
                         <%: entrada[2] %>
@@ -228,6 +235,9 @@
                     <% } } else if (EsCompras || EsVentas || EsAdminVista) {
                         foreach (var seccion in (EsCompras ? VistasCompras : EsVentas ? VistasVentas : VistasAdmin))
                         {
+                            if (EsVentas && string.Equals(RolActual, "Bodeguero", StringComparison.OrdinalIgnoreCase) && seccion[0] != "Despachos") continue;
+                            if (EsVentas && string.Equals(RolActual, "Contador", StringComparison.OrdinalIgnoreCase) && seccion[0] == "VentasPOS") continue;
+                            if (EsAdminVista && !EsRolAdmin && seccion[0] != "Privacidad") continue;
                             string urlDestino = seccion.Length > 3 ? seccion[3] : (seccion[0] + ".aspx");
                     %>
                     <a class="menu-item" aria-current="<%: ClaveSeccionActual == seccion[0] ? "page" : "false" %>"

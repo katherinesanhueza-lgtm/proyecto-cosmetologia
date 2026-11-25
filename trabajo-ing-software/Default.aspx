@@ -2,7 +2,7 @@
     AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="trabajo_ing_software._Default" ResponseEncoding="utf-8" %>
 
 <asp:Content ID="EstilosInicio" ContentPlaceHolderID="EstilosPagina" runat="server">
-    <link href="<%: ResolveUrl("~/Content/Inicio.css?v=5") %>" rel="stylesheet" />
+    <link href="<%: ResolveUrl("~/Content/Inicio.css?v=7") %>" rel="stylesheet" />
 </asp:Content>
 
 <asp:Content ID="Acciones" ContentPlaceHolderID="AccionesUsuario" runat="server">
@@ -15,7 +15,7 @@
             <div>
                 <p class="dashboard-etiqueta">Panel ejecutivo central</p>
                 <h1>Bienvenido a Dermo ERP</h1>
-                <p class="dashboard-descripcion">Resumen consolidado de compras, ventas, inventario FEFO y contabilidad general en tiempo real.</p>
+                <p class="dashboard-descripcion"><%: DescripcionInicio %></p>
             </div>
             <div class="inicio-fecha">
                 <span>Fecha del sistema</span>
@@ -79,9 +79,9 @@
                         <asp:Label ID="lblContabilidadDetalle" runat="server" Text="0 CxP · 0 CxC vigentes" CssClass="inicio-detalle" />
                     </div>
                 </div><% } %>
-            </div>
+            <% if (EsVistaCompleta) { %></div>
 
-            <div class="inicio-indicadores" style="margin-top: 14px;">
+            <div class="inicio-indicadores" style="margin-top: 16px;"><% } %>
                 <div class="card-dermocosmetica inicio-indicador">
                     <span class="inicio-icono inicio-icono-alerta" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z M12 9v4 M12 17h.01" /></svg>
@@ -104,7 +104,7 @@
                     </div>
                 </div>
 
-                <% if ((VerArea("Administrador") || Convert.ToString(Session["RolUsuario"])=="Bodeguero")) { %><div class="card-dermocosmetica inicio-indicador">
+                <% if (PuedeGestionarInventario) { %><div class="card-dermocosmetica inicio-indicador">
                     <span class="inicio-icono" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z M3.27 6.96L12 12.01l8.73-5.05 M12 22.08V12" /></svg>
                     </span>
@@ -124,15 +124,7 @@
                     <p>Navega directamente al módulo operativo que necesitas gestionar.</p>
                 </div>
             </div>
-            <div class="inicio-modulos">
-                <a href="<%: ResolveUrl("~/Inventario.aspx") %>" class="inicio-modulo">
-                    <span class="inicio-icono" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18v5H3z M5 9v11h14V9 M10 13h4" /></svg>
-                    </span>
-                    <h3>Inventario</h3>
-                    <p>Consulta existencias por SKU y bodega, control de lotes FEFO y movimientos de kardex.</p>
-                    <span class="inicio-enlace">Ver inventario</span>
-                </a>
+            <div class="inicio-modulos<%: EsVistaCompleta ? "" : " inicio-modulos-2" %>">
                 <% if (VerArea("Comprador")) { %><a href="<%: ResolveUrl("~/Compras.aspx") %>" class="inicio-modulo">
                     <span class="inicio-icono" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14v14H5z M9 8V6a3 3 0 0 1 6 0v2" /></svg>
@@ -148,6 +140,22 @@
                     <h3>Ventas</h3>
                     <p>Gestiona cartera de clientes, presupuestos, emisión de boletas y facturas y despachos.</p>
                     <span class="inicio-enlace">Ir a ventas</span>
+                </a><% } %>
+                <a href="<%: ResolveUrl("~/Inventario.aspx?vista=resumen") %>" class="inicio-modulo">
+                    <span class="inicio-icono" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h18v5H3z M5 9v11h14V9 M10 13h4" /></svg>
+                    </span>
+                    <h3>Inventario</h3>
+                    <p><%: PuedeGestionarInventario ? "Consulta existencias por SKU y bodega, control de lotes FEFO y movimientos de kardex." : "Consulta existencias por SKU y bodega, historial de movimientos, alertas y reportes de inventario." %></p>
+                    <span class="inicio-enlace">Ver inventario</span>
+                </a>
+                <% if (EsBodeguero) { %><a href="<%: ResolveUrl("~/Despachos.aspx") %>" class="inicio-modulo">
+                    <span class="inicio-icono" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h15v13H1z M16 8h4l3 3v5h-7V8z M5.5 18.5m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0 M18.5 18.5m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0" /></svg>
+                    </span>
+                    <h3>Despachos</h3>
+                    <p>Consulta y actualiza el estado de preparación, ruta y entrega de despachos asignados.</p>
+                    <span class="inicio-enlace">Ir a despachos</span>
                 </a><% } %>
                 <% if (VerArea("Contador")) { %><a href="<%: ResolveUrl("~/Contabilidad.aspx") %>" class="inicio-modulo">
                     <span class="inicio-icono" aria-hidden="true">

@@ -38,11 +38,15 @@
                 <p class="text-muted" style="margin-top: 4px;">Programaci&oacute;n de env&iacute;os, asignaci&oacute;n de transportistas, seguimiento de ruta y registro de entregas.</p>
             </div>
             <div class="compras-acciones" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <% if (!EsBodegueroVentas) { %>
                 <a href="ReporteVentas.aspx?tipo=8&amp;origen=despachos" class="btn btn-outline-secondary">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                     Reporte Consolidado
                 </a>
+                <% } %>
+                <% if (PuedeGuardarVentas) { %>
                 <button type="button" class="btn btn-primary" onclick="abrirModalDespacho();">+ Programar Despacho</button>
+                <% } %>
             </div>
         </div>
 

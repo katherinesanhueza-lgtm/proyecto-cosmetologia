@@ -13,6 +13,9 @@ namespace trabajo_ing_software
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (gvHistorialCotizaciones.Columns.Count > 6)
+                gvHistorialCotizaciones.Columns[6].Visible = PuedeGuardarVentas;
+
             if (!IsPostBack)
             {
                 using (var con = ConexionErp.Crear(connectionString))
