@@ -217,7 +217,7 @@
 
             <!-- MODAL FLOTANTE DE RECEPCION Y ASIGNACION DE LOTES -->
             <asp:Panel ID="pnlFormularioRec" runat="server" Visible="false" CssClass="modal-overlay">
-                <div class="modal-content-card modal-lg-card">
+                <div class="modal-content-card modal-lg-card" style="max-width: 980px;">
                 <div class="modal-header-dermo">
                     <div>
                         <span class="pill-badge" style="font-size: 10px; padding: 3px 10px;">RECEPCI&Oacute;N F&Iacute;SICA</span>
@@ -276,44 +276,58 @@
                         Indique la cantidad recepcionada en bodega, el c&oacute;digo de lote impreso en el empaque y la fecha de caducidad para el control FEFO.
                     </p>
 
-                    <div class="table-dermo-container" style="margin-bottom: 0; border-radius: 12px;">
-                        <asp:GridView ID="gvItemsRecepcion" runat="server" AutoGenerateColumns="False" CssClass="table table-hover align-middle" GridLines="None" ShowHeaderWhenEmpty="True">
+                    <div class="table-dermo-container" style="margin-bottom: 0; border-radius: 12px; overflow-x: auto;">
+                        <asp:GridView ID="gvItemsRecepcion" runat="server" AutoGenerateColumns="False" CssClass="table table-hover align-middle mb-0" GridLines="None" ShowHeaderWhenEmpty="True" style="margin-bottom: 0; font-size: 13px;">
                             <EmptyDataTemplate>
                                 <div style="padding: 18px 16px; text-align: center; color: #736E67; font-size: 13px; background: #FFFFFF;">
                                     Seleccione una <strong>Orden de Compra pendiente</strong> en el paso 1 para cargar los productos, asignar el <strong>N&deg; de lote</strong> y definir la <strong>fecha de vencimiento (FEFO)</strong>.
                                 </div>
                             </EmptyDataTemplate>
                             <Columns>
-                                <asp:BoundField DataField="Sku" HeaderText="SKU" />
-                                <asp:BoundField DataField="Producto" HeaderText="Producto e Insumo" />
-                                <asp:BoundField DataField="NombreVariante" HeaderText="Variante / Presentaci&oacute;n" />
-                                <asp:BoundField DataField="CantidadPedida" HeaderText="Pedidas" />
-                                <asp:BoundField DataField="CantidadRecibida" HeaderText="Ya Recibidas" />
-                                <asp:BoundField DataField="CantidadPendiente" HeaderText="Pendientes" />
+                                <asp:TemplateField HeaderText="Producto / SKU">
+                                    <ItemTemplate>
+                                        <div style="font-weight: 700; color: #24211E; line-height: 1.3;"><%# Eval("Producto") %></div>
+                                        <div style="font-size: 11.5px; color: #736E67; margin-top: 2px;">
+                                            <span style="font-weight: 600; color: #7A5E47;"><%# Eval("Sku") %></span> &middot; <%# Eval("NombreVariante") %>
+                                        </div>
+                                        <div style="font-size: 11px; color: #8C827A; margin-top: 2px;">
+                                            Costo unit.: <strong><%# string.Format("{0:C0}", Eval("CostoUnitario")) %></strong>
+                                        </div>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
 
-                                <asp:TemplateField HeaderText="Cant. a Recibir (*)">
+                                <asp:TemplateField HeaderText="Saldo OC" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center text-nowrap">
+                                    <ItemTemplate>
+                                        <span class="pill-badge" style="font-size: 11px; padding: 3px 9px; background-color: #F4EFEA; color: #5C4533;">
+                                            Pend.: <strong><%# Eval("CantidadPendiente") %></strong>
+                                        </span>
+                                        <div style="font-size: 11px; color: #736E67; margin-top: 4px;">
+                                            Ped.: <%# Eval("CantidadPedida") %> &middot; Rec.: <%# Eval("CantidadRecibida") %>
+                                        </div>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+
+                                <asp:TemplateField HeaderText="Cant. a Recibir (*)" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center">
                                     <ItemTemplate>
                                         <asp:HiddenField ID="hfIdDetalleOC" runat="server" Value='<%# Eval("IdDetalleOC") %>' />
                                         <asp:HiddenField ID="hfIdVariante" runat="server" Value='<%# Eval("IdVariante") %>' />
                                         <asp:HiddenField ID="hfCostoUnitario" runat="server" Value='<%# Eval("CostoUnitario") %>' />
                                         <asp:HiddenField ID="hfCantidadPendiente" runat="server" Value='<%# Eval("CantidadPendiente") %>' />
-                                        <asp:TextBox ID="txtCantRecibir" runat="server" Text='<%# Eval("CantidadPendiente") %>' TextMode="Number" min="0" max='<%# Eval("CantidadPendiente") %>' CssClass="form-control form-control-sm" style="width: 80px;"></asp:TextBox>
+                                        <asp:TextBox ID="txtCantRecibir" runat="server" Text='<%# Eval("CantidadPendiente") %>' TextMode="Number" min="0" max='<%# Eval("CantidadPendiente") %>' CssClass="form-control form-control-sm text-center" style="width: 78px; margin: 0 auto;"></asp:TextBox>
                                     </ItemTemplate>
                                 </asp:TemplateField>
 
                                 <asp:TemplateField HeaderText="N&deg; Lote (*)">
                                     <ItemTemplate>
-                                        <asp:TextBox ID="txtNumeroLote" runat="server" Text='<%# Eval("SugerenciaLote") %>' CssClass="form-control form-control-sm" placeholder="Ej: LOT-2026-A" style="width: 140px;"></asp:TextBox>
+                                        <asp:TextBox ID="txtNumeroLote" runat="server" Text='<%# Eval("SugerenciaLote") %>' CssClass="form-control form-control-sm" placeholder="Ej: LOT-2026-A" style="width: 155px;"></asp:TextBox>
                                     </ItemTemplate>
                                 </asp:TemplateField>
 
-                                <asp:TemplateField HeaderText="Fecha Vencimiento (*)">
+                                <asp:TemplateField HeaderText="Vencimiento (*)">
                                     <ItemTemplate>
-                                        <asp:TextBox ID="txtFechaVencimiento" runat="server" Text='<%# Eval("SugerenciaVencimiento") %>' TextMode="Date" CssClass="form-control form-control-sm" style="width: 135px;"></asp:TextBox>
+                                        <asp:TextBox ID="txtFechaVencimiento" runat="server" Text='<%# Eval("SugerenciaVencimiento") %>' TextMode="Date" CssClass="form-control form-control-sm" style="width: 145px;"></asp:TextBox>
                                     </ItemTemplate>
                                 </asp:TemplateField>
-
-                                <asp:BoundField DataField="CostoUnitario" HeaderText="Costo Unit." DataFormatString="{0:C0}" />
                             </Columns>
                         </asp:GridView>
                     </div>
