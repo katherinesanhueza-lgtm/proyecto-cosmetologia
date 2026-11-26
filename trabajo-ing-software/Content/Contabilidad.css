@@ -617,8 +617,9 @@ h1, h2, h3, .titulo-elegante {
 .erp-contenido :is(.form-control,.form-select):focus { border-color: #a88b70; box-shadow: 0 0 0 .2rem rgba(121,96,71,.15); }
 .erp-contenido .table { --bs-table-hover-bg: #FAF8F5; --bs-table-border-color: #EFEAE3; font-family: 'Plus Jakarta Sans', sans-serif; margin-bottom: 0; }
 .erp-contenido .table th {
-    background-color: #FAF8F5;
-    color: #6B5B4E;
+    background-color: #FAF8F5 !important;
+    color: #6B5B4E !important;
+    --bs-table-color: #6B5B4E;
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.5px;

@@ -229,5 +229,6 @@ namespace trabajo_ing_software
         protected global::System.Web.UI.WebControls.Literal litDocsEmitidos;
         protected global::System.Web.UI.WebControls.Literal litPorDespachar;
         protected global::System.Web.UI.WebControls.Literal litClientesActivos;
+        protected global::System.Web.UI.WebControls.Label lblDescuentoPct;
     }
 }

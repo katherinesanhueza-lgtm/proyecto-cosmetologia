@@ -381,7 +381,7 @@
                 </asp:Panel>
 
                 <!-- REPORTE 5: PRESUPUESTOS Y CONVERSIÓN -->
-                <asp:GridView ID="gvAnalisis" runat="server" AutoGenerateColumns="true" CssClass="table" EmptyDataText="Sin registros en el período." />
+                <asp:GridView ID="gvAnalisis" runat="server" AutoGenerateColumns="true" CssClass="table" Visible="false" EmptyDataText="Sin registros en el período." />
                 <asp:Panel ID="pnlReporte5" runat="server" Visible="false">
                     <div class="table-dermo-container" style="border: none; box-shadow: none;">
                         <asp:GridView ID="gvCotizacionesReporte" runat="server" CssClass="table table-hover align-middle" AutoGenerateColumns="False" GridLines="None" EmptyDataText="No se registran cotizaciones en el per&iacute;odo seleccionado.">
@@ -410,6 +410,120 @@
                                     <ItemTemplate>
                                         <span class='<%# Eval("VentaConcretada").ToString().Contains("Concretada") ? "badge-fac" : "badge-warn" %>'>
                                             <%# Eval("VentaConcretada") %>
+                                        </span>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                            </Columns>
+                        </asp:GridView>
+                    </div>
+                </asp:Panel>
+
+                <!-- REPORTE 6: RANKING PARETO 80/20 DE MEJORES CLIENTES MAYORISTAS -->
+                <asp:Panel ID="pnlReporte6" runat="server" Visible="false">
+                    <div class="table-dermo-container" style="border: none; box-shadow: none;">
+                        <asp:GridView ID="gvPareto" runat="server" CssClass="table table-hover align-middle" AutoGenerateColumns="False" GridLines="None" EmptyDataText="No se registran compras de clientes mayoristas / B2B en el per&iacute;odo seleccionado.">
+                            <Columns>
+                                <asp:TemplateField HeaderText="#">
+                                    <ItemTemplate>
+                                        <strong style="color: var(--color-acento);">#<%# Eval("Ranking") %></strong>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                                <asp:TemplateField HeaderText="Cliente Mayorista / B2B">
+                                    <ItemTemplate>
+                                        <div style="font-weight: 600;"><%# Eval("Cliente") %></div>
+                                        <div style="font-size: 10px; color: var(--color-texto-suave);">RUT: <%# Eval("Rut") %></div>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                                <asp:BoundField DataField="Categoria" HeaderText="Segmento" />
+                                <asp:BoundField DataField="CantidadDocs" HeaderText="N&deg; Docs." HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center" />
+                                <asp:TemplateField HeaderText="Facturaci&oacute;n Neta ($)" HeaderStyle-CssClass="text-end" ItemStyle-CssClass="text-end text-nowrap">
+                                    <ItemTemplate>
+                                        <strong style="color: var(--color-acento);"><%# string.Format("${0:N0}", Eval("Monto")) %></strong>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                                <asp:TemplateField HeaderText="% Part.">
+                                    <ItemTemplate>
+                                        <div style="font-size: 12px; font-weight: 600;"><%# string.Format("{0:0.0}%", Eval("ParticipacionPct")) %></div>
+                                        <div class="share-bar-wrap">
+                                            <div class="share-bar-fill" style='<%# string.Format("width:{0:0}%;", Eval("ParticipacionPct")) %>'></div>
+                                        </div>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                                <asp:TemplateField HeaderText="% Acumulado" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center">
+                                    <ItemTemplate>
+                                        <strong><%# string.Format("{0:0.0}%", Eval("PorcentajeAcumulado")) %></strong>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                                <asp:TemplateField HeaderText="Clasificaci&oacute;n 80/20" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center">
+                                    <ItemTemplate>
+                                        <span class='<%# Eval("Grupo80").ToString().StartsWith("Top 80%") ? "badge-fac" : "badge-bol" %>'>
+                                            <%# Eval("Grupo80") %>
+                                        </span>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                            </Columns>
+                        </asp:GridView>
+                    </div>
+                </asp:Panel>
+
+                <!-- REPORTE 7: INGRESOS POR CATEGORÍA (SKINCARE VS. INSUMOS DE SALÓN) -->
+                <asp:Panel ID="pnlReporte7" runat="server" Visible="false">
+                    <div class="table-dermo-container" style="border: none; box-shadow: none;">
+                        <asp:GridView ID="gvCategorias" runat="server" CssClass="table table-hover align-middle" AutoGenerateColumns="False" GridLines="None" EmptyDataText="No se registran ingresos por categor&iacute;a en el per&iacute;odo seleccionado.">
+                            <Columns>
+                                <asp:TemplateField HeaderText="Categor&iacute;a Cosmec&eacute;utica">
+                                    <ItemTemplate>
+                                        <strong style="color: var(--color-texto);"><%# Eval("Categoria") %></strong>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                                <asp:BoundField DataField="Documentos" HeaderText="N&deg; Ventas" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center" />
+                                <asp:BoundField DataField="Unidades" HeaderText="Unidades" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center" />
+                                <asp:BoundField DataField="IngresoNeto" HeaderText="Ingreso Neto ($)" DataFormatString="${0:N0}" HeaderStyle-CssClass="text-end" ItemStyle-CssClass="text-end text-nowrap" />
+                                <asp:BoundField DataField="IvaCalculado" HeaderText="IVA ($)" DataFormatString="${0:N0}" HeaderStyle-CssClass="text-end" ItemStyle-CssClass="text-end text-nowrap" />
+                                <asp:TemplateField HeaderText="Total Facturado ($)" HeaderStyle-CssClass="text-end" ItemStyle-CssClass="text-end text-nowrap">
+                                    <ItemTemplate>
+                                        <strong style="color: var(--color-acento);"><%# string.Format("${0:N0}", Eval("IngresoTotal")) %></strong>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                                <asp:TemplateField HeaderText="Participaci&oacute;n">
+                                    <ItemTemplate>
+                                        <div style="font-size: 12px; font-weight: 600;"><%# string.Format("{0:0.0}%", Eval("ParticipacionPct")) %></div>
+                                        <div class="share-bar-wrap">
+                                            <div class="share-bar-fill" style='<%# string.Format("width:{0:0}%;", Eval("ParticipacionPct")) %>'></div>
+                                        </div>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                            </Columns>
+                        </asp:GridView>
+                    </div>
+                </asp:Panel>
+
+                <!-- REPORTE 8: TASA DE EFECTIVIDAD EN TIEMPOS DE ENTREGA -->
+                <asp:Panel ID="pnlReporte8" runat="server" Visible="false">
+                    <div class="table-dermo-container" style="border: none; box-shadow: none;">
+                        <asp:GridView ID="gvEntregas" runat="server" CssClass="table table-hover align-middle" AutoGenerateColumns="False" GridLines="None" EmptyDataText="No se registran despachos evaluables en el per&iacute;odo seleccionado.">
+                            <Columns>
+                                <asp:TemplateField HeaderText="Transportista / Operador">
+                                    <ItemTemplate>
+                                        <strong style="color: var(--color-texto);"><%# Eval("Transportista") %></strong>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                                <asp:BoundField DataField="Programados" HeaderText="Despachos Evaluados" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center" />
+                                <asp:BoundField DataField="Entregados" HeaderText="Entregados" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center" />
+                                <asp:BoundField DataField="ATiempo" HeaderText="A Tiempo" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center fw-semibold" />
+                                <asp:BoundField DataField="ConRetraso" HeaderText="Retraso / Pend." HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center" />
+                                <asp:TemplateField HeaderText="Efectividad (%)">
+                                    <ItemTemplate>
+                                        <div style="font-size: 12px; font-weight: 600;"><%# string.Format("{0:0.0}%", Eval("PorcentajeATiempo")) %></div>
+                                        <div class="share-bar-wrap">
+                                            <div class="share-bar-fill" style='<%# string.Format("width:{0:0}%;", Eval("PorcentajeATiempo")) %>'></div>
+                                        </div>
+                                    </ItemTemplate>
+                                </asp:TemplateField>
+                                <asp:TemplateField HeaderText="Evaluaci&oacute;n SLA" HeaderStyle-CssClass="text-center" ItemStyle-CssClass="text-center">
+                                    <ItemTemplate>
+                                        <span class='<%# Convert.ToDecimal(Eval("PorcentajeATiempo")) >= 80m ? "badge-fac" : Convert.ToDecimal(Eval("PorcentajeATiempo")) >= 50m ? "badge-warn" : "badge-nc" %>'>
+                                            <%# Convert.ToDecimal(Eval("PorcentajeATiempo")) >= 80m ? "Óptimo" : Convert.ToDecimal(Eval("PorcentajeATiempo")) >= 50m ? "En Observación" : "Crítico" %>
                                         </span>
                                     </ItemTemplate>
                                 </asp:TemplateField>

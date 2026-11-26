@@ -379,6 +379,25 @@ namespace trabajo_ing_software
             ActualizarCarrito();
         }
 
+        private decimal ObtenerPorcentajeDescuento(out bool valido)
+        {
+            string raw = (txtDescuento.Text ?? "").Trim().Replace("%", "").Replace(",", ".");
+            if (string.IsNullOrEmpty(raw))
+            {
+                valido = true;
+                return 0m;
+            }
+            if (!decimal.TryParse(raw, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal pct))
+            {
+                valido = false;
+                return 0m;
+            }
+            valido = pct >= 0m && pct <= 100m;
+            if (pct < 0m) pct = 0m;
+            if (pct > 100m) pct = 100m;
+            return pct;
+        }
+
         private void ActualizarCarrito()
         {
             gvCarrito.DataSource = Carrito;
@@ -388,15 +407,17 @@ namespace trabajo_ing_software
             foreach (DataRow fila in Carrito.Rows)
                 subtotalBruto += Convert.ToDecimal(fila["Subtotal"]);
 
-            decimal.TryParse(txtDescuento.Text.Trim(), out decimal descuento);
+            decimal pctDescuento = ObtenerPorcentajeDescuento(out _);
+            decimal descuento = Math.Round(subtotalBruto * (pctDescuento / 100m), 0, MidpointRounding.AwayFromZero);
             if (descuento < 0) descuento = 0;
             if (descuento > subtotalBruto) descuento = subtotalBruto;
 
-            decimal totalNeto = Math.Round((subtotalBruto - descuento) / 1.19m, 2);
-            decimal totalIva = (subtotalBruto - descuento) - totalNeto;
             decimal totalPagar = subtotalBruto - descuento;
+            decimal totalNeto = Math.Round(totalPagar / 1.19m, 2);
+            decimal totalIva = totalPagar - totalNeto;
 
             lblSubtotalBruto.Text = "$" + subtotalBruto.ToString("N0");
+            if (lblDescuentoPct != null) lblDescuentoPct.Text = pctDescuento.ToString("0.##") + "%";
             lblDescuento.Text = "-$" + descuento.ToString("N0");
             lblNeto.Text = "$" + totalNeto.ToString("N0");
             lblIva.Text = "$" + totalIva.ToString("N0");
@@ -420,12 +441,22 @@ namespace trabajo_ing_software
             }
 
             var cantidades = new SortedDictionary<int, int>();
+            decimal subtotalBruto = 0;
             foreach (DataRow fila in Carrito.Rows)
+            {
                 cantidades.Add((int)fila["IdVariante"], (int)fila["Cantidad"]);
+                subtotalBruto += Convert.ToDecimal(fila["Subtotal"]);
+            }
 
             string tipoDoc = ddlTipoDocumento.SelectedValue;
             string formaPago = ddlPago.SelectedValue;
-            decimal.TryParse(txtDescuento.Text.Trim(), out decimal descuento);
+            decimal pctDescuento = ObtenerPorcentajeDescuento(out bool pctValido);
+            if (!pctValido)
+            {
+                Mostrar("Ingresa un porcentaje de descuento comercial válido entre 0% y 100%.", false);
+                return;
+            }
+            decimal descuento = Math.Round(subtotalBruto * (pctDescuento / 100m), 0, MidpointRounding.AwayFromZero);
 
             DateTime? vence = null;
             if (formaPago == "credito")

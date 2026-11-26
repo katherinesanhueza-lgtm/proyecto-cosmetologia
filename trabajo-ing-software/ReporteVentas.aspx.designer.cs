@@ -53,5 +53,11 @@ namespace trabajo_ing_software
         protected global::System.Web.UI.WebControls.GridView gvAnalisis;
         protected global::System.Web.UI.HtmlControls.HtmlGenericControl indicadoresDetalle;
         protected global::System.Web.UI.WebControls.GridView gvCotizacionesReporte;
+        protected global::System.Web.UI.WebControls.Panel pnlReporte6;
+        protected global::System.Web.UI.WebControls.GridView gvPareto;
+        protected global::System.Web.UI.WebControls.Panel pnlReporte7;
+        protected global::System.Web.UI.WebControls.GridView gvCategorias;
+        protected global::System.Web.UI.WebControls.Panel pnlReporte8;
+        protected global::System.Web.UI.WebControls.GridView gvEntregas;
     }
 }

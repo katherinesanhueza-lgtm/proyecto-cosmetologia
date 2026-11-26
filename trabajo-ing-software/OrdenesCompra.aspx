@@ -325,9 +325,18 @@
             font-size: 0.73rem !important;
             gap: 4px !important;
         }
-        .table-dermo-container .table th,
+        .table-dermo-container .table th {
+            background-color: #FAF8F5 !important;
+            color: #6B5B4E !important;
+            font-size: 0.71rem !important;
+            font-weight: 700;
+            letter-spacing: 0.45px;
+            text-transform: uppercase;
+            padding: 10px 10px;
+            white-space: nowrap;
+        }
         .table-dermo-container .table td {
-            padding: 9px 6px;
+            padding: 10px 10px;
             font-size: 0.81rem;
         }
         .table-dermo-container .avatar-circle {
@@ -557,17 +566,17 @@
 
                     <!-- GRILLA TEMPORAL DEL DETALLE DE LA ORDEN -->
                     <div class="table-dermo-container" style="margin-bottom: 0; border-radius: 12px;">
-                        <asp:GridView ID="gvDetalleOC" runat="server" AutoGenerateColumns="False" CssClass="table table-hover align-middle" GridLines="None" EmptyDataText="No se han agregado productos a la orden de compra." OnRowCommand="gvDetalleOC_RowCommand">
+                        <asp:GridView ID="gvDetalleOC" runat="server" AutoGenerateColumns="False" CssClass="table table-hover align-middle mb-0" GridLines="None" EmptyDataText="No se han agregado productos a la orden de compra." OnRowCommand="gvDetalleOC_RowCommand">
                             <Columns>
-                                <asp:BoundField DataField="Sku" HeaderText="SKU" />
-                                <asp:BoundField DataField="Producto" HeaderText="Producto e Insumo" />
-                                <asp:BoundField DataField="NombreVariante" HeaderText="Presentaci&oacute;n / Variante" />
-                                <asp:BoundField DataField="CantidadPedida" HeaderText="Cant. Pedida" />
-                                <asp:BoundField DataField="CostoUnitario" HeaderText="Costo Unitario" DataFormatString="{0:C0}" />
-                                <asp:BoundField DataField="Subtotal" HeaderText="Subtotal L&iacute;nea" DataFormatString="{0:C0}" />
-                                <asp:TemplateField HeaderText="Acci&oacute;n">
+                                <asp:BoundField DataField="Sku" HeaderText="SKU" ItemStyle-CssClass="text-nowrap fw-semibold" />
+                                <asp:BoundField DataField="Producto" HeaderText="Producto" />
+                                <asp:BoundField DataField="NombreVariante" HeaderText="Presentaci&oacute;n" />
+                                <asp:BoundField DataField="CantidadPedida" HeaderText="Cant." HeaderStyle-CssClass="col-center" ItemStyle-CssClass="col-center" />
+                                <asp:BoundField DataField="CostoUnitario" HeaderText="Costo Unit." DataFormatString="{0:C0}" HeaderStyle-CssClass="col-right" ItemStyle-CssClass="col-right" />
+                                <asp:BoundField DataField="Subtotal" HeaderText="Subtotal" DataFormatString="{0:C0}" HeaderStyle-CssClass="col-right" ItemStyle-CssClass="col-right fw-semibold" />
+                                <asp:TemplateField HeaderText="Acci&oacute;n" HeaderStyle-CssClass="col-center" ItemStyle-CssClass="col-center">
                                     <ItemTemplate>
-                                        <asp:LinkButton ID="btnEliminarItem" runat="server" CommandName="EliminarItem" CommandArgument='<%# Container.DataItemIndex %>' style="color: #C0392B; text-decoration: none; font-size: 12px; font-weight: 600;">
+                                        <asp:LinkButton ID="btnEliminarItem" runat="server" CommandName="EliminarItem" CommandArgument='<%# Container.DataItemIndex %>' CssClass="btn btn-outline-danger btn-sm oc-btn-accion">
                                             Eliminar
                                         </asp:LinkButton>
                                     </ItemTemplate>

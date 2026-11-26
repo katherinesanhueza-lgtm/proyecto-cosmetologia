@@ -145,7 +145,7 @@
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                     <a href="ReporteVentas.aspx?tipo=7&amp;origen=pos" class="btn btn-outline-secondary">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                        Reporte Anal&iacute;tico
+                        Reporte Ingresos por Categor&iacute;a
                     </a>
                 </div>
             </div>
@@ -224,11 +224,14 @@
                         <h2>3. Descuentos Comerciales</h2>
                         <div class="pos-descuento-grid">
                             <div>
-                                <label class="form-label">Descuento Global ($)</label>
-                                <asp:TextBox ID="txtDescuento" runat="server" CssClass="form-control" TextMode="Number" Text="0" AutoPostBack="true" OnTextChanged="txtDescuento_TextChanged"></asp:TextBox>
+                                <label class="form-label" for="<%= txtDescuento.ClientID %>">Descuento Comercial (%)</label>
+                                <div class="input-group">
+                                    <asp:TextBox ID="txtDescuento" runat="server" CssClass="form-control" TextMode="Number" min="0" max="100" step="0.5" Text="0" AutoPostBack="true" OnTextChanged="txtDescuento_TextChanged"></asp:TextBox>
+                                    <span class="input-group-text" style="background-color: #F4EFEA; border-color: #dcd3ca; color: #5C4533; font-weight: 600;">%</span>
+                                </div>
                             </div>
                             <div style="font-size: 12.5px; color: #736E67; padding-top: 18px;">
-                                Rebaja comercial directa aplicada sobre el subtotal bruto antes de emitir el documento.
+                                Porcentaje de rebaja comercial (0% a 100%) aplicado sobre el subtotal bruto antes de emitir el documento.
                             </div>
                         </div>
                     </div>
@@ -264,7 +267,7 @@
                                 <asp:Label ID="lblSubtotalBruto" runat="server" Text="$0"></asp:Label>
                             </div>
                             <div class="resumen-totales-fila">
-                                <span>Descuento Aplicado:</span>
+                                <span>Descuento Aplicado (<asp:Label ID="lblDescuentoPct" runat="server" Text="0%"></asp:Label>):</span>
                                 <asp:Label ID="lblDescuento" runat="server" Text="-$0"></asp:Label>
                             </div>
                             <div class="resumen-totales-fila">
